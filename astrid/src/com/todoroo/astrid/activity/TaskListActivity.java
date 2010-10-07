@@ -3,9 +3,9 @@ package com.todoroo.astrid.activity;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
 import android.app.AlertDialog;
@@ -27,27 +27,28 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
@@ -58,7 +59,7 @@ import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
-import com.todoroo.andlib.utility.Pair;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.andlib.widget.GestureService;
 import com.todoroo.andlib.widget.GestureService.GestureInterface;
 import com.todoroo.astrid.activity.SortSelectionActivity.OnSortSelectedListener;
@@ -76,6 +77,8 @@ import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.helper.TaskListContextMenuExtensionLoader;
+import com.todoroo.astrid.helper.TaskListContextMenuExtensionLoader.ContextMenuItem;
 import com.todoroo.astrid.reminders.Notifications;
 import com.todoroo.astrid.reminders.ReminderService;
 import com.todoroo.astrid.reminders.ReminderService.AlarmScheduler;
@@ -86,7 +89,6 @@ import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.utility.Constants;
 import com.todoroo.astrid.utility.Flags;
-import com.todoroo.astrid.utility.Preferences;
 import com.todoroo.astrid.widget.TasksWidget;
 
 /**
@@ -151,15 +153,18 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     protected DetailReceiver detailReceiver = new DetailReceiver();
     protected RefreshReceiver refreshReceiver = new RefreshReceiver();
     protected SyncActionReceiver syncActionReceiver = new SyncActionReceiver();
+    protected final AtomicReference<String> sqlQueryTemplate = new AtomicReference<String>();
+    protected Filter filter;
+    protected int sortFlags;
+    protected int sortSort;
 
     private ImageButton quickAddButton;
     private EditText quickAddBox;
-    private Filter filter;
-    private int sortFlags;
-    private int sortSort;
-    private final AtomicReference<String> sqlQueryTemplate = new AtomicReference<String>();
     private Timer backgroundTimer;
     private final LinkedHashSet<SyncAction> syncActions = new LinkedHashSet<SyncAction>();
+
+
+    private final TaskListContextMenuExtensionLoader contextMenuExtensionLoader = new TaskListContextMenuExtensionLoader();
 
     /* ======================================================================
      * ======================================================= initialization
@@ -173,6 +178,18 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         DependencyInjectionService.getInstance().inject(this);
     }
 
+    /**
+     * @return view to attach to the body of the task list. must contain two
+     * elements, a view with id android:id/empty and a list view with id
+     * android:id/list. It should NOT be attached to root
+     */
+    protected View getListBody(ViewGroup root) {
+        if(AndroidUtilities.getSdkVersion() > 3)
+            return getLayoutInflater().inflate(R.layout.task_list_body_standard, root, false);
+        else
+            return getLayoutInflater().inflate(R.layout.task_list_body_api3, root, false);
+    }
+
     /**  Called when loading up the activity */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,10 +197,9 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         super.onCreate(savedInstanceState);
 
         new StartupService().onStartupApplication(this);
-        if(AndroidUtilities.getSdkVersion() > 3)
-            setContentView(R.layout.task_list_activity);
-        else
-            setContentView(R.layout.task_list_activity_api3);
+        ViewGroup parent = (ViewGroup) getLayoutInflater().inflate(R.layout.task_list_activity, null);
+        parent.addView(getListBody(parent), 1);
+        setContentView(parent);
 
         if(database == null)
             return;
@@ -210,12 +226,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         if(Constants.DEBUG)
             setTitle("[D] " + filter.title); //$NON-NLS-1$
 
-        // perform caching
-        new Thread(new Runnable() {
-            public void run() {
-                loadContextMenuIntents();
-            }
-        }).start();
+        contextMenuExtensionLoader.loadInNewThread(this);
     }
 
     /**
@@ -746,30 +757,15 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         return task;
     }
 
-    protected Pair<CharSequence, Intent>[] contextMenuItemCache = null;
-
-    protected void loadContextMenuIntents() {
-        Intent queryIntent = new Intent(AstridApiConstants.ACTION_TASK_CONTEXT_MENU);
-        PackageManager pm = getPackageManager();
-        List<ResolveInfo> resolveInfoList = pm.queryIntentActivities(queryIntent, 0);
-        int length = resolveInfoList.size();
-        contextMenuItemCache = new Pair[length];
-        for(int i = 0; i < length; i++) {
-            ResolveInfo resolveInfo = resolveInfoList.get(i);
-            Intent intent = new Intent(AstridApiConstants.ACTION_TASK_CONTEXT_MENU);
-            intent.setClassName(resolveInfo.activityInfo.packageName,
-                    resolveInfo.activityInfo.name);
-            CharSequence title = resolveInfo.loadLabel(pm);
-            contextMenuItemCache[i] = Pair.create(title, intent);
-        }
-    }
-
     @SuppressWarnings("nls")
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
         AdapterContextMenuInfo adapterInfo = (AdapterContextMenuInfo)menuInfo;
         Task task = ((ViewHolder)adapterInfo.targetView.getTag()).task;
+        if (task.getFlag(Task.FLAGS, Task.FLAG_IS_READONLY))
+            return;
+
         int id = (int)task.getId();
         menu.setHeaderTitle(task.getValue(Task.TITLE));
 
@@ -785,25 +781,20 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
             menu.add(id, CONTEXT_MENU_DELETE_TASK_ID, Menu.NONE,
                     R.string.TAd_contextDeleteTask);
 
+            long taskId = task.getId();
+            for(ContextMenuItem item : contextMenuExtensionLoader.getList()) {
+                MenuItem menuItem = menu.add(id, CONTEXT_MENU_ADDON_INTENT_ID, Menu.NONE,
+                        item.title);
+                item.intent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, taskId);
+                menuItem.setIntent(item.intent);
+            }
+
             if(Constants.DEBUG) {
                 menu.add("--- debug ---");
                 menu.add(id, CONTEXT_MENU_DEBUG, Menu.NONE,
-                        "when alarm?");
+                "when alarm?");
                 menu.add(id, CONTEXT_MENU_DEBUG + 1, Menu.NONE,
-                        "make notification");
-            }
-
-            if(contextMenuItemCache == null)
-                return;
-
-            // ask about plug-ins
-            long taskId = task.getId();
-            for(int i = 0; i < contextMenuItemCache.length; i++) {
-                Intent intent = contextMenuItemCache[i].getRight();
-                MenuItem item = menu.add(id, CONTEXT_MENU_ADDON_INTENT_ID, Menu.NONE,
-                        contextMenuItemCache[i].getLeft());
-                intent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, taskId);
-                item.setIntent(intent);
+                "make notification");
             }
         }
     }
@@ -899,7 +890,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
 
         case CONTEXT_MENU_ADDON_INTENT_ID: {
             intent = item.getIntent();
-            AndroidUtilities.startExternalIntent(this, intent, ACTIVITY_MENU_EXTERNAL);
+            sendBroadcast(intent);
             return true;
         }
 

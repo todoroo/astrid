@@ -12,18 +12,18 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.dao.Database;
-import com.todoroo.astrid.utility.Preferences;
 
 
 public final class UpgradeService {
 
-    private static final int V3_3_0 = 155;
-    private static final int V3_2_0 = 147;
-    private static final int V3_1_0 = 146;
-    private static final int V3_0_0 = 136;
-    private static final int V2_14_4 = 135;
+    public static final int V3_3_0 = 155;
+    public static final int V3_2_0 = 147;
+    public static final int V3_1_0 = 146;
+    public static final int V3_0_0 = 136;
+    public static final int V2_14_4 = 135;
 
     @Autowired
     private Database database;
@@ -105,6 +105,11 @@ public final class UpgradeService {
                     "and easier to use. Hope you like it!",
                     "If you liked the old version, you can also go back by " +
                     "<a href='http://bit.ly/oldastrid'>clicking here</a>",
+            });
+        if(from >= V3_3_0)
+            newVersionString(changeLog, "3.3.6 (9/27/10)", new String[] {
+                    "Restored alarm functionality",
+                    "Producteev: sync can now remove due dates in Producteev",
             });
         if(from >= V3_0_0 && from < V3_3_0)
             newVersionString(changeLog, "3.3.0 (9/17/10)", new String[] {

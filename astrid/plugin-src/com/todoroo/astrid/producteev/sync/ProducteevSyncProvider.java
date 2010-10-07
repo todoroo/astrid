@@ -52,7 +52,7 @@ import com.todoroo.astrid.sync.SyncContainer;
 import com.todoroo.astrid.sync.SyncProvider;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.utility.Constants;
-import com.todoroo.astrid.utility.Preferences;
+import com.todoroo.andlib.utility.Preferences;
 
 @SuppressWarnings("nls")
 public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer> {
@@ -236,14 +236,12 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
                         remote.task.setFlag(Task.REMINDER_FLAGS, Task.NOTIFY_AFTER_DEADLINE, false);
                     boolean foundLocal = dataService.findLocalMatch(remote);
 
-                    // if creator & responsible != current user, skip / delete it
+                    // if creator & responsible != current user, set it to readonly
                     if(userId != remote.pdvTask.getValue(ProducteevTask.CREATOR_ID) &&
-                            userId != remote.pdvTask.getValue(ProducteevTask.RESPONSIBLE_ID)) {
-                        if(foundLocal)
-                            remote.task.setValue(Task.DELETION_DATE, DateUtilities.now());
-                        else
-                            continue;
-                    }
+                          userId != remote.pdvTask.getValue(ProducteevTask.RESPONSIBLE_ID))
+                        remote.task.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, true);
+                    else
+                        remote.task.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, false);
 
                     remoteTasks.add(remote);
                 }
@@ -527,8 +525,12 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
             invoker.tasksSetTitle(idTask, local.task.getValue(Task.TITLE));
         if(shouldTransmit(local, Task.IMPORTANCE, remote))
             invoker.tasksSetStar(idTask, createStars(local.task));
-        if(shouldTransmit(local, Task.DUE_DATE, remote) && local.task.hasDueDate()) // temporary can't unset deadline
-            invoker.tasksSetDeadline(idTask, createDeadline(local.task), local.task.hasDueTime() ? 0 : 1);
+        if(shouldTransmit(local, Task.DUE_DATE, remote)) {
+            if(local.task.hasDueDate())
+                invoker.tasksSetDeadline(idTask, createDeadline(local.task), local.task.hasDueTime() ? 0 : 1);
+            else
+                invoker.tasksUnsetDeadline(idTask);
+        }
         if(shouldTransmit(local, Task.COMPLETION_DATE, remote))
             invoker.tasksSetStatus(idTask, local.task.isCompleted() ? 2 : 1);
 

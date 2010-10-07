@@ -62,16 +62,28 @@ public class MetadataService {
      * Delete from metadata table where rows match a certain condition
      * @param where
      */
-    public void deleteWhere(Criterion where) {
-        metadataDao.deleteWhere(where);
+    public int deleteWhere(Criterion where) {
+        return metadataDao.deleteWhere(where);
+    }
+
+    /**
+     * Delete from metadata table where rows match a certain condition
+     * @param where predicate for which rows to update
+     * @param metadata values to set
+     */
+    public int update(Criterion where, Metadata metadata) {
+        return metadataDao.update(where, metadata);
     }
 
     /**
      * Save a single piece of metadata
      * @param metadata
      */
-    public void save(Metadata metadata) {
-        metadataDao.persist(metadata);
+    public boolean save(Metadata metadata) {
+        if(!metadata.containsNonNullValue(Metadata.TASK))
+            throw new IllegalArgumentException("metadata needs to be attached to a task: " + metadata.getMergedValues()); //$NON-NLS-1$
+
+        return metadataDao.persist(metadata);
     }
 
     /**

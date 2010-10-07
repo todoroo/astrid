@@ -23,7 +23,7 @@ import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.provider.Astrid2TaskProvider;
 import com.todoroo.astrid.reminders.Notifications;
 import com.todoroo.astrid.reminders.ReminderService;
-import com.todoroo.astrid.utility.Preferences;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.widget.PowerWidget;
 import com.todoroo.astrid.widget.PowerWidget42;
 import com.todoroo.astrid.widget.TasksWidget;
@@ -211,10 +211,10 @@ public class TaskDao extends DatabaseDao<Task> {
 
     @Override
     public boolean saveExisting(Task item) {
-        if(!item.getSetValues().containsKey(Task.DETAILS.name))
+        if(!item.getSetValues().containsKey(Task.DETAILS_DATE.name)) {
             item.setValue(Task.DETAILS, null);
-        if(!item.getSetValues().containsKey(Task.DETAILS_DATE.name))
             item.setValue(Task.MODIFICATION_DATE, DateUtilities.now());
+        }
         return super.saveExisting(item);
     }
 

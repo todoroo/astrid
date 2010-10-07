@@ -33,7 +33,7 @@ import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.utility.Constants;
 import com.todoroo.astrid.utility.Flags;
-import com.todoroo.astrid.utility.Preferences;
+import com.todoroo.andlib.utility.Preferences;
 
 /**
  * Displays the preference screen for users to edit their preferences
@@ -187,7 +187,7 @@ public class EditPreferences extends TodorooPreferences {
             else
                 preference.setSummary(R.string.EPr_showNotes_desc_enabled);
             if((Boolean)value != Preferences.getBoolean(preference.getKey(), false)) {
-                taskService.clearDetails(Task.NOTES.neq(""));
+                taskService.clearDetails(Criterion.all);
                 Flags.set(Flags.REFRESH);
             }
         }

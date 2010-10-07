@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.timsu.astrid"
-          android:versionName="3.3.1 (bug fix release)" 
-          android:versionCode="156">
+          android:versionName="3.3.6 (bug fix release)" 
+          android:versionCode="161">
           
   <!-- widgets, alarms, and services will break if Astrid is installed on SD card -->
   <!--    android:installLocation="internalOnly"> -->
@@ -22,6 +22,9 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
   <!-- for analytics -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <!-- for google tasks -->
+  <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+  <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
 
   <!-- ============================================== Exported Permissions = -->
 
@@ -196,6 +199,8 @@
     </receiver>
     <activity android:name="com.todoroo.astrid.core.CustomFilterActivity" />
     <activity android:name="com.todoroo.astrid.core.CustomFilterExposer$DeleteActivity" />
+    <activity android:name="com.todoroo.astrid.tags.TagFilterExposer$DeleteTagActivity" />
+    <activity android:name="com.todoroo.astrid.tags.TagFilterExposer$RenameTagActivity" />
 
     <!-- alarms -->
     <receiver android:name="com.todoroo.astrid.alarms.AlarmTaskRepeatListener">
@@ -211,6 +216,44 @@
       </intent-filter>
     </receiver>    
     
+    <!-- gtasks -->
+    <activity android:name="com.todoroo.astrid.gtasks.GtasksListActivity"
+              android:windowSoftInputMode="stateHidden"
+              android:theme="@style/Theme">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+    <receiver android:name="com.todoroo.astrid.gtasks.GtasksFilterExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <receiver android:name="com.todoroo.astrid.gtasks.GtasksDetailExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_DETAILS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <activity android:name="com.todoroo.astrid.gtasks.GtasksPreferences"
+              android:label="@string/gtasks_GPr_header">
+      <meta-data android:name="category"
+                 android:resource="@string/SyP_label" />
+      <intent-filter>   
+        <action android:name="com.todoroo.astrid.SETTINGS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+    <service android:name="com.todoroo.astrid.gtasks.GtasksBackgroundService"/>    
+    <receiver android:name="com.todoroo.astrid.gtasks.GtasksSyncActionExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>    
+    
     <!-- tags -->
     <receiver android:name="com.todoroo.astrid.tags.TagsPlugin">
       <intent-filter>
@@ -221,6 +264,12 @@
     <receiver android:name="com.todoroo.astrid.tags.TagFilterExposer">
       <intent-filter>
         <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <receiver android:name="com.todoroo.astrid.tags.TagCustomFilterCriteriaExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_CUSTOM_FILTER_CRITERIA" />
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
@@ -308,12 +357,6 @@
     </receiver>
     
     <!-- timers -->
-    <receiver android:name="com.todoroo.astrid.timers.TimerDecorationExposer">
-      <intent-filter>
-        <action android:name="com.todoroo.astrid.REQUEST_DECORATIONS" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver>
     <receiver android:name="com.todoroo.astrid.timers.TimerActionExposer">
       <intent-filter>
         <action android:name="com.todoroo.astrid.REQUEST_ACTIONS" />
@@ -364,6 +407,12 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
+    <receiver android:name="com.todoroo.astrid.producteev.ProducteevCustomFilterCriteriaExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_CUSTOM_FILTER_CRITERIA" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
     <activity android:name="com.todoroo.astrid.producteev.ProducteevPreferences"
               android:label="@string/producteev_PPr_header">
       <meta-data android:name="category"
@@ -395,48 +444,47 @@
       </intent-filter>
     </receiver>    
 
-
-        <!-- rmilk -->
-        <receiver android:name="org.weloveastrid.rmilk.MilkFilterExposer">
-          <intent-filter>
-            <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-        </receiver>
-        <receiver android:name="org.weloveastrid.rmilk.MilkDetailExposer">
-          <intent-filter>
-            <action android:name="com.todoroo.astrid.REQUEST_DETAILS" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-        </receiver>
-        <activity android:name="org.weloveastrid.rmilk.MilkLoginActivity" />
-        <activity android:name="org.weloveastrid.rmilk.MilkPreferences"
-                  android:icon="@drawable/icon"
-                  android:label="@string/rmilk_MPr_header">
-          <meta-data android:name="category"
-                     android:resource="@string/SyP_label" />
-          <intent-filter>   
-            <action android:name="com.todoroo.astrid.SETTINGS" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-        </activity>
-        <service android:name="org.weloveastrid.rmilk.MilkBackgroundService"/>
-        <receiver android:name="org.weloveastrid.rmilk.MilkStartupReceiver">
-          <intent-filter>
-            <action android:name="android.intent.action.BOOT_COMPLETED" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-          <intent-filter>
-            <action android:name="com.todoroo.astrid.STARTUP" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-        </receiver>
-        <receiver android:name="org.weloveastrid.rmilk.MilkSyncActionExposer">
-          <intent-filter>
-            <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
-            <category android:name="android.intent.category.DEFAULT" />
-          </intent-filter>
-        </receiver>    
+    <!-- rmilk -->
+    <receiver android:name="org.weloveastrid.rmilk.MilkFilterExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <receiver android:name="org.weloveastrid.rmilk.MilkDetailExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_DETAILS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <activity android:name="org.weloveastrid.rmilk.MilkLoginActivity" />
+    <activity android:name="org.weloveastrid.rmilk.MilkPreferences"
+              android:icon="@drawable/icon"
+              android:label="@string/rmilk_MPr_header">
+      <meta-data android:name="category"
+                 android:resource="@string/SyP_label" />
+      <intent-filter>   
+        <action android:name="com.todoroo.astrid.SETTINGS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+    <service android:name="org.weloveastrid.rmilk.MilkBackgroundService"/>
+    <receiver android:name="org.weloveastrid.rmilk.MilkStartupReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.STARTUP" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
+    <receiver android:name="org.weloveastrid.rmilk.MilkSyncActionExposer">
+      <intent-filter>
+        <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>    
     
   </application>
 

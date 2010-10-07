@@ -19,6 +19,8 @@
  */
 package com.todoroo.astrid.producteev;
 
+import java.util.TimeZone;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -37,11 +40,11 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.producteev.api.ApiAuthenticationException;
 import com.todoroo.astrid.producteev.api.ProducteevInvoker;
 import com.todoroo.astrid.producteev.sync.ProducteevSyncProvider;
 import com.todoroo.astrid.utility.Constants;
-import com.todoroo.astrid.utility.Preferences;
 
 /**
  * This activity allows users to sign in or log in to Producteev
@@ -79,6 +82,21 @@ public class ProducteevLoginActivity extends Activity {
         final EditText emailEditText = (EditText) findViewById(R.id.email);
         final EditText passwordEditText = (EditText) findViewById(R.id.password);
         final View newUserLayout = findViewById(R.id.newUserLayout);
+        final Spinner timezoneList = (Spinner) findViewById(R.id.timezoneList);
+
+        String[] timezoneIds = TimeZone.getAvailableIDs();
+        String defaultTimeZone = TimeZone.getDefault().getID();
+        int selected = 0;
+        for(int i = 0; i < timezoneIds.length; i++) {
+            if(timezoneIds[i].equals(defaultTimeZone))
+                selected = i;
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, timezoneIds);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        timezoneList.setAdapter(adapter);
+        timezoneList.setSelection(selected);
 
         Button signIn = (Button) findViewById(R.id.signIn);
         signIn.setOnClickListener(new OnClickListener() {
@@ -112,7 +130,7 @@ public class ProducteevLoginActivity extends Activity {
                     Editable password = passwordEditText.getText();
                     Editable firstName = ((EditText)findViewById(R.id.firstName)).getText();
                     Editable lastName = ((EditText)findViewById(R.id.lastName)).getText();
-                    String timezone = ((Spinner)findViewById(R.id.timezoneList)).getSelectedItem().toString();
+                    String timezone = timezoneList.getSelectedItem().toString();
                     if(email.length() == 0 || password.length() == 0 ||
                             firstName.length() == 0 ||
                             lastName.length() == 0) {
@@ -146,7 +164,7 @@ public class ProducteevLoginActivity extends Activity {
                     Preferences.setString(R.string.producteev_PPr_password, password);
                     ProducteevUtilities.INSTANCE.setToken(invoker.getToken());
 
-                    FlurryAgent.onEvent("producteev-login");
+                    FlurryAgent.onEvent("producteev-login"); //$NON-NLS-1$
 
                     synchronize();
                 } catch (ApiAuthenticationException e) {
@@ -222,7 +240,10 @@ public class ProducteevLoginActivity extends Activity {
         FlurryAgent.onStartSession(this, Constants.FLURRY_KEY);
     }
 
-    private void onEn() {
+    @Override
+    protected void onStop() {
+        super.onStop();
         FlurryAgent.onEndSession(this);
     }
+
 }

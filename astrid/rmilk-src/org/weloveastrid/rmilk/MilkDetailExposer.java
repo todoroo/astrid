@@ -3,7 +3,8 @@
  */
 package org.weloveastrid.rmilk;
 
-import org.weloveastrid.rmilk.data.MilkDataService;
+import org.weloveastrid.rmilk.data.MilkListService;
+import org.weloveastrid.rmilk.data.MilkMetadataService;
 import org.weloveastrid.rmilk.data.MilkNoteFields;
 import org.weloveastrid.rmilk.data.MilkTaskFields;
 
@@ -13,9 +14,12 @@ import android.content.Intent;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.TodorooCursor;
+import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.data.Metadata;
+import com.todoroo.andlib.utility.Preferences;
 
 /**
  * Exposes Task Details for Remember the Milk:
@@ -30,9 +34,17 @@ public class MilkDetailExposer extends BroadcastReceiver {
 
     public static final String DETAIL_SEPARATOR = " | "; //$NON-NLS-1$
 
+    @Autowired private MilkMetadataService milkMetadataService;
+    @Autowired private MilkListService milkListService;
+
+    static {
+        MilkDependencyInjector.initialize();
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         ContextManager.setContext(context);
+        DependencyInjectionService.getInstance().inject(this);
 
         // if we aren't logged in, don't expose features
         if(!MilkUtilities.INSTANCE.isLoggedIn())
@@ -56,7 +68,7 @@ public class MilkDetailExposer extends BroadcastReceiver {
     }
 
     public String getTaskDetails(Context context, long id, boolean extended) {
-        Metadata metadata = MilkDataService.getInstance(context).getTaskMetadata(id);
+        Metadata metadata = milkMetadataService.getTaskMetadata(id);
         if(metadata == null)
             return null;
 
@@ -64,7 +76,7 @@ public class MilkDetailExposer extends BroadcastReceiver {
 
         if(!extended) {
             long listId = metadata.getValue(MilkTaskFields.LIST_ID);
-            String listName = MilkDataService.getInstance(context).getListName(listId);
+            String listName = milkListService.getListName(listId);
             // RTM list is out of date. don't display RTM stuff
             if(listName == null)
                 return null;
@@ -77,8 +89,10 @@ public class MilkDetailExposer extends BroadcastReceiver {
             if(repeat != 0) {
                 builder.append(context.getString(R.string.rmilk_TLA_repeat)).append(DETAIL_SEPARATOR);
             }
-        } else {
-            TodorooCursor<Metadata> notesCursor = MilkDataService.getInstance(context).getTaskNotesCursor(id);
+        }
+
+        if(Preferences.getBoolean(R.string.p_showNotes, false) == !extended) {
+            TodorooCursor<Metadata> notesCursor = milkMetadataService.getTaskNotesCursor(id);
             try {
                 for(notesCursor.moveToFirst(); !notesCursor.isAfterLast(); notesCursor.moveToNext()) {
                     metadata.readFromCursor(notesCursor);

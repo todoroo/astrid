@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.weloveastrid.rmilk.MilkBackgroundService;
+import org.weloveastrid.rmilk.MilkDependencyInjector;
 import org.weloveastrid.rmilk.MilkLoginActivity;
 import org.weloveastrid.rmilk.MilkPreferences;
 import org.weloveastrid.rmilk.MilkUtilities;
@@ -27,7 +28,8 @@ import org.weloveastrid.rmilk.api.data.RtmTaskSeries;
 import org.weloveastrid.rmilk.api.data.RtmTasks;
 import org.weloveastrid.rmilk.api.data.RtmAuth.Perms;
 import org.weloveastrid.rmilk.api.data.RtmTask.Priority;
-import org.weloveastrid.rmilk.data.MilkDataService;
+import org.weloveastrid.rmilk.data.MilkListService;
+import org.weloveastrid.rmilk.data.MilkMetadataService;
 import org.weloveastrid.rmilk.data.MilkNoteFields;
 
 import android.app.Activity;
@@ -44,7 +46,9 @@ import android.util.Log;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.TodorooCursor;
+import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
@@ -57,7 +61,13 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
 
     private ServiceImpl rtmService = null;
     private String timeline = null;
-    private MilkDataService dataService = null;
+
+    @Autowired private MilkMetadataService milkMetadataService;
+    @Autowired private MilkListService milkListService;
+
+    static {
+        MilkDependencyInjector.initialize();
+    }
 
     // ----------------------------------------------------------------------
     // ------------------------------------------------------- public methods
@@ -67,11 +77,12 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
      * Sign out of RTM, deleting all synchronization metadata
      */
     public void signOut(Context context) {
+        ContextManager.setContext(context);
         MilkUtilities.INSTANCE.setToken(null);
         MilkUtilities.INSTANCE.clearLastSyncDate();
 
-        dataService = MilkDataService.getInstance(context);
-        dataService.clearMetadata();
+        DependencyInjectionService.getInstance().inject(this);
+        milkMetadataService.clearMetadata();
     }
 
     /**
@@ -144,7 +155,7 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
     @Override
     @SuppressWarnings("nls")
     protected void initiateBackground(Service service) {
-        dataService = MilkDataService.getInstance(service);
+        DependencyInjectionService.getInstance().inject(this);
 
         try {
             String authToken = MilkUtilities.INSTANCE.getToken();
@@ -247,7 +258,7 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
 
             // load RTM lists
             RtmLists lists = rtmService.lists_getList();
-            dataService.setLists(lists);
+            milkListService.setLists(lists);
 
             // read all tasks
             ArrayList<MilkTaskContainer> remoteChanges = new ArrayList<MilkTaskContainer>();
@@ -324,10 +335,10 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
      */
     private SyncData<MilkTaskContainer> populateSyncData(ArrayList<MilkTaskContainer> remoteTasks) {
         // fetch locally created tasks
-        TodorooCursor<Task> localCreated = dataService.getLocallyCreated(PROPERTIES);
+        TodorooCursor<Task> localCreated = milkMetadataService.getLocallyCreated(PROPERTIES);
 
         // fetch locally updated tasks
-        TodorooCursor<Task> localUpdated = dataService.getLocallyUpdated(PROPERTIES);
+        TodorooCursor<Task> localUpdated = milkMetadataService.getLocallyUpdated(PROPERTIES);
 
         return new SyncData<MilkTaskContainer>(remoteTasks, localCreated, localUpdated);
     }
@@ -344,7 +355,7 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
                 if(remote.task.hasDueDate() && remote.task.getValue(Task.DUE_DATE) < DateUtilities.now())
                     remote.task.setFlag(Task.REMINDER_FLAGS, Task.NOTIFY_AFTER_DEADLINE, false);
 
-                dataService.findLocalMatch(remote);
+                milkMetadataService.findLocalMatch(remote);
                 list.add(remote);
             }
         }
@@ -453,11 +464,11 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
         HashSet<String> localTags = new HashSet<String>();
         HashSet<String> remoteTags = new HashSet<String>();
         for(Metadata item : local.metadata)
-            if(MilkDataService.TAG_KEY.equals(item.getValue(Metadata.KEY)))
+            if(MilkMetadataService.TAG_KEY.equals(item.getValue(Metadata.KEY)))
                 localTags.add(item.getValue(Metadata.VALUE1));
         if(remote != null && remote.metadata != null) {
             for(Metadata item : remote.metadata)
-                if(MilkDataService.TAG_KEY.equals(item.getValue(Metadata.KEY)))
+                if(MilkMetadataService.TAG_KEY.equals(item.getValue(Metadata.KEY)))
                     remoteTags.add(item.getValue(Metadata.VALUE1));
         }
         if(!localTags.equals(remoteTags)) {
@@ -517,7 +528,7 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
         if(rtmTaskSeries.getTags() != null) {
             for(String tag : rtmTaskSeries.getTags()) {
                 Metadata tagData = new Metadata();
-                tagData.setValue(Metadata.KEY, MilkDataService.TAG_KEY);
+                tagData.setValue(Metadata.KEY, MilkMetadataService.TAG_KEY);
                 tagData.setValue(Metadata.VALUE1, tag);
                 metadata.add(tagData);
             }
@@ -558,12 +569,12 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
 
     @Override
     protected MilkTaskContainer read(TodorooCursor<Task> cursor) throws IOException {
-        return dataService.readTaskAndMetadata(cursor);
+        return milkMetadataService.readTaskAndMetadata(cursor);
     }
 
     @Override
     protected void write(MilkTaskContainer task) throws IOException {
-        dataService.saveTaskAndMetadata(task);
+        milkMetadataService.saveTaskAndMetadata(task);
     }
 
     // ----------------------------------------------------------------------
