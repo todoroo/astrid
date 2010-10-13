@@ -58,7 +58,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
         AstridDependencyInjector.initialize();
     }
 
-
+    static int rowLimit = 9;
     static final long ENCOURAGEMENT_CYCLE_TIME = 1000 * 60 * 60 * 4; // 4 hours
 
     static final String ACTION_MARK_COMPLETE = "com.todoroo.astrid.widget.ACTION_MARK_COMPLETE";
@@ -306,7 +306,18 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
             Filter filter = null;
             try {
                 filter = getFilter(appWidgetId);
-                views.setTextViewText(R.id.widget_title, filter.title);
+                int size = taskService.countTasks(filter);
+                int totalPages = Math.round(size/getRowLimit()) + 1;
+                Integer pageNumber = Math.round(scrollOffset/getRowLimit()) + 1;
+                StringBuilder title = new StringBuilder();
+                title.append(filter.title);
+                title.append(" (");
+                title.append(pageNumber);
+                title.append("/");
+                title.append(totalPages);
+                title.append(")");
+                views.setTextViewText(R.id.widget_title, title.toString());
+
                 views.setTextColor(R.id.widget_title, textColor);
 
                 // create intent to add a new task
@@ -360,7 +371,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
                 database.openForReading();
                 cursor = taskService.fetchFiltered(query, null, properties);
 
-                boolean canScrollDown = cursor.getCount() > 1;
+                boolean canScrollDown = cursor.getCount() > rowLimit;
 
                 Task task = new Task();
                 int position;
@@ -453,12 +464,12 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
                 scrollUpIntent.setAction(ACTION_SCROLL_UP);
                 scrollUpIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
                 scrollUpIntent.setType(AppWidgetManager.EXTRA_APPWIDGET_ID + appWidgetId);
-                if (scrollOffset-1 < 0){
+                if (scrollOffset - rowLimit < 0){
                     scrollUpIntent.putExtra(EXTRA_SCROLL_OFFSET, scrollOffset);
                     views.setImageViewResource(R.id.scroll_up, R.drawable.scroll_up_disabled);
                     views.setImageViewResource(R.id.scroll_up_alt, R.drawable.scroll_up_disabled);
                 } else {
-                    scrollUpIntent.putExtra(EXTRA_SCROLL_OFFSET, scrollOffset-1);
+                    scrollUpIntent.putExtra(EXTRA_SCROLL_OFFSET, scrollOffset - rowLimit);
                     views.setImageViewResource(R.id.scroll_up, R.drawable.scroll_up);
                     views.setImageViewResource(R.id.scroll_up_alt, R.drawable.scroll_up);
                 }
@@ -476,7 +487,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
                     views.setImageViewResource(R.id.scroll_down, R.drawable.scroll_down_disabled);
                     views.setImageViewResource(R.id.scroll_down_alt, R.drawable.scroll_down_disabled);
                 } else {
-                    scrollDownIntent.putExtra(EXTRA_SCROLL_OFFSET, scrollOffset+1);
+                    scrollDownIntent.putExtra(EXTRA_SCROLL_OFFSET, scrollOffset + rowLimit);
                     views.setImageViewResource(R.id.scroll_down, R.drawable.scroll_down);
                     views.setImageViewResource(R.id.scroll_down_alt, R.drawable.scroll_down);
                 }

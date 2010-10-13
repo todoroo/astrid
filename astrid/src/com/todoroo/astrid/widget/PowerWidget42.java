@@ -4,6 +4,9 @@ import com.timsu.astrid.R;
 
 public class PowerWidget42 extends PowerWidget {
 
+    @SuppressWarnings("hiding")
+    static int rowLimit = 4;
+
     @Override
     public Class<? extends UpdateService> getUpdateService() {
         return UpdateService42.class;
@@ -23,7 +26,7 @@ public class PowerWidget42 extends PowerWidget {
 
         @Override
         public int getRowLimit() {
-            return 5;
+            return rowLimit;
         }
     }
 
