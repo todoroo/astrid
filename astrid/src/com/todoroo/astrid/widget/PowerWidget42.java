@@ -5,7 +5,7 @@ import com.timsu.astrid.R;
 public class PowerWidget42 extends PowerWidget {
 
     @SuppressWarnings("hiding")
-    static int rowLimit = 4;
+    static int rowLimit = 3;
 
     @Override
     public Class<? extends UpdateService> getUpdateService() {
