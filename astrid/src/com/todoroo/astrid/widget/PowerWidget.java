@@ -11,8 +11,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.IBinder;
 import android.text.format.DateUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.timsu.astrid.R;
@@ -58,7 +61,6 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
         AstridDependencyInjector.initialize();
     }
 
-    static int rowLimit = 9;
     static final long ENCOURAGEMENT_CYCLE_TIME = 1000 * 60 * 60 * 4; // 4 hours
 
     static final String ACTION_MARK_COMPLETE = "com.todoroo.astrid.widget.ACTION_MARK_COMPLETE";
@@ -190,8 +192,8 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
         /** widget layout resource id */
         abstract public int getWidgetLayout();
 
-        /** # rows defined in the xml file */
-        abstract public int getRowLimit();
+        abstract public int getWidgetHeight();
+
 
         // --- implementation
 
@@ -216,6 +218,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
         @Override
         public void onStart(Intent intent, int startId) {
             ContextManager.setContext(this);
+
             AppWidgetManager manager = AppWidgetManager.getInstance(this);
 
             int scrollOffset = SCROLL_OFFSET_UNSET;
@@ -252,6 +255,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
 
             RemoteViews views = new RemoteViews(context.getPackageName(),
                     getWidgetLayout());
+
 
             String color = Preferences.getStringValue(WidgetConfigActivity.PREF_COLOR + appWidgetId);
 
@@ -302,21 +306,17 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
                 views.setViewVisibility(R.id.scroll_up_alt, View.VISIBLE);
             }
 
+            int rowLimit = getRowHeight(showEncouragements);
+
             TodorooCursor<Task> cursor = null;
             Filter filter = null;
             try {
                 filter = getFilter(appWidgetId);
                 int size = taskService.countTasks(filter);
-                int totalPages = Math.round(size/getRowLimit()) + 1;
-                Integer pageNumber = Math.round(scrollOffset/getRowLimit()) + 1;
-                StringBuilder title = new StringBuilder();
-                title.append(filter.title);
-                title.append(" (");
-                title.append(pageNumber);
-                title.append("/");
-                title.append(totalPages);
-                title.append(")");
-                views.setTextViewText(R.id.widget_title, title.toString());
+                int totalPages = Math.round(size/rowLimit) + 1;
+                Integer pageNumber = Math.round(scrollOffset/rowLimit) + 1;
+                String title = filter.title + " (" + pageNumber + "/" + totalPages + ")";
+                views.setTextViewText(R.id.widget_title, title);
 
                 views.setTextColor(R.id.widget_title, textColor);
 
@@ -355,7 +355,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
 
                 scrollOffset = Math.max(0, scrollOffset);
                 query = query.replaceAll("[lL][iI][mM][iI][tT] +[^ ]+", "") + " LIMIT " +
-                    scrollOffset + "," + (getRowLimit() + 1);
+                    scrollOffset + "," + (rowLimit + 1);
 
                 // load last completed task
                 Task lastCompleted = null;
@@ -375,7 +375,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
 
                 Task task = new Task();
                 int position;
-                for (position = 0; position < cursor.getCount() && position < getRowLimit(); position++) {
+                for (position = 0; position < cursor.getCount() && position < rowLimit; position++) {
                     if(lastCompleted != null && lastCompletedPosition == position + scrollOffset) {
                         task = lastCompleted;
                     } else {
@@ -452,7 +452,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
                     views.setViewVisibility(TASK_DUE[position], View.VISIBLE);
                 }
 
-                for(; position < getRowLimit(); position++) {
+                for(; position <= rowLimit; position++) {
                     views.setViewVisibility(TASK_IMPORTANCE[position], View.INVISIBLE);
                     views.setViewVisibility(TASK_CHECKBOX[position], View.INVISIBLE);
                     views.setViewVisibility(TASK_TITLE[position], View.INVISIBLE);
@@ -504,6 +504,39 @@ abstract public class PowerWidget extends AppWidgetProvider implements DatabaseU
 
             return views;
         }
+
+        @SuppressWarnings("static-access")
+        private int getRowHeight(boolean showEncouragements) {
+
+            Display display = ((WindowManager)
+                    this.getSystemService(this.WINDOW_SERVICE)).getDefaultDisplay();
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+
+            //android
+            final int portraitCellHeight = 100;
+            final int landscapeCellHeight = 74;
+
+          //defined in widget_power_44/42.xml
+            final int rowHeight = 38;
+            final int headerHeight = 36;
+            final int footerHeight = 17;
+            final int encourageHeight = 38;
+
+            int cellHeight =  portraitCellHeight;
+            if (metrics.widthPixels > metrics.heightPixels){
+                cellHeight = landscapeCellHeight;
+            }
+            int widgetHeight = (int)(cellHeight * getWidgetHeight());
+
+
+            int footerHeightUsed = showEncouragements ? encourageHeight: footerHeight;
+            int rowLimit = (int) Math.floor((widgetHeight - footerHeightUsed - headerHeight)/rowHeight);
+            return rowLimit;
+        }
+
+
 
         private Filter getFilter(int widgetId) {
             // base our filter off the inbox filter, replace stuff if we have it
