@@ -22,7 +22,7 @@ public class PowerWidget44 extends PowerWidget {
         }
 
         @Override
-        public int getWidgetHeight(){
+        public int getWidgetVerticalCellCount(){
             return 4; // 2 height
         }
     }
