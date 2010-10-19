@@ -608,7 +608,6 @@ abstract public class PowerWidget extends AppWidgetProvider implements
             final int headerHeight = 36;
             final int footerHeight = 17;
             final int encourageHeight = 48;
-            final int padding = 10;
 
             int cellHeight = portraitCellHeight;
             if (metrics.widthPixels > metrics.heightPixels) {
@@ -618,7 +617,7 @@ abstract public class PowerWidget extends AppWidgetProvider implements
 
             int footerHeightUsed = showEncouragements ? encourageHeight : footerHeight;
             int rowLimit = (int) Math.floor((widgetHeight - footerHeightUsed
-                    - headerHeight - padding)
+                    - headerHeight)
                     / rowHeight);
             return rowLimit;
         }

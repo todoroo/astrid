@@ -283,7 +283,7 @@
 		            android:textColor="#ffffff"
 		            android:textSize="16sp"
 		            android:textStyle="bold"
-			    	android:text="Add Task"
+			    	android:text="@string/PPW_add_task"
 			    	android:gravity="center_vertical"
 			    	/>
             

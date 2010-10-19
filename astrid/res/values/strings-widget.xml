@@ -17,6 +17,8 @@
     <string name="PPW_due">Due:</string>
     <string name="PPW_past_due">Past Due:</string>
     
+    <string name="PPW_add_task">Add Task</string>
+    
     <string-array name="PPW_encouragements">
         <!-- general encouragements -->
     	<item>Hi there!</item>
