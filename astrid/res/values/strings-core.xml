@@ -40,6 +40,15 @@
 
   <!-- Button for going to Market -->
   <string name="DLG_to_market">Go To Market</string>
+
+  <!-- Button for accepting EULA -->
+  <string name="DLG_accept">I Accept</string>
+
+  <!-- Button for declining EULA -->
+  <string name="DLG_decline">I Decline</string>
+
+  <!-- EULA title -->
+  <string name="DLG_eula_title">Astrid Terms Of Use</string>
   
   <!-- =============================================================== UI == -->
   
@@ -287,10 +296,10 @@
   </string-array>
   
   <!-- Add Ons tab when no add-ons found -->
-  <string name="TEA_no_addons">No Add-ons Found!</string>
+  <string name="TEA_addons_text">Looking for more features?</string>
   
   <!-- Add Ons button -->
-  <string name="TEA_addons_button">Get Some Add-ons</string>
+  <string name="TEA_addons_button">Get the Power Pack!</string>
   
   <!-- ============================================= IntroductionActivity == -->
   
@@ -313,10 +322,13 @@
   <!-- Changelog Window Title -->
   <string name="UpS_changelog_title">What\'s New In Astrid?</string>
   
+  <!-- Updates Window Title -->
+  <string name="UpS_updates_title">Latest Astrid News</string>
+  
   <!-- ================================================== EditPreferences == -->
     
   <!-- Preference Window Title -->
-  <string name="EPr_title">Astrid: Preferences</string>
+  <string name="EPr_title">Astrid: Settings</string>
 
   <!-- Preference Category: Appearance Title -->
   <string name="EPr_appearance_header">Appearance</string>
@@ -424,6 +436,9 @@
   
   <!-- Add-on Activity - menu item to visit android market -->
   <string name="AOA_visit_market">Android Market</string>
+  
+  <!-- Add-on Activity - when list is empty -->
+  <string name="AOA_no_addons">Empty List!</string>
   
   <!-- ====================================================== TasksWidget == -->
 

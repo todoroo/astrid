@@ -20,7 +20,7 @@ public class ProducteevStartupReceiver extends BroadcastReceiver {
     /** Called when device is restarted */
     public void onReceive(final Context context, Intent intent) {
         ContextManager.setContext(context);
-        ProducteevBackgroundService.scheduleService();
+        new ProducteevBackgroundService().scheduleService();
     }
 
 }

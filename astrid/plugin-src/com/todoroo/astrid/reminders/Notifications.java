@@ -21,13 +21,14 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.service.NotificationManager;
 import com.todoroo.andlib.service.NotificationManager.AndroidNotificationManager;
+import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.dao.TaskDao;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.utility.Constants;
-import com.todoroo.astrid.voice.VoiceOutputAssistant;
+import com.todoroo.astrid.voice.VoiceOutputService;
 
 public class Notifications extends BroadcastReceiver {
 
@@ -95,6 +96,12 @@ public class Notifications extends BroadcastReceiver {
         if(!showTaskNotification(id, type, reminder)) {
             notificationManager.cancel((int)id);
         }
+
+        try {
+            VoiceOutputService.getVoiceOutputInstance().onDestroy();
+        } catch (VerifyError e) {
+            // unavailable
+        }
     }
 
     // --- notification creation
@@ -144,8 +151,9 @@ public class Notifications extends BroadcastReceiver {
         String text = reminder + " " + taskTitle; //$NON-NLS-1$
 
         Intent notifyIntent = new Intent(context, NotificationActivity.class);
+        notifyIntent.setAction("NOTIFY" + id); //$NON-NLS-1$
         notifyIntent.putExtra(NotificationActivity.TOKEN_ID, id);
-        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 
         showNotification((int)id, notifyIntent, type, title, text, nonstopMode);
         return true;
@@ -177,7 +185,7 @@ public class Notifications extends BroadcastReceiver {
         }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context,
-                notificationId, intent, PendingIntent.FLAG_ONE_SHOT);
+                notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // set up properties (name and icon) for the notification
         int icon;
@@ -272,15 +280,17 @@ public class Notifications extends BroadcastReceiver {
 
         notificationManager.notify(notificationId, notification);
         if (voiceReminder) {
-            while (audioManager.getMode() == AudioManager.MODE_RINGTONE) {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            AndroidUtilities.sleepDeep(1000);
+            for(int i = 0; i < 50; i++) {
+                AndroidUtilities.sleepDeep(500);
+                if(audioManager.getMode() != AudioManager.MODE_RINGTONE)
+                    break;
             }
-            VoiceOutputAssistant.getInstance().queueSpeak(text);
+            try {
+                VoiceOutputService.getVoiceOutputInstance().queueSpeak(text);
+            } catch (VerifyError e) {
+                // unavailable
+            }
         }
     }
 

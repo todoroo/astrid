@@ -36,8 +36,8 @@ if [ ! -e /usr/bin/gettext ]; then
 fi    
 
 # Set the languages here (po -> name of .po file. res -> name of res folder)
-po_lang=( "ca" "cs" "de" "es" "fr" "id" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "tr" "zh_CN"  "zh_TW")
-res_lang=("ca" "cs" "de" "es" "fr" "id" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "tr" "zh-rCN" "zh-rTW")
+po_lang=( "cs" "de" "es" "fr" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "zh_CN"  "zh_TW")
+res_lang=("cs" "de" "es" "fr" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "zh-rCN" "zh-rTW")
 
 #Change the dirs where the files are located.
 launchpad_po_files_dir="translations"
@@ -56,6 +56,12 @@ android_xml_filenames="strings"
 xml2po="`dirname $0`/xml2po.py"
 catxml="`dirname $0`/catxml"
 
+function cat_all_xml() {
+    ${catxml} "${android_xml_files_res_dir}"/"${resource_file}"-*.xml ../astridApi/res/values/${resource_file}*.xml \
+        ../astrid-plugins/astrid-power-pack/res/values/${resource_file}*.xml \
+        > "${launchpad_pot_file_dir}/${resource_file}".xml
+}
+
 function import_po2xml
 {
     for resource_file in $android_xml_filenames; do
@@ -70,13 +76,14 @@ function import_po2xml
         done
     done
     rm -f .xml2po.mo
+    sed -i 's/\\\\/\\/g' ${android_xml_files_res_dir}-*/* 
 }
 
 function export_xml2po
 {
     for resource_file in $android_xml_filenames; do
         echo "Concatenating strings into single XML"
-        ${catxml} "${android_xml_files_res_dir}"/"${resource_file}"-*.xml ../astridApi/res/values/${resource_file}*.xml > "${launchpad_pot_file_dir}/${resource_file}".xml
+        cat_all_xml
         echo "Exporting .xml to .pot: $resource_file"
         ${xml2po} -a -l en -o \
             "${launchpad_pot_file_dir}/${resource_file}".pot \
@@ -94,11 +101,24 @@ function export_xml2po
 
 }
 
+function export_pot
+{
+    for resource_file in $android_xml_filenames; do
+        echo "Concatenating strings into single XML"
+        cat_all_xml
+        echo "Exporting .xml to .pot: $resource_file"
+        ${xml2po} -a -l en -o \
+            "${launchpad_pot_file_dir}/${resource_file}".pot \
+            "${launchpad_pot_file_dir}/${resource_file}.xml"
+    done
+
+}
 function usage
 {
     echo "Wrapper for xml2po for android and launchpad."
     echo "Usage: androidxml2po -i        Import .xml's from .po's. Updates the .xml's."
     echo "       androidxml2po -e        Export/update .po's from string.xml's. Overwrites the .pot and merges the .po's."
+    echo "       androidxml2po -t        Export/update .pot file"
     echo "Set variables correctly inside. Provide a string with value "translator-credits" for Launchpad."
     echo ""
     echo "Copyright 2009 by pjv. Licensed under GPLv3."
@@ -112,6 +132,9 @@ while [ "$1" != "" ]; do
         					exit
                                 		;;
         -e | --xml2po | --export )    		export_xml2po
+        					exit
+                                		;;
+        -t | --pot )    			export_pot
         					exit
                                 		;;
         -h | --help )           		usage

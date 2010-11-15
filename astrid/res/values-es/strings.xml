@@ -10,9 +10,6 @@
     <!-- Task Edit Activity: Add New Alarm -->
     <string name="alarm_ACS_button">Añadir una alarma</string>
     
-    <!-- Task Detail for Alarms (%s -> time)-->
-    <string name="alarm_ADE_detail">Alarma %s</string>
-   
     <string-array name="reminders_alarm">
       <!-- reminders related to alarm -->
       <item>¡Alarma!</item>
@@ -46,7 +43,7 @@
     <string name="backup_BPr_group_options">Opciones</string>
 
     <!-- Preference: Automatic Backup Title -->    
-    <string name="backup_BPr_auto_title">Copias de seguridad automáticas</string>
+    <string name="backup_BPr_auto_title">Respaldos automáticos</string>
     <!-- Preference: Automatic Backup Description (when disabled) -->
     <string name="backup_BPr_auto_disabled">Copias de seguridad automáticas desactivadas</string>    
     <!-- Preference: Automatic Backup Description (when enabled) -->
@@ -74,11 +71,11 @@
   <!-- ============================================== Importer / Exporter == -->
   
   <!-- Message displayed when error occurs -->
-  <string name="backup_TXI_error">Error al importar</string>
+  <string name="backup_TXI_error">Error de importación</string>
     
   <string name="export_toast">Se hicieron copias de seguridad de %s tareas en %s.</string>
     
-  <string name="export_toast_no_tasks">Sin tareas que exportar</string>
+  <string name="export_toast_no_tasks">No hay tareas para exportar</string>
   
   <!-- Progress Dialog Title for exporting -->    
   <string name="export_progress_title">Exportando...</string>
@@ -86,7 +83,7 @@
   <!-- Backup: Title of Import Summary Dialog -->
   <string name="import_summary_title">Resumen de restauración</string>
     
-  <!-- Backup: Summary message for import. (%s => total # tasks, %s => imported, %s => skipped) -->
+  <!-- Backup: Summary message for import. (%s => file name, %s => total # tasks, %s => imported, %s => skipped, %s => errors) -->
   <string name="import_summary_message">El archivo %s contenido en %s.\n\n %s importados,\n %s ya existentes\n %s tuvieron errores\n</string>
   
   <!-- Progress Dialog Title for importing -->    
@@ -148,6 +145,15 @@
 
   <!-- Button for going to Market -->
   <string name="DLG_to_market">Ir al Market</string>
+
+  <!-- Button for accepting EULA -->
+  <string name="DLG_accept">Acepto</string>
+
+  <!-- Button for declining EULA -->
+  <string name="DLG_decline">No acepto</string>
+
+  <!-- EULA title -->
+  <string name="DLG_eula_title">Términos de uso de Astrid</string>
   
   <!-- =============================================================== UI == -->
   
@@ -158,7 +164,7 @@
   <string name="WID_dateButtonLabel">$D $T</string>
   
   <!-- String formatter for Disable button -->
-  <string name="WID_disableButton">Desactivar</string>
+  <string name="WID_disableButton">Deshabilitar</string>
   
   <!-- ================================================= TaskListActivity == -->
   
@@ -166,7 +172,7 @@
   <string name="TLA_no_items">Sin tareas</string>
   
   <!-- Menu: Add-ons -->    
-  <string name="TLA_menu_addons">Complementos</string>
+  <string name="TLA_menu_addons">Componentes adicionales</string>
   
   <!-- Menu: Adjust Sort and Hidden Task Settings -->    
   <string name="TLA_menu_sort">Ordenar y Ocultar</string>
@@ -184,7 +190,7 @@
   <string name="TLA_search_label">Buscar en esta lista</string>
   
   <!-- Window title for displaying Custom Filter -->
-  <string name="TLA_custom">Personalizado</string>
+  <string name="TLA_custom">Personalizar</string>
   
   <!-- Quick Add Edit Box Hint-->
   <string name="TLA_quick_add_hint">Añadir a esta lista...</string>
@@ -204,10 +210,10 @@
   <string name="TAd_completed">Terminado %s</string>
   
   <!-- Action Button: edit task -->
-  <string name="TAd_actionEditTask">Editar</string>
+  <string name="TAd_actionEditTask">Modificar</string>
   
   <!-- Context Item: edit task -->
-  <string name="TAd_contextEditTask">Editar Tarea</string>
+  <string name="TAd_contextEditTask">Editar tarea</string>
 
   <!-- Context Item: delete task -->
   <string name="TAd_contextDeleteTask">Borrar Tarea</string>
@@ -233,7 +239,7 @@
   <string name="SSD_deleted">Mostrar tareas eliminadas</string>
   
   <!-- Sort Selection: sort options header -->    
-  <string name="SSD_sort_header">Opciones de clasificación</string>
+  <string name="SSD_sort_header">Opciones de ordenación</string>
   
   <!-- Sort Selection: smart sort -->
   <string name="SSD_sort_auto">Clasificación Inteligente Astrid</string>
@@ -306,7 +312,7 @@
   <string name="TEA_tab_extra">Avanzado</string>
   
   <!-- Third Tab - add-ons -->
-  <string name="TEA_tab_addons">Complementos</string>
+  <string name="TEA_tab_addons">Componentes adicionales</string>
   
   <!-- Task title label -->
   <string name="TEA_title_label">Título</string>
@@ -321,13 +327,16 @@
   <string name="TEA_urgency_label">Fecha límite</string>
   
   <!-- Task urgency specific time checkbox -->
-  <string name="TEA_urgency_specific_time">At specific time?</string>
+  <string name="TEA_urgency_specific_time">A una hora específica?</string>
   
   <!-- Task urgency specific time title when specific time false -->
-  <string name="TEA_urgency_time_none">No Time Set</string>
+  <string name="TEA_urgency_time_none">Hora sin especificar</string>
   
   <!-- Task hide until label -->
   <string name="TEA_hideUntil_label">Esconder hasta</string>
+  
+  <!-- Task editing data being loaded label -->
+  <string-array name="TEA_loading"><item>Cargando...</item></string-array>
   
   <!-- Task note label -->
   <string name="TEA_note_label">Notas</string>
@@ -357,7 +366,7 @@
   <string name="TEA_onTaskSave_notDue">Tarea guardada</string>
   
   <!-- Toast: task was not saved -->
-  <string name="TEA_onTaskCancel">Se canceló la edición</string>
+  <string name="TEA_onTaskCancel">Se canceló la edición de la tarea</string>
   
   <!-- Toast: task was deleted -->
   <string name="TEA_onTaskDelete">¡Tarea eliminada!</string>
@@ -367,7 +376,7 @@
       <item>Día/Hora específicos</item>
       <item>Hoy</item>
       <item>Mañana</item>
-      <item>(day after)</item>
+      <item>dia sigiente</item>
       <item>Próxima semana</item>
       <item>Sin fecha límite</item>
   </string-array>
@@ -382,10 +391,10 @@
   </string-array>
   
   <!-- Add Ons tab when no add-ons found -->
-  <string name="TEA_no_addons">No se han encontrado complementos!</string>
+  <string name="TEA_addons_text">Looking for more features?</string>
   
   <!-- Add Ons button -->
-  <string name="TEA_addons_button">Obtener algunos complementos</string>
+  <string name="TEA_addons_button">Get the Power Pack!</string>
   
   <!-- ============================================= IntroductionActivity == -->
   
@@ -408,6 +417,9 @@
   <!-- Changelog Window Title -->
   <string name="UpS_changelog_title">¿Que hay de nuevo en Astrid?</string>
   
+  <!-- Updates Window Title -->
+  <string name="UpS_updates_title">Últimas Noticias de Astrid</string>
+  
   <!-- ================================================== EditPreferences == -->
     
   <!-- Preference Window Title -->
@@ -426,7 +438,7 @@
   <!-- Preference: Task List Show Notes Description (disabled) -->
   <string name="EPr_showNotes_desc_disabled">Las notas se mostrarán cuando se toca una tarea.</string>  
   <!-- Preference: Task List Show Notes Description (enabled) -->
-  <string name="EPr_showNotes_desc_enabled">Las notas se mostrarán siempre.</string>  
+  <string name="EPr_showNotes_desc_enabled">Se mostrarán siempre las notas</string>
   
   <!-- Preference Category: Defaults Title -->
   <string name="EPr_defaults_header">Configuración de nuevas tareas por defecto</string>
@@ -507,6 +519,9 @@
   <!-- Add-on Activity - menu item to visit android market -->
   <string name="AOA_visit_market">Android Market</string>
   
+  <!-- Add-on Activity - when list is empty -->
+  <string name="AOA_no_addons">Empty List!</string>
+  
   <!-- ====================================================== TasksWidget == -->
 
   <!-- Widget text when loading tasks -->
@@ -581,7 +596,7 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
     <string name="CFA_type_intersect">también</string>
     
     <!-- Filter Criteria Context Menu: chaining (%s chain type as above) -->
-    <string name="CFA_context_chain">Encadenamiento: %s</string>
+    <string name="CFA_context_chain">%s tiene criterio</string>
     
     <!-- Filter Criteria Context Menu: delete -->
     <string name="CFA_context_delete">Eliminar fila</string>
@@ -612,7 +627,7 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
         <item>Mañana</item>
         <item>Pasado mañana</item>
         <item>Próxima semana</item>
-        <item>Next Month</item>
+        <item>Mes siguiente</item>
     </string-array>
     
     <!-- Criteria: importance - display text (? -> user input)-->
@@ -626,14 +641,14 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
     <string name="CFC_tag_name">Etiquetas...</string>
     
     <!-- Criteria: tag_contains - name of criteria -->
-    <string name="CFC_tag_contains_name">Tag contains...</string>
+    <string name="CFC_tag_contains_name">Etiqueta contiene...</string>
     <!-- Criteria: tag_contains - text (? -> user input) -->
-    <string name="CFC_tag_contains_text">Tag contains: ?</string>
+    <string name="CFC_tag_contains_text">Etiqueta contiene: ?</string>
     
     <!-- Criteria: title_contains - name of criteria -->
-    <string name="CFC_title_contains_name">Title contains...</string>
+    <string name="CFC_title_contains_name">Título contiene...</string>
     <!-- Criteria: title_contains - text (? -> user input) -->
-    <string name="CFC_title_contains_text">Title contains: ?</string>
+    <string name="CFC_title_contains_text">Título contiene: ?</string>
     
 
 
@@ -676,6 +691,123 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
 <!-- See the file "LICENSE" for the full license governing this code. -->
 
 
+    <!-- ============================================================= UI == -->
+
+    <!-- filters header: GTasks -->
+    <string name="gtasks_FEx_header">Google Tasks</string>
+    
+    <!-- filter category for GTasks lists -->
+    <string name="gtasks_FEx_list">Lista</string>
+    
+    <!-- filter title for GTasks lists (%s => list name) -->
+    <string name="gtasks_FEx_title">Google Tasks: %s</string>
+    
+    <!-- short help title for Gtasks -->
+    <string name="gtasks_help_title">Bienvenido a Google Tasks!</string>
+    
+    <!-- short help for GTasks list activity -->
+    <string name="gtasks_help_body">Drag the grabber on the left side of a task 
+    to rearrange it. Swipe the grabber left or right to change indentation.</string>
+        
+    <!-- ============================================ GtasksLoginActivity == -->
+    
+    <!-- Activity Title: Gtasks Login -->    
+    <string name="gtasks_GLA_title">Log In to Google Tasks</string>
+
+    <!-- Instructions: Gtasks login -->    
+    <string name="gtasks_GLA_body">Please log in to Google Tasks Sync (Beta!). Google Apps
+    for Domain is currently unsupported, we\'re working on that!</string>
+
+    <!-- Instructions: Gtasks further help -->    
+    <string name="gtasks_GLA_further_help">To view your tasks with indentation
+    and order preserved, go to the Filters page and select a Google Tasks list.
+    By default, Astrid uses its own sort settings for tasks.</string>
+
+    <!-- Sign In Button -->    
+    <string name="gtasks_GLA_signIn">Ingresar</string>
+
+    <!-- E-mail Address Label -->    
+    <string name="gtasks_GLA_email">Correo electrónico</string>
+
+    <!-- Password Label -->    
+    <string name="gtasks_GLA_password">Contraseña</string>
+    
+    <!-- Google Apps for Domain checkbox -->
+    <string name="gtasks_GLA_domain">Google Apps for Domain account</string>
+
+    <!-- Error Message when fields aren't filled out -->    
+    <string name="gtasks_GLA_errorEmpty">Error: rellene todos los campos!</string>
+
+    <!-- Error Message when we receive a HTTP 401 Unauthorized -->    
+    <string name="gtasks_GLA_errorAuth">Error: correo o contraseña incorrectos!</string>
+        
+    <!-- ============================================== GtasksPreferences == -->
+
+    <!-- GTasks Preferences Title -->    
+    <string name="gtasks_GPr_header">Google Tasks (Beta!)</string>
+    
+    <!-- ================================================ Synchronization == -->    
+    
+    <!-- title for notification tray when synchronizing -->
+    <string name="gtasks_notification_title">Astrid: Google Tasks</string>
+        
+
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
+    <!-- Resources initial tasks added -->
+  
+   <!-- Intro Tag or click prompt -->
+  <string name="intro_click_prompt">Intro: Press me to see details</string>
+  
+  <!-- Task 1 Summary  -->
+  <string name="intro_task_1_summary">Crea su primera tarea</string>
+
+  <!-- Task 1 Note -->
+  <string name="intro_task_1_note">Two ways to add a task:\n
+  1) Quick Add: Just type the task into the quick entry box and press the + 
+  button that appears on the left.\n\n
+  
+  2) Regular add: Press the button to the right of the quick entry box. 
+  Add basic details (due date, tags, notes) or set more advanced options. 
+  Save the task with the save button or your phone\'s back button.\n\n
+  </string>
+  
+  <!-- Task 2 Summary  -->
+  <string name="intro_task_2_summary">Add a widget to your desktop</string>
+
+  <!-- Task 2 Note -->
+  <string name="intro_task_2_note">A desktop widget is a great way to keep 
+  	track of your what you have to do as well as a way to quickly add new 
+  	tasks.\n\n
+	How to add a widget:\n
+	1) Long press on your phone\'s desktop.\n
+	2) Choose \"Widget\" form resulting menu\n
+	3) Choose the Astrid widget.\n
+	4) You can select a Astrid filter. Choose \"Active Tasks\" for all your 
+	tasks\n\n
+
+	Bonus: Use the widget to add a task!</string>
+  
+    <!-- Task 3 Summary  -->
+  <string name="intro_task_3_summary">Setup sync with Gmail Tasks or 
+  Producteev</string>
+
+  <!-- Task 3 Note -->
+  <string name="intro_task_3_note">Astrid makes it possible for you to sync 
+  	your tasks with the simple task list provided by Gmail. For more advanced 
+  	task features we recommend synchronization with Producteev.\n\n
+
+	To enable sync from Astrid press \"Menu\" -&gt; \"Settings\" -&gt; \"Synchronization\" and 
+	choose the sync provider you prefer.
+	</string>
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
   <!-- Resources for built-in locale plug-in -->
 
   <!-- Locale Alert Editing Window Title -->
@@ -706,6 +838,23 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
   <!-- Locale Plugin was not found, it is required -->
   <string name="locale_plugin_required">Por favor, instale el complemento Astrid Locale</string>        
      
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
+  <!-- ================================================== EditPreferences == -->
+    
+  <!-- Preference Category: Power Pack -->
+  <string name="EPr_powerpack_header">Astrid Power Pack</string>
+  
+  <!-- Preference: Anonymous User Statistics -->
+  <string name="EPr_statistics_title">Estadísticas de uso anónimas</string>
+  <!-- Preference: User Statistics (disabled) -->
+  <string name="EPr_statistics_desc_disabled">No se enviará ninguna información</string>  
+  <!-- Preference: User Statistics (enabled) -->
+  <string name="EPr_statistics_desc_enabled">Ayúdanos a mejorar Astrid permitiendo el envío anónimo de datos relacionados con el uso de la aplicación</string>
+      
 
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
@@ -779,6 +928,9 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
 
     <!-- Password Label -->    
     <string name="producteev_PLA_password">Contraseña</string>
+    
+    <!-- Timezone Spinner -->
+    <string name="producteev_PLA_timezone">Huso horario</string>
 
     <!-- Confirm Password Label -->    
     <string name="producteev_PLA_confirmPassword">Confirme Contraseña</string>
@@ -828,7 +980,15 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
 
     <!-- Spinner-item for default dashboard on taskeditactivity -->
     <string name="producteev_TEA_dashboard_default">&lt;Predeterminado&gt;</string>
-    
+
+    <string name="CFC_producteev_in_workspace_text">¿En qué espacio de trabajo?</string>
+
+    <string name="CFC_producteev_in_workspace_name">En el espacio de trabajo...</string>
+
+    <string name="CFC_producteev_assigned_to_text">Asignado a:</string>
+
+    <string name="CFC_producteev_assigned_to_name">Asginado a...</string>
+
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
 
@@ -935,11 +1095,11 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
   <string name="rmd_EPr_nagging_desc_false">Astrid no le dará ningún mensaje de estímulo</string>
 
   <!-- Reminder Preference: Snooze Dialog Title -->  
-  <string name="rmd_EPr_snooze_dialog_title">Snooze Dialog HH:MM</string>
+  <string name="rmd_EPr_snooze_dialog_title">Diálogo de espera HH:MM</string>
   <!-- Reminder Preference: Snooze Dialog Description (true) -->
-  <string name="rmd_EPr_snooze_dialog_desc_true">Snooze by selecting new snooze time (HH:MM)</string>
+  <string name="rmd_EPr_snooze_dialog_desc_true">Retrasar seleccionando un nuevo tiempo de espera (HH:MM)</string>
   <!-- Reminder Preference: Nagging Description (false) -->
-  <string name="rmd_EPr_snooze_dialog_desc_false">Snooze by selecting # days/hours to snooze</string>
+  <string name="rmd_EPr_snooze_dialog_desc_false">Retrasar seleccionando # días/horas de espera</string>
   
   <!-- Reminder Preference: Default Reminders Title -->
   <string name="rmd_EPr_defaultRemind_title">Recordatorios aleatorios</string>
@@ -1235,7 +1395,28 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
   
   <!-- %s => tag name -->
   <string name="tag_FEx_name">Etiqueta \'%s\'</string>
-    
+
+  <!-- context menu option to rename a tag -->
+  <string name="tag_cm_rename">Renombrar etiqueta</string>
+
+  <!-- context menu option to delete a tag -->
+  <string name="tag_cm_delete">Borrar etiqueta</string>
+
+  <!-- Dialog to confirm deletion of a tag -->
+  <string name="DLG_delete_this_tag_question">¿Eliminar la etiqueta %s? (no se eliminarán tareas)</string>
+
+  <!-- Dialog to rename tag -->
+  <string name="DLG_rename_this_tag_header">Renombrar la etiqueta %s como:</string>
+
+  <!-- Toast notification that no changes have been made -->
+  <string name="TEA_no_tags_modified">No se realizaron cambios</string>
+
+  <!-- Toast notification that a tag has been deleted -->
+  <string name="TEA_tags_deleted">Se eliminó la etiqueta %s de %d tareas</string>
+
+  <!-- Toast notification that a tag has been renamed -->
+  <string name="TEA_tags_renamed">Se reemplazó %s con %s en %d tareas</string>
+
 
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
@@ -1263,25 +1444,38 @@ Si puede añada Astrid a la lista de exclusión de modo que no sea matada. De ot
 <!-- See the file "LICENSE" for the full license governing this code. -->
 
     
-    <!-- Resources for power pack widget -->
+  <!-- Voice Add Prompt Text -->
+  <string name="voice_create_prompt">Speak to create a task</string>
+  <string name="voice_edit_title_prompt">Speak to set task title</string>
+  <string name="voice_edit_note_prompt">Speak to set task notes</string>
     
-    <string name="PPW_widget_42_label">Astrid 4x2 (beta!)</string>
-    <string name="PPW_widget_44_label">Astrid 4x4 (beta!)</string>
+  <!-- Preference: Task List recognition-service is not installed, but available -->
+  <string name="EPr_voiceInputInstall_dlg">La entrada de datos por voz no está instalada.\nDesea ir al market e instalarla?</string>
+  <!-- Preference: Task List recognition-service is not available for this system -->
+  <string name="EPr_voiceInputUnavailable_dlg">Unfortunately voice-input is not available for your system.\nIf possible, please update Android to 2.1 or later.</string>
+  <!-- Preference: Market is not available for this system -->
+  <string name="EPr_marketUnavailable_dlg">Unfortunately the market is not available for your system.\nIf possible, try downloading voice search from another source.</string>
+  <!-- Preference: Task List Show Voice-button if recognition-service is available -->
+  <string name="EPr_voiceInputEnabled_title">Voice Input</string>
+  <!-- Preference: voice button description (true) -->
+  <string name="EPr_voiceInputEnabled_desc_enabled">Voice input button will be displayed in task list page</string>
+  <!-- Preference: voice button description (false) -->
+  <string name="EPr_voiceInputEnabled_desc_disabled">Voice input button will be hidden on task list page</string>
+  <!-- Preference: Task List Voice-button directly creates tasks -->
+  <string name="EPr_voiceInputCreatesTask_title">Directly Create Tasks</string>
+  <!-- Preference: Task List Voice-creation description (true) -->
+  <string name="EPr_voiceInputCreatesTask_desc_enabled">Tasks will automatically be created from voice input</string>
+  <!-- Preference: Task List Voice-creation description (false) -->
+  <string name="EPr_voiceInputCreatesTask_desc_disabled">You can edit the task title after voice input finishes</string>
+  <!-- Preference: Voice reminders if TTS-service is available -->
+  <string name="EPr_voiceRemindersEnabled_title">Voice Reminders</string>
+  <!-- Preference: Voice reminders description (true) -->
+  <string name="EPr_voiceRemindersEnabled_desc_enabled">Astrid will speak task names during task reminders</string>
+  <!-- Preference: Voice reminders description (false) -->
+  <string name="EPr_voiceRemindersEnabled_desc_disabled">Astrid will sound a ringtone during task reminders</string>    
+  
+  <!-- Preference Category: Voice Title -->
+  <string name="EPr_voice_header">Voice Input Settings</string>
     
-    <string name="PPW_configure_title">Configurar widget</string>
-    
-    <string name="PPW_color">Color del widget</string>
-    <string name="PPW_enable_calendar">Mostrar eventos del calendario</string>
-    <string name="PPW_disable_encouragements">Ocultar estímulos</string>
-    <string name="PPW_filter">Seleccionar filtro</string>
-    
-    <string name="PPW_due">Vencimiento:</string>
-    <string name="PPW_past_due">Vencido:</string>
-    
-    <string-array name="PPW_encouragements">
-    	<item>Listo para trabajar?</item>
-    	<item>Tiene tiempo para acabar una cosa?</item>
-    	<item>Vaya, se le ve muy tranquilo hoy!</item>
-    </string-array>
 
 </resources>

@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.speech.RecognizerIntent;
-import android.text.Editable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -30,6 +29,7 @@ import com.todoroo.andlib.utility.Preferences;
  *
  * @author Arne Jans
  */
+@SuppressWarnings("nls")
 public class VoiceInputAssistant {
 
     /** requestcode for activityresult from voicerecognizer-intent */
@@ -44,8 +44,7 @@ public class VoiceInputAssistant {
     private final Activity activity;
     private final ImageButton voiceButton;
     private final EditText textField;
-
-    private boolean voiceInputAvailable;
+    private boolean append = false;
 
     private String languageModel = RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH;
 
@@ -61,6 +60,23 @@ public class VoiceInputAssistant {
      */
     public String getLanguageModel() {
         return languageModel;
+    }
+
+    /** Sets whether voice input will append into field */
+    public void setAppend(boolean append) {
+        this.append = append;
+    }
+
+    /**
+     * Creates a new VoiceInputAssistant-instance simply for checking the availability of the
+     * RecognizerService. This is used for Preferences-Screens that dont want to provide
+     * a microphone-button themselves.
+     */
+    public VoiceInputAssistant(Activity activity) {
+        Assert.assertNotNull("Each VoiceInputAssistant must be bound to an activity!", activity);
+        this.activity = activity;
+        this.voiceButton = null;
+        this.textField = null;
     }
 
     /**
@@ -126,15 +142,15 @@ public class VoiceInputAssistant {
      * If this method returns false, then it wasnt a request with a RecognizerIntent, so you can handle
      * these other requests as you need.
      *
-     * @param requestCode if this equals the requestCode specified by constructor, then results of voice-recognition
+     * @param activityRequestCode if this equals the requestCode specified by constructor, then results of voice-recognition
      * @param resultCode
      * @param data
      * @return
      */
-    public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
+    public boolean handleActivityResult(int activityRequestCode, int resultCode, Intent data) {
         boolean result = false;
         // handle the result of voice recognition, put it into the textfield
-        if (requestCode == this.requestCode) {
+        if (activityRequestCode == this.requestCode) {
             // this was handled here, even if voicerecognition fails for any reason
             // so your program flow wont get chaotic if you dont explicitly state
             // your own requestCodes.
@@ -145,16 +161,14 @@ public class VoiceInputAssistant {
                         RecognizerIntent.EXTRA_RESULTS);
                 // make sure we only do this if there is SomeThing (tm) returned
                 if (match != null && match.size() > 0 && match.get(0).length() > 0) {
-                    Editable currentText = textField.getText();
                     String recognizedSpeech = match.get(0);
+                    recognizedSpeech = recognizedSpeech.substring(0, 1).toUpperCase() +
+                        recognizedSpeech.substring(1).toLowerCase();
 
-                    if (currentText.length() > 0) {
-                        // if something is already typed in, append the recognized speech,
-                        // add a space if it isn't already there
-                        textField.append((currentText.toString().endsWith(" ") ? recognizedSpeech : " "+recognizedSpeech ));
-                    } else {
+                    if(append)
+                        textField.setText((textField.getText() + " " + recognizedSpeech).trim());
+                    else
                         textField.setText(recognizedSpeech);
-                    }
                 }
             }
         }

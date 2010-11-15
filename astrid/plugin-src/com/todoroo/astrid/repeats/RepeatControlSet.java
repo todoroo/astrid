@@ -1,7 +1,6 @@
 package com.todoroo.astrid.repeats;
 
 import java.text.DateFormatSymbols;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,15 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
-import com.flurry.android.FlurryAgent;
 import com.google.ical.values.Frequency;
 import com.google.ical.values.RRule;
 import com.google.ical.values.Weekday;
@@ -32,6 +30,7 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.astrid.activity.TaskEditActivity.TaskEditControlSet;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.ui.NumberPicker;
 import com.todoroo.astrid.ui.NumberPickerDialog;
 import com.todoroo.astrid.ui.NumberPickerDialog.OnNumberPickedListener;
@@ -122,17 +121,6 @@ public class RepeatControlSet implements TaskEditControlSet {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View view, int position, long id) {
                 daysOfWeekContainer.setVisibility(position == INTERVAL_WEEKS ? View.VISIBLE : View.GONE);
-                if(position == INTERVAL_WEEKS) {
-                    Date date;
-                    if(model.getValue(Task.DUE_DATE) == 0)
-                        date = new Date();
-                    else
-                        date = new Date(model.getValue(Task.DUE_DATE));
-
-                    int dayOfWeek = date.getDay();
-                    for(int i = 0; i < 7; i++)
-                        daysOfWeek[i].setChecked(i == dayOfWeek);
-                }
             }
 
             @Override
@@ -182,6 +170,15 @@ public class RepeatControlSet implements TaskEditControlSet {
         if(recurrence == null)
             recurrence = "";
 
+        Date date;
+        if(model.getValue(Task.DUE_DATE) == 0)
+            date = new Date();
+        else
+            date = new Date(model.getValue(Task.DUE_DATE));
+        int dayOfWeek = date.getDay();
+        for(int i = 0; i < 7; i++)
+            daysOfWeek[i].setChecked(i == dayOfWeek);
+
         // read recurrence rule
         if(recurrence.length() > 0) {
             try {
@@ -214,13 +211,14 @@ public class RepeatControlSet implements TaskEditControlSet {
 
                 for(WeekdayNum day : rrule.getByDay()) {
                     for(int i = 0; i < 7; i++)
-                        if(daysOfWeek[i].getTag() == day.wday)
+                        if(daysOfWeek[i].getTag().equals(day.wday))
                             daysOfWeek[i].setChecked(true);
                 }
 
                 // suppress first call to interval.onItemSelected
                 setInterval = true;
-            } catch (ParseException e) {
+            } catch (Exception e) {
+                // invalid RRULE
                 recurrence = ""; //$NON-NLS-1$
                 exceptionService.reportError("repeat-parse-exception", e);
             }
@@ -243,7 +241,7 @@ public class RepeatControlSet implements TaskEditControlSet {
             result = ""; //$NON-NLS-1$
         else {
             if(TextUtils.isEmpty(task.getValue(Task.RECURRENCE))) {
-                FlurryAgent.onEvent("repeat-task-create"); //$NON-NLS-1$
+                StatisticsService.reportEvent("repeat-task-create"); //$NON-NLS-1$
             }
 
             RRule rrule = new RRule();

@@ -15,9 +15,9 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.util.Log;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
@@ -25,12 +25,13 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.service.ExceptionService.TodorooUncaughtExceptionHandler;
 import com.todoroo.andlib.utility.AndroidUtilities;
+import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.backup.BackupConstants;
 import com.todoroo.astrid.backup.BackupService;
 import com.todoroo.astrid.backup.TasksXmlImporter;
 import com.todoroo.astrid.dao.Database;
-import com.todoroo.astrid.producteev.ProducteevBackgroundService;
+import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.producteev.ProducteevUtilities;
 import com.todoroo.astrid.reminders.ReminderStartupReceiver;
 import com.todoroo.astrid.utility.AstridPreferences;
@@ -90,7 +91,6 @@ public class StartupService {
         int latestSetVersion = AstridPreferences.getCurrentVersion();
         int version = 0;
         try {
-
             PackageManager pm = context.getPackageManager();
             PackageInfo pi = pm.getPackageInfo(Constants.PACKAGE, PackageManager.GET_META_DATA);
             version = pi.versionCode;
@@ -109,13 +109,15 @@ public class StartupService {
             upgradeService.performUpgrade(context, latestSetVersion);
             AstridPreferences.setCurrentVersion(version);
         }
+        if(latestSetVersion == 0) {
+            onFirstTime();
+        }
 
         upgradeService.performSecondaryUpgrade(context);
 
         // perform startup activities in a background thread
         new Thread(new Runnable() {
             public void run() {
-
                 // start widget updating alarm
                 AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
                 Intent intent = new Intent(context, UpdateService.class);
@@ -134,8 +136,10 @@ public class StartupService {
                 ProducteevUtilities.INSTANCE.stopOngoing();
                 MilkUtilities.INSTANCE.stopOngoing();
 
-                ProducteevBackgroundService.scheduleService();
                 BackupService.scheduleService(context);
+
+                // get and display update messages
+                new UpdateMessageService().processUpdates(context);
             }
         }).start();
 
@@ -146,6 +150,26 @@ public class StartupService {
             showTaskKillerHelp(context);
 
         hasStartedUp = true;
+    }
+
+    /**
+     * Create tasks for first time users
+     */
+    private void onFirstTime() {
+        Resources r = ContextManager.getResources();
+
+        addIntroTask(r, R.string.intro_task_1_summary, R.string.intro_task_1_note);
+        addIntroTask(r, R.string.intro_task_2_summary, R.string.intro_task_2_note);
+        addIntroTask(r, R.string.intro_task_3_summary, R.string.intro_task_3_note);
+    }
+
+    private void addIntroTask(Resources r, int summary, int note) {
+        Task task = new Task();
+        task.setValue(Task.TITLE, r.getString(summary));
+        task.setValue(Task.DETAILS, r.getString(R.string.intro_click_prompt));
+        task.setValue(Task.DETAILS_DATE, 2*DateUtilities.now());
+        task.setValue(Task.NOTES, r.getString(note));
+        taskService.save(task);
     }
 
     /**
@@ -162,9 +186,9 @@ public class StartupService {
                 File[] children = directory.listFiles();
                 AndroidUtilities.sortFilesByDateDesc(children);
                 if(children.length > 0) {
-                    FlurryAgent.onStartSession(context, Constants.FLURRY_KEY);
+                    StatisticsService.sessionStart(context);
                     TasksXmlImporter.importTasks(context, children[0].getAbsolutePath(), null);
-                    FlurryAgent.onEvent("lost-tasks-restored"); //$NON-NLS-1$
+                    StatisticsService.reportEvent("lost-tasks-restored"); //$NON-NLS-1$
                 }
             }
         } catch (Exception e) {

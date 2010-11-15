@@ -8,17 +8,18 @@ import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Functions;
-import com.todoroo.andlib.sql.Order;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.PermaSql;
 import com.todoroo.astrid.dao.MetadataDao;
-import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.TaskDao;
+import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.gtasks.GtasksMetadata;
+import com.todoroo.astrid.producteev.sync.ProducteevTask;
 
 /**
  * Service layer for {@link Task}-centered activities.
@@ -102,6 +103,13 @@ public class TaskService {
                 long newId = newTask.getId();
                 for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     metadata.readFromCursor(cursor);
+
+                    // don't clone sync metadata
+                    if(GtasksMetadata.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
+                        continue;
+                    if(ProducteevTask.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
+                        continue;
+
                     metadata.setValue(Metadata.TASK, newId);
                     metadata.clearValue(Metadata.ID);
                     metadataDao.createNew(metadata);
@@ -196,18 +204,6 @@ public class TaskService {
         sql = PermaSql.replacePlaceholders(sql);
 
         return taskDao.query(Query.select(properties).withQueryTemplate(sql));
-    }
-
-    /**
-     * Return the default task ordering
-     * @return
-     */
-    @SuppressWarnings("nls")
-    public static Order defaultTaskOrder() {
-        return Order.asc(Functions.caseStatement(Task.DUE_DATE.eq(0),
-                DateUtilities.now() + DateUtilities.ONE_WEEK,
-                Task.DUE_DATE) + " + 200000000 * " +
-                Task.IMPORTANCE + " + 2*" + Task.COMPLETION_DATE);
     }
 
     /**

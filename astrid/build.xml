@@ -34,6 +34,13 @@
          should be checked in in Version Control Systems. -->
     <property file="default.properties" />
 
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+      <classpath>
+        <pathelement location="antlib/ant-contrib-1.0b3.jar"/>
+      </classpath>
+    </taskdef>
+
     <!-- Custom Android task to deal with the project target, and import the proper rules.
          This requires ant 1.6.0 or above. -->
     <path id="android.antlibs">
@@ -64,12 +71,6 @@
     -->
     <setup />
 
-    <taskdef resource="net/sf/antcontrib/antlib.xml">
-      <classpath>
-        <pathelement location="antlib/ant-contrib-1.0b3.jar"/>
-      </classpath>
-    </taskdef>
-
     <!-- amalgamate sources -->
     <delete dir="${source.dir}" />
     <mkdir dir="${source.dir}" />
@@ -80,5 +81,32 @@
         </copy>
       </sequential>
     </for>
+
+    <target name="get-version">
+      <loadfile property="manifest" srcFile="AndroidManifest.xml" />
+      <propertyregex property="manifest.version.code"
+                     input="${manifest}"
+                     regexp="android:versionCode=&quot;(.*)&quot;"
+                     select="\1" />
+      <propertyregex property="manifest.version.name"
+                     input="${manifest}"
+                     regexp="android:versionName=&quot;([^&quot; ]*)"
+                     select="\1" />
+      <echo message="Astrid: version ${manifest.version.code}, named ${manifest.version.name}" />
+    </target>
+      
+                     
+
+    <!-- post build: rename apk -->
+    <target name="release" depends="get-version, android_rules.release">
+      <property name="out.release.package"
+                location="${out.absolute.dir}/${ant.project.name}-release.apk" />
+      <property name="out.final.package"
+                  location="${out.absolute.dir}/${ant.project.name}-${manifest.version.code}-${manifest.version.name}-release.apk" />
+
+      <move file="${out.release.package}" tofile="${out.final.package}" />
+      <echo>Final Release Package: ${out.final.package}</echo>
+    </target>
+
 
 </project>

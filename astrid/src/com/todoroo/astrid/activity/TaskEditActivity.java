@@ -21,6 +21,7 @@ package com.todoroo.astrid.activity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +66,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property.StringProperty;
 import com.todoroo.andlib.service.Autowired;
@@ -85,12 +85,12 @@ import com.todoroo.astrid.repeats.RepeatControlSet;
 import com.todoroo.astrid.service.AddOnService;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.tags.TagsControlSet;
 import com.todoroo.astrid.timers.TimerControlSet;
 import com.todoroo.astrid.ui.DeadlineTimePickerDialog;
 import com.todoroo.astrid.ui.DeadlineTimePickerDialog.OnDeadlineTimeSetListener;
-import com.todoroo.astrid.utility.Constants;
 import com.todoroo.astrid.voice.VoiceInputAssistant;
 
 /**
@@ -161,7 +161,8 @@ public final class TaskEditActivity extends TabActivity {
     private EditTextControlSet notesControlSet = null;
     private EditText title;
 
-    private final ArrayList<TaskEditControlSet> controls = new ArrayList<TaskEditControlSet>();
+    private final List<TaskEditControlSet> controls =
+        Collections.synchronizedList(new ArrayList<TaskEditControlSet>());
 
 	// --- other instance variables
 
@@ -245,13 +246,17 @@ public final class TaskEditActivity extends TabActivity {
         controls.add(new UrgencyControlSet(R.id.urgency));
 
         // prepare and set listener for voice-button
-        voiceAddNoteButton = (ImageButton) findViewById(R.id.voiceAddNoteButton);
-        notesEditText = (EditText) findViewById(R.id.notes);
-        int prompt = R.string.TEA_voice_edit_note_prompt;
-        voiceNoteAssistant = new VoiceInputAssistant(this, voiceAddNoteButton,
-                notesEditText);
-        voiceNoteAssistant.setLanguageModel(RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        voiceNoteAssistant.configureMicrophoneButton(prompt);
+        if(addOnService.hasPowerPack()) {
+            voiceAddNoteButton = (ImageButton) findViewById(R.id.voiceAddNoteButton);
+            voiceAddNoteButton.setVisibility(View.VISIBLE);
+            notesEditText = (EditText) findViewById(R.id.notes);
+            int prompt = R.string.voice_edit_note_prompt;
+            voiceNoteAssistant = new VoiceInputAssistant(this, voiceAddNoteButton,
+                    notesEditText);
+            voiceNoteAssistant.setAppend(true);
+            voiceNoteAssistant.setLanguageModel(RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            voiceNoteAssistant.configureMicrophoneButton(prompt);
+        }
 
         new Thread() {
             @Override
@@ -265,6 +270,7 @@ public final class TaskEditActivity extends TabActivity {
 
                         LinearLayout extrasAddons = (LinearLayout) findViewById(R.id.tab_extra_addons);
                         controls.add(new RepeatControlSet(TaskEditActivity.this, extrasAddons));
+                        controls.add(new GCalControlSet(TaskEditActivity.this, extrasAddons));
 
                         LinearLayout addonsAddons = (LinearLayout) findViewById(R.id.tab_addons_addons);
 
@@ -279,19 +285,20 @@ public final class TaskEditActivity extends TabActivity {
                         }
 
                         if(addOnService.hasPowerPack()) {
-                            controls.add(new GCalControlSet(TaskEditActivity.this, addonsAddons));
                             controls.add(new TimerControlSet(TaskEditActivity.this, addonsAddons));
                             controls.add(new AlarmControlSet(TaskEditActivity.this, addonsAddons));
-                        }
-
-                        // show add-on help if necessary
-                        if(addonsAddons.getChildCount() == 0) {
-                            ((View)addonsAddons.getParent()).setVisibility(View.GONE);
-                            findViewById(R.id.addons_empty).setVisibility(View.VISIBLE);
+                        } else {
+                            // show add-on help if necessary
+                            View addonsEmpty = findViewById(R.id.addons_empty);
+                            addonsEmpty.setVisibility(View.VISIBLE);
+                            addonsAddons.removeView(addonsEmpty);
+                            addonsAddons.addView(addonsEmpty);
                             ((Button)findViewById(R.id.addons_button)).setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    startActivity(new Intent(TaskEditActivity.this, AddOnActivity.class));
+                                    Intent addOnActivity = new Intent(TaskEditActivity.this, AddOnActivity.class);
+                                    addOnActivity.putExtra(AddOnActivity.TOKEN_START_WITH_AVAILABLE, true);
+                                    startActivity(addOnActivity);
                                 }
                             });
                         }
@@ -373,19 +380,23 @@ public final class TaskEditActivity extends TabActivity {
         if(model == null) {
             String valuesAsString = intent.getStringExtra(TOKEN_VALUES);
             ContentValues values = null;
-            if(valuesAsString != null)
-                values = AndroidUtilities.contentValuesFromSerializedString(valuesAsString);
+            try {
+                if(valuesAsString != null)
+                    values = AndroidUtilities.contentValuesFromSerializedString(valuesAsString);
+            } catch (Exception e) {
+                // oops, can't serialize
+            }
             model = TaskListActivity.createWithValues(values, null, taskService, metadataService);
         }
 
         if(model.getValue(Task.TITLE).length() == 0) {
-            FlurryAgent.onEvent("create-task");
+            StatisticsService.reportEvent("create-task");
             isNewTask = true;
 
             // set deletion date until task gets a title
             model.setValue(Task.DELETION_DATE, DateUtilities.now());
         } else {
-            FlurryAgent.onEvent("edit-task");
+            StatisticsService.reportEvent("edit-task");
         }
 
         if(model == null) {
@@ -637,13 +648,13 @@ public final class TaskEditActivity extends TabActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, Constants.FLURRY_KEY);
+        StatisticsService.sessionStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        StatisticsService.sessionStop(this);
     }
 
     /* ======================================================================
@@ -1166,20 +1177,23 @@ public final class TaskEditActivity extends TabActivity {
         @Override
         public void readFromTask(Task task) {
             long date = task.getValue(Task.HIDE_UNTIL);
-            long dueDate = task.getValue(Task.DUE_DATE);
+
+            Date dueDay = new Date(task.getValue(Task.DUE_DATE)/1000L*1000L);
+            dueDay.setHours(0);
+            dueDay.setMinutes(0);
+            dueDay.setSeconds(0);
 
             int selection = 0;
             if(date == 0) {
                 selection = 0;
                 date = 0;
-            } else if(Math.abs(date - dueDate) < DateUtilities.ONE_DAY) {
+            } else if(date == dueDay.getTime()) {
                 selection = 1;
                 date = 0;
-            } else if(Math.abs(date - dueDate) < 2 * DateUtilities.ONE_DAY) {
+            } else if(date + DateUtilities.ONE_DAY == dueDay.getTime()) {
                 selection = 2;
                 date = 0;
-            } else if(Math.abs(date - dueDate) > DateUtilities.ONE_WEEK &&
-                    Math.abs(date - dueDate) < (DateUtilities.ONE_WEEK + DateUtilities.ONE_DAY)) {
+            } else if(date + DateUtilities.ONE_WEEK == dueDay.getTime()) {
                 selection = 3;
                 date = 0;
             }
@@ -1195,7 +1209,11 @@ public final class TaskEditActivity extends TabActivity {
 
         @Override
         public String writeToModel(Task task) {
+            if(adapter == null || spinner == null)
+                return null;
             HideUntilValue item = adapter.getItem(spinner.getSelectedItemPosition());
+            if(item == null)
+                return null;
             long value = task.createHideUntil(item.setting, item.date);
             task.setValue(Task.HIDE_UNTIL, value);
             return null;
@@ -1222,10 +1240,15 @@ public final class TaskEditActivity extends TabActivity {
                     getString(R.string.TEA_reminder_alarm_off),
                     getString(R.string.TEA_reminder_alarm_on),
             };
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                     TaskEditActivity.this, android.R.layout.simple_spinner_item, list);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mode.setAdapter(adapter);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mode.setAdapter(adapter);
+                }
+            });
         }
 
         public void setValue(int flags) {

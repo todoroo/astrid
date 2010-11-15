@@ -6,8 +6,6 @@
 package com.todoroo.astrid.dao;
 
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.DatabaseDao;
@@ -17,15 +15,14 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Functions;
 import com.todoroo.andlib.utility.DateUtilities;
-import com.todoroo.astrid.api.AstridApiConstants;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.data.TaskApiDao;
 import com.todoroo.astrid.provider.Astrid2TaskProvider;
+import com.todoroo.astrid.provider.Astrid3ContentProvider;
 import com.todoroo.astrid.reminders.Notifications;
 import com.todoroo.astrid.reminders.ReminderService;
-import com.todoroo.andlib.utility.Preferences;
-import com.todoroo.astrid.widget.PowerWidget;
-import com.todoroo.astrid.widget.PowerWidget42;
 import com.todoroo.astrid.widget.TasksWidget;
 
 /**
@@ -138,7 +135,7 @@ public class TaskDao extends DatabaseDao<Task> {
         // delete all metadata
         metadataDao.deleteWhere(MetadataCriteria.byTask(id));
 
-        afterTasklistChange();
+        afterTaskListChanged();
 
         return true;
     }
@@ -219,55 +216,58 @@ public class TaskDao extends DatabaseDao<Task> {
     }
 
     /**
-     * Called after the task is saved.
-     * <ul>
-     * <li>Handle repeating tasks
-     * <li>Save for synchronization
-     *
-     * @param database
-     * @param task task that was just changed
-     * @param values values to be persisted to the database
-     * @param skipHooks whether this save occurs as part of a sync
+     * Called after the task is saved. This differs from the call in
+     * TaskApiDao in that it runs hooks that need to be run from within
+     * Astrid.
      */
-    private void afterSave(Task task, ContentValues values) {
-        if(values != null) {
-            if(values.containsKey(Task.COMPLETION_DATE.name) && task.isCompleted())
-                afterComplete(task, values);
-            else if(values.containsKey(Task.DUE_DATE.name) ||
-                    values.containsKey(Task.REMINDER_FLAGS.name) ||
-                    values.containsKey(Task.REMINDER_PERIOD.name) ||
-                    values.containsKey(Task.REMINDER_LAST.name) ||
-                    values.containsKey(Task.REMINDER_SNOOZE.name))
-                ReminderService.getInstance().scheduleAlarm(task);
+    public static void afterSave(Task task, ContentValues values) {
+        if(TaskApiDao.insignificantChange(values))
+            return;
+
+        // run global save hooks
+        TaskApiDao.afterSave(task, values);
+
+        if(values.containsKey(Task.COMPLETION_DATE.name) && task.isCompleted())
+            afterComplete(task, values);
+        else {
+            if(values.containsKey(Task.DUE_DATE.name) ||
+                values.containsKey(Task.REMINDER_FLAGS.name) ||
+                values.containsKey(Task.REMINDER_PERIOD.name) ||
+                values.containsKey(Task.REMINDER_LAST.name) ||
+                values.containsKey(Task.REMINDER_SNOOZE.name))
+            ReminderService.getInstance().scheduleAlarm(task);
         }
 
-        afterTasklistChange();
+        for(DatabaseUpdateListener listener : taskChangeListeners) {
+            listener.onDatabaseUpdated();
+        }
     }
 
-    /**
-     * Called when task list has changed
-     */
-    private void afterTasklistChange() {
-        Astrid2TaskProvider.notifyDatabaseModification();
-        TasksWidget.updateWidgets(ContextManager.getContext());
-        PowerWidget.updateWidgets(ContextManager.getContext());
-        PowerWidget42.updateWidgets(ContextManager.getContext());
+    public static void afterTaskListChanged() {
+        for(DatabaseUpdateListener listener : taskChangeListeners) {
+            listener.onDatabaseUpdated();
+        }
+        TaskApiDao.afterTaskListChanged();
     }
+
+    private static final DatabaseUpdateListener[] taskChangeListeners = new DatabaseUpdateListener[] {
+        new DatabaseUpdateListener() {
+            @Override
+            public void onDatabaseUpdated() {
+                Astrid2TaskProvider.notifyDatabaseModification();
+                Astrid3ContentProvider.notifyDatabaseModification();
+                TasksWidget.updateWidgets(ContextManager.getContext());
+            }
+        }
+    };
 
     /**
      * Called after the task was just completed
      *
      * @param task
      * @param values
-     * @param duringSync
      */
-    private void afterComplete(Task task, ContentValues values) {
-        // send broadcast
-        Context context = ContextManager.getContext();
-        Intent broadcastIntent = new Intent(AstridApiConstants.BROADCAST_EVENT_TASK_COMPLETED);
-        broadcastIntent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, task.getId());
-        context.sendOrderedBroadcast(broadcastIntent, null);
-
+    private static void afterComplete(Task task, ContentValues values) {
         Notifications.cancelNotifications(task.getId());
     }
 

@@ -7,7 +7,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import android.app.ListActivity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -17,6 +19,7 @@ import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.Property.IntegerProperty;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.astrid.adapter.TaskAdapter;
+import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.data.Task;
 
 /**
@@ -60,7 +63,7 @@ public class DraggableTaskListActivity extends TaskListActivity {
      */
     @Override
     protected void setUpTaskList() {
-        sqlQueryTemplate.set(SortSelectionActivity.adjustQueryForFlagsAndSort(filter.sqlQuery,
+        sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
         ((TextView)findViewById(R.id.listLabel)).setText(filter.title);
@@ -79,6 +82,14 @@ public class DraggableTaskListActivity extends TaskListActivity {
         registerForContextMenu(getListView());
 
         loadTaskListContent(false);
+
+        getTouchListView().setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                taskAdapter.clearSelection();
+                return false;
+            }
+        });
     }
 
     public Property<?>[] getProperties() {
@@ -104,7 +115,7 @@ public class DraggableTaskListActivity extends TaskListActivity {
             ViewHolder viewHolder = (ViewHolder) view.getTag();
             if(getIndentProperty() != null) {
                 int indent = viewHolder.task.getValue(getIndentProperty());
-                view.findViewById(R.id.indent).getLayoutParams().width = indent * 15;
+                view.findViewById(R.id.indent).getLayoutParams().width = indent * 20;
             }
         }
 
@@ -115,10 +126,12 @@ public class DraggableTaskListActivity extends TaskListActivity {
             viewHolder.completeBox.setOnClickListener(completeBoxListener);
 
             // context menu listener
-            viewHolder.nameView.setOnCreateContextMenuListener(listener);
+            View taskText = container.findViewById(R.id.taskText);
+            taskText.setTag(viewHolder);
+            taskText.setOnCreateContextMenuListener(listener);
 
             // tap listener
-            viewHolder.nameView.setOnClickListener(listener);
+            taskText.setOnClickListener(listener);
         }
     }
 

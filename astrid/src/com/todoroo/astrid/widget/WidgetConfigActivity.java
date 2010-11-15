@@ -5,25 +5,37 @@ import android.appwidget.AppWidgetManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.utility.AndroidUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.adapter.FilterAdapter;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterCategory;
 import com.todoroo.astrid.api.FilterListItem;
-import com.todoroo.astrid.utility.Constants;
-import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.service.StatisticsService;
 
-public class WidgetConfigActivity extends ExpandableListActivity {
+@SuppressWarnings("nls")
+abstract public class WidgetConfigActivity extends ExpandableListActivity {
+
+    static final String PREF_TITLE = "widget-title-";
+    static final String PREF_SQL = "widget-sql-";
+    static final String PREF_VALUES = "widget-values-";
+
 
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
     FilterAdapter adapter = null;
+
+    public WidgetConfigActivity() {
+        super();
+    }
+
+    abstract public void updateWidget();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -59,7 +71,7 @@ public class WidgetConfigActivity extends ExpandableListActivity {
         Button button = (Button)findViewById(R.id.ok);
         button.setOnClickListener(mOnClickListener);
 
-        FlurryAgent.onEvent("widget-config"); //$NON-NLS-1$
+        StatisticsService.reportEvent("widget-config"); //$NON-NLS-1$
     }
 
     View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -67,8 +79,7 @@ public class WidgetConfigActivity extends ExpandableListActivity {
             // Save configuration options
             saveConfiguration(adapter.getSelection());
 
-            // Push widget update to surface with newly set prefix
-            TasksWidget.updateWidget(WidgetConfigActivity.this, mAppWidgetId);
+            updateWidget();
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
@@ -122,16 +133,19 @@ public class WidgetConfigActivity extends ExpandableListActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, Constants.FLURRY_KEY);
+        StatisticsService.sessionStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        StatisticsService.sessionStop(this);
     }
 
-    private void saveConfiguration(FilterListItem filterListItem) {
+    private void saveConfiguration(FilterListItem filterListItem){
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
         String sql = null, contentValuesString = null, title = null;
 
         if(filterListItem != null && filterListItem instanceof Filter) {
@@ -142,10 +156,9 @@ public class WidgetConfigActivity extends ExpandableListActivity {
             title = ((Filter)filterListItem).title;
         }
 
-        Preferences.setString(TasksWidget.PREF_TITLE + mAppWidgetId, title);
-        Preferences.setString(TasksWidget.PREF_SQL + mAppWidgetId, sql);
-        Preferences.setString(TasksWidget.PREF_VALUES + mAppWidgetId, contentValuesString);
-
-        FlurryAgent.onEvent("widget-config"); //$NON-NLS-1$
+        Preferences.setString(WidgetConfigActivity.PREF_TITLE + mAppWidgetId, title);
+        Preferences.setString(WidgetConfigActivity.PREF_SQL + mAppWidgetId, sql);
+        Preferences.setString(WidgetConfigActivity.PREF_VALUES + mAppWidgetId, contentValuesString);
     }
+
 }

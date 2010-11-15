@@ -5,6 +5,7 @@ package com.todoroo.astrid.gtasks.sync;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,17 +16,10 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.text.method.PasswordTransformationMethod;
+import android.text.TextUtils;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.AbstractModel;
 import com.todoroo.andlib.data.Property;
@@ -38,6 +32,7 @@ import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.core.PluginServices;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.StoreObject;
 import com.todoroo.astrid.data.Task;
@@ -48,13 +43,15 @@ import com.todoroo.astrid.gtasks.GtasksMetadata;
 import com.todoroo.astrid.gtasks.GtasksMetadataService;
 import com.todoroo.astrid.gtasks.GtasksPreferenceService;
 import com.todoroo.astrid.gtasks.GtasksPreferences;
-import com.todoroo.astrid.gtasks.GtasksPreferences.OnGetCredentials;
 import com.todoroo.astrid.gtasks.GtasksTaskListUpdater;
+import com.todoroo.astrid.gtasks.auth.GtasksLoginActivity;
 import com.todoroo.astrid.service.AstridDependencyInjector;
+import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.sync.SyncBackgroundService;
 import com.todoroo.astrid.sync.SyncContainer;
 import com.todoroo.astrid.sync.SyncProvider;
 import com.todoroo.astrid.utility.Constants;
+import com.todoroo.astrid.utility.Flags;
 import com.todoroo.gtasks.GoogleConnectionManager;
 import com.todoroo.gtasks.GoogleLoginException;
 import com.todoroo.gtasks.GoogleTaskService;
@@ -63,6 +60,7 @@ import com.todoroo.gtasks.GoogleTaskTask;
 import com.todoroo.gtasks.GoogleTaskView;
 import com.todoroo.gtasks.GoogleTasksException;
 import com.todoroo.gtasks.actions.Actions;
+import com.todoroo.gtasks.actions.GetTasksAction;
 import com.todoroo.gtasks.actions.ListAction;
 import com.todoroo.gtasks.actions.ListActions;
 import com.todoroo.gtasks.actions.ListActions.TaskBuilder;
@@ -162,7 +160,10 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
                 Log.e("astrid-sync", "No token, unable to sync");
                 return;
             } else {
-                connectionManager = new GoogleConnectionManager(authToken);
+                connectionManager = new GoogleConnectionManager(
+                        Preferences.getStringValue(GtasksPreferenceService.PREF_USER_NAME),
+                        Preferences.getStringValue(GtasksPreferenceService.PREF_PASSWORD),
+                        !Preferences.getBoolean(GtasksPreferenceService.PREF_IS_DOMAIN, false));
             }
 
             taskService = new GoogleTaskService(connectionManager);
@@ -186,38 +187,8 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
 
         // check if we have a token & it works
         if(authToken == null) {
-            final GtasksPreferences preferenceActivity = (GtasksPreferences)activity;
-            preferenceActivity.getCredentials(new OnGetCredentials() {
-                @Override
-                public void getCredentials(String[] accounts) {
-                    LinearLayout layout = new LinearLayout(activity);
-                    layout.setPadding(5, -5, 5, 0);
-                    layout.setOrientation(LinearLayout.VERTICAL);
-                    TextView textView = new TextView(activity);
-                    textView.setText(R.string.producteev_PLA_email);
-                    layout.addView(textView);
-                    final EditText email = new EditText(activity);
-                    if(accounts != null && accounts.length > 0)
-                        email.setText(accounts[0]);
-                    layout.addView(email);
-                    textView = new TextView(activity);
-                    textView.setText(R.string.producteev_PLA_password);
-                    layout.addView(textView);
-                    final EditText password = new EditText(activity);
-                    password.setTransformationMethod(new PasswordTransformationMethod());
-                    layout.addView(password);
-
-                    DialogUtilities.viewDialog(activity,
-                            activity.getString(R.string.gtasks_login), layout,
-                            new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface arg0, int arg1) {
-                                    trySynchronizing(activity, email.getText(), password.getText());
-                                }
-
-                            }, null);
-                }
-            });
+            Intent intent = new Intent(activity, GtasksLoginActivity.class);
+            activity.startActivityForResult(intent, 0);
         } else {
             activity.startService(new Intent(SyncBackgroundService.SYNC_ACTION, null,
                 activity, GtasksBackgroundService.class));
@@ -225,30 +196,12 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
         }
     }
 
-    private void trySynchronizing(Activity activity, CharSequence email, CharSequence password) {
-        GoogleConnectionManager gcm = new GoogleConnectionManager(email.toString(), password.toString());
-        try {
-            gcm.authenticate(false);
-        } catch (GoogleLoginException e) {
-            Toast.makeText(activity, R.string.gtasks_login_error, Toast.LENGTH_LONG).show();
-            return;
-        } catch (IOException e) {
-            Toast.makeText(activity, R.string.SyP_ioerror, Toast.LENGTH_LONG).show();
-        }
-        String token = gcm.getToken();
-        System.err.println("got token " + token);
-        gtasksPreferenceService.setToken(token);
-        activity.startService(new Intent(SyncBackgroundService.SYNC_ACTION, null,
-            activity, GtasksBackgroundService.class));
-        activity.finish();
-    }
-
     // ----------------------------------------------------------------------
     // ----------------------------------------------------- synchronization!
     // ----------------------------------------------------------------------
 
     protected void performSync() {
-        FlurryAgent.onEvent("gtasks-started");
+        StatisticsService.reportEvent("gtasks-started");
         gtasksPreferenceService.recordSyncStart();
 
         try {
@@ -259,8 +212,8 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
 
             gtasksTaskListUpdater.createParentSiblingMaps();
 
-            // batched read tasks for each list
-            ArrayList<GtasksTaskContainer> remoteTasks = readAllRemoteTasks();
+            // read non-deleted tasks for each list
+            ArrayList<GtasksTaskContainer> remoteTasks = readAllRemoteTasks(false);
 
             SyncData<GtasksTaskContainer> syncData = populateSyncData(remoteTasks);
             try {
@@ -273,7 +226,9 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
             gtasksTaskListUpdater.updateAllMetadata();
 
             gtasksPreferenceService.recordSuccessfulSync();
-            FlurryAgent.onEvent("gtasks-sync-finished"); //$NON-NLS-1$
+            StatisticsService.reportEvent("gtasks-sync-finished"); //$NON-NLS-1$
+
+            Flags.set(Flags.REFRESH);
         } catch (IllegalStateException e) {
         	// occurs when application was closed
         } catch (Exception e) {
@@ -301,8 +256,9 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
     protected void readRemotelyUpdated(SyncData<GtasksTaskContainer> data)
             throws IOException {
         // first, pull all tasks. then we can write them
+        // include deleted tasks so we can delete them in astrid
         try {
-            data.remoteUpdated = readAllRemoteTasks();
+            data.remoteUpdated = readAllRemoteTasks(true);
         } catch (JSONException e) {
             throw new GoogleTasksException(e);
         }
@@ -345,12 +301,15 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
     // ------------------------------------------------- create / push / pull
     // ----------------------------------------------------------------------
 
-    private ArrayList<GtasksTaskContainer> readAllRemoteTasks()
+    private ArrayList<GtasksTaskContainer> readAllRemoteTasks(boolean includeDeleted)
             throws JSONException, IOException, GoogleLoginException {
         ArrayList<GtasksTaskContainer> remoteTasks = new ArrayList<GtasksTaskContainer>();
         for(StoreObject dashboard : gtasksListService.getLists()) {
             String listId = dashboard.getValue(GtasksList.REMOTE_ID);
-            List<GoogleTaskTask> list = taskService.getTasks(listId);
+
+            GetTasksAction action = new GetTasksAction(listId, includeDeleted);
+            taskService.executeActions(action);
+            List<GoogleTaskTask> list = action.getGoogleTasks();
             addRemoteTasksToList(list, remoteTasks);
         }
         return remoteTasks;
@@ -365,6 +324,9 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
         HashMap<String, String> parentToPriorSiblingMap = new HashMap<String, String>();
 
         for(GoogleTaskTask remoteTask : list) {
+            if(TextUtils.isEmpty(remoteTask.getName()))
+                continue;
+
             GtasksTaskContainer container = parseRemoteTask(remoteTask);
             String id = remoteTask.getId();
 
@@ -419,7 +381,8 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
 
         String remoteId = updateTaskHelper(local, null, createdTask);
         gtasksTaskListUpdater.addRemoteTaskMapping(local.task.getId(), remoteId);
-        local.gtaskMetadata.setValue(GtasksMetadata.LIST_ID, remoteId);
+        local.gtaskMetadata.setValue(GtasksMetadata.ID, remoteId);
+        local.gtaskMetadata.setValue(GtasksMetadata.LIST_ID, list);
 
         return local;
     }
@@ -457,7 +420,7 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
                 ListAction action = ((TaskModifier) builder).done();
                 if(remote == null || local.parentId != remote.parentId || local.priorSiblingId != remote.priorSiblingId)
                     taskService.executeListActions(idList, action, moveAction);
-                else
+                else if(action.toJson(idList).getJSONObject("entity_delta").length() > 0)
                     taskService.executeListActions(idList, action);
             } else {
                 id = ((ConvenientTaskCreator)builder).go();
@@ -484,6 +447,7 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
 
         long dueDate = remoteTask.getTask_date();
         task.setValue(Task.DUE_DATE, task.createDueDate(Task.URGENCY_SPECIFIC_DAY, dueDate));
+        task.setValue(Task.NOTES, remoteTask.getNotes());
         task.setValue(Task.NOTES, remoteTask.getNotes());
 
         Metadata gtasksMetadata = GtasksMetadata.createEmptyMetadata(AbstractModel.NO_ID);
@@ -534,7 +498,26 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
 
     @Override
     protected void write(GtasksTaskContainer task) throws IOException {
+        //  merge astrid dates with google dates
+        if(task.task.isSaved()) {
+            Task local = PluginServices.getTaskService().fetchById(task.task.getId(), Task.DUE_DATE);
+            mergeDates(task.task, local);
+        }
+
         gtasksMetadataService.saveTaskAndMetadata(task);
+    }
+
+    /** pick up due time from local task */
+    private void mergeDates(Task remote, Task local) {
+        if(remote.hasDueDate() && local.hasDueTime()) {
+            Date newDate = new Date(remote.getValue(Task.DUE_DATE));
+            Date oldDate = new Date(local.getValue(Task.DUE_DATE));
+            newDate.setHours(oldDate.getHours());
+            newDate.setMinutes(oldDate.getMinutes());
+            newDate.setSeconds(oldDate.getSeconds());
+            remote.setValue(Task.DUE_DATE, remote.createDueDate(Task.URGENCY_SPECIFIC_DAY_TIME,
+                    newDate.getTime()));
+        }
     }
 
     // ----------------------------------------------------------------------

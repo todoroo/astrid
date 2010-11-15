@@ -17,19 +17,31 @@
             android:title="@string/EPr_showNotes_title"
             android:defaultValue="false" />
     </PreferenceCategory>
+    
     <PreferenceCategory
-        android:title="@string/EPr_voice_header">
+        android:title="@string/EPr_powerpack_header">
         <CheckBoxPreference
-            android:key="@string/p_voiceInputEnabled"
-            android:title="@string/EPr_voiceInputEnabled_title"
+            android:key="@string/p_statistics"
+            android:title="@string/EPr_statistics_title"
             android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="@string/p_voiceInputCreatesTask"
-            android:title="@string/EPr_voiceInputCreatesTask_title"
-            android:defaultValue="false" />
-        <CheckBoxPreference
-            android:key="@string/p_voiceRemindersEnabled"
-            android:title="@string/EPr_voiceRemindersEnabled_title"
-            android:defaultValue="true" />
+        <PreferenceScreen
+            android:title="@string/EPr_voice_header">
+            
+            <CheckBoxPreference
+                android:key="@string/p_voiceInputEnabled"
+                android:title="@string/EPr_voiceInputEnabled_title"
+                android:defaultValue="true" />
+            <CheckBoxPreference
+                android:key="@string/p_voiceInputCreatesTask"
+                android:title="@string/EPr_voiceInputCreatesTask_title"
+                android:dependency="@string/p_voiceInputEnabled"
+                android:defaultValue="false" />
+            <CheckBoxPreference
+                android:key="@string/p_voiceRemindersEnabled"
+                android:title="@string/EPr_voiceRemindersEnabled_title"
+                android:defaultValue="false" />
+            
+        </PreferenceScreen>
     </PreferenceCategory>
+    
 </PreferenceScreen>

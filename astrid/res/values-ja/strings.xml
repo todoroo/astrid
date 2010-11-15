@@ -10,9 +10,6 @@
     <!-- Task Edit Activity: Add New Alarm -->
     <string name="alarm_ACS_button">アラームを追加する</string>
     
-    <!-- Task Detail for Alarms (%s -> time)-->
-    <string name="alarm_ADE_detail">アラーム %s</string>
-   
     <string-array name="reminders_alarm">
       <!-- reminders related to alarm -->
       <item>Alarm!</item>
@@ -78,7 +75,7 @@
     
   <string name="export_toast">%s を %s にバックアップしました。</string>
     
-  <string name="export_toast_no_tasks">No Tasks to Export.</string>
+  <string name="export_toast_no_tasks">エクスポートするタスクがありません</string>
   
   <!-- Progress Dialog Title for exporting -->    
   <string name="export_progress_title">エクスポート中</string>
@@ -86,7 +83,7 @@
   <!-- Backup: Title of Import Summary Dialog -->
   <string name="import_summary_title">復元の概要</string>
     
-  <!-- Backup: Summary message for import. (%s => total # tasks, %s => imported, %s => skipped) -->
+  <!-- Backup: Summary message for import. (%s => file name, %s => total # tasks, %s => imported, %s => skipped, %s => errors) -->
   <string name="import_summary_message">ファイル %s の %s 中、\n\n成功: %s\n既に存在: %s\n失敗: %s\n</string>
   
   <!-- Progress Dialog Title for importing -->    
@@ -96,7 +93,7 @@
   <string name="import_progress_read">タスク %d を読み込み中</string>
   
   <!-- Backup: Dialog when unable to open a file -->  
-  <string name="DLG_error_opening">Could not find this item: </string>
+  <string name="DLG_error_opening">ファイルを開けませんでした</string>
   
   <!-- Backup: Dialog when unable to open SD card folder (%s => folder) -->
   <string name="DLG_error_sdcard">フォルダ %s を開けません</string>
@@ -118,13 +115,13 @@
   <string name="app_name">Astrid Tasks</string>
   
   <!-- permission title for READ_TASKS -->
-  <string name="read_permission_label">Astrid Permission</string>
+  <string name="read_permission_label">タスクの読み込み</string>
   
   <!-- permission description for READ_TASKS -->
-  <string name="read_permission_desc">read tasks, display task filters</string>
+  <string name="read_permission_desc">タスクの読み込みとフィルタの表示</string>
   
   <!-- permission title for READ_TASKS -->
-  <string name="write_permission_label">Astrid Permission</string>
+  <string name="write_permission_label">タスクの読み込み</string>
   
   <!-- permission description for READ_TASKS -->
   <string name="write_permission_desc">タスクの作成、編集</string>
@@ -135,10 +132,10 @@
   <string name="DLG_delete_this_task_question">このタスクを削除しますか?</string>
 
   <!-- question for deleting items (%s => item name) -->
-  <string name="DLG_delete_this_item_question">Delete this item: %s?</string>
+  <string name="DLG_delete_this_item_question">項目 %s を削除しますか?</string>
     
   <!-- Progress dialog shown when upgrading -->
-  <string name="DLG_upgrading">Upgrading your tasks...</string>
+  <string name="DLG_upgrading">タスクを更新しています</string>
   
   <!-- Title for dialog selecting a time (hours and minutes) -->
   <string name="DLG_hour_minutes">時間 (時:分)</string>
@@ -150,6 +147,15 @@
 
   <!-- Button for going to Market -->
   <string name="DLG_to_market">マーケットへ</string>
+
+  <!-- Button for accepting EULA -->
+  <string name="DLG_accept">同意する</string>
+
+  <!-- Button for declining EULA -->
+  <string name="DLG_decline">同意しない</string>
+
+  <!-- EULA title -->
+  <string name="DLG_eula_title">Astrid 利用規定</string>
   
   <!-- =============================================================== UI == -->
   
@@ -183,10 +189,10 @@
   <string name="TLA_menu_help">ヘルプ</string>
   
   <!-- Search Label-->
-  <string name="TLA_search_label">Search This List</string>
+  <string name="TLA_search_label">このリストの検索</string>
   
   <!-- Window title for displaying Custom Filter -->
-  <string name="TLA_custom">Custom</string>
+  <string name="TLA_custom">カスタムフィルタ</string>
   
   <!-- Quick Add Edit Box Hint-->
   <string name="TLA_quick_add_hint">このリストに追加...</string>
@@ -323,13 +329,16 @@
   <string name="TEA_urgency_label">期限</string>
   
   <!-- Task urgency specific time checkbox -->
-  <string name="TEA_urgency_specific_time">At specific time?</string>
+  <string name="TEA_urgency_specific_time">時刻を設定する</string>
   
   <!-- Task urgency specific time title when specific time false -->
-  <string name="TEA_urgency_time_none">No Time Set</string>
+  <string name="TEA_urgency_time_none">時刻未指定</string>
   
   <!-- Task hide until label -->
   <string name="TEA_hideUntil_label">タスクを表示する期間</string>
+  
+  <!-- Task editing data being loaded label -->
+  <string-array name="TEA_loading"><item>読み込み中...</item></string-array>
   
   <!-- Task note label -->
   <string name="TEA_note_label">メモ</string>
@@ -353,7 +362,7 @@
   <string name="TEA_menu_delete">タスクを削除</string>
   
    <!-- Toast: task saved with deadline (%s => preposition + time units) -->
-  <string name="TEA_onTaskSave_due">Task Saved: due %s</string>
+  <string name="TEA_onTaskSave_due">タスクは保存されました: 期限は%s</string>
   
   <!-- Toast: task saved without deadlines -->
   <string name="TEA_onTaskSave_notDue">タスクは保存されました</string>
@@ -384,10 +393,10 @@
   </string-array>
   
   <!-- Add Ons tab when no add-ons found -->
-  <string name="TEA_no_addons">アドオンはありません</string>
+  <string name="TEA_addons_text">Looking for more features?</string>
   
   <!-- Add Ons button -->
-  <string name="TEA_addons_button">Get Some Add-ons</string>
+  <string name="TEA_addons_button">Get the Power Pack!</string>
   
   <!-- ============================================= IntroductionActivity == -->
   
@@ -409,6 +418,9 @@
   
   <!-- Changelog Window Title -->
   <string name="UpS_changelog_title">Astrid の変更点</string>
+  
+  <!-- Updates Window Title -->
+  <string name="UpS_updates_title">Latest Astrid News</string>
   
   <!-- ================================================== EditPreferences == -->
     
@@ -436,22 +448,22 @@
   <!-- Preference: Default Urgency Title -->
   <string name="EPr_default_urgency_title">期限</string>
   <!-- Preference: Default Urgency Description (%s => setting) -->
-  <string name="EPr_default_urgency_desc">Currently: %s</string>
+  <string name="EPr_default_urgency_desc">現在の設定: %s</string>
   
   <!-- Preference: Default Importance Title -->
   <string name="EPr_default_importance_title">重要度</string>
   <!-- Preference: Default Importance Description (%s => setting) -->
-  <string name="EPr_default_importance_desc">Currently: %s</string>
+  <string name="EPr_default_importance_desc">現在の設定: %s</string>
   
   <!-- Preference: Default Hide Until Title -->
   <string name="EPr_default_hideUntil_title">表示期間</string>
   <!-- Preference: Default Hide Until Description (%s => setting) -->
-  <string name="EPr_default_hideUntil_desc">Currently: %s</string>
+  <string name="EPr_default_hideUntil_desc">現在の設定: %s</string>
   
   <!-- Preference: Default Reminders Title -->
   <string name="EPr_default_reminders_title">標準リマインダー</string>
   <!-- Preference: Default Hide Until Description (%s => setting) -->
-  <string name="EPr_default_reminders_desc">Currently: %s</string>
+  <string name="EPr_default_reminders_desc">現在の設定: %s</string>
   
   <string-array name="EPr_default_importance">
       <!-- importance: labels for "Task Defaults" preference item. -->
@@ -480,7 +492,7 @@
   
   <string-array name="EPr_default_reminders">
       <!-- reminders: labels for "Task Defaults" preference item. -->
-      <item>No deadline reminders</item>
+      <item>期限を通知しない</item>
       <item>At deadline</item>
       <item>When overdue</item>
       <item>At deadline or overdue</item>
@@ -501,13 +513,16 @@
   <string name="AOA_tab_available">追加</string>
   
   <!-- Add-on Activity - free add-ons label -->
-  <string name="AOA_free">Free</string>
+  <string name="AOA_free">無料</string>
   
   <!-- Add-on Activity - menu item to visit add-on website -->
   <string name="AOA_visit_website">Web サイトの表示</string>
   
   <!-- Add-on Activity - menu item to visit android market -->
   <string name="AOA_visit_market">Android マーケット</string>
+  
+  <!-- Add-on Activity - when list is empty -->
+  <string name="AOA_no_addons">Empty List!</string>
   
   <!-- ====================================================== TasksWidget == -->
 
@@ -529,7 +544,10 @@
   <string name="marketplace_title">Astrid Task/Todo List</string>
   
   <!-- Astrid's Android Marketplace description. It never appears in the app itself. -->
-  <string name="marketplace_description">Astrid is the much loved open-source todo list / task manager designed to help you get stuff done. It features reminders, tags, sync, a widget and more.</string>
+  <string name="marketplace_description">
+Astrid is the much loved open-source todo list / task manager designed to help 
+you get stuff done. It features reminders, tags, sync, Locale plug-in, a widget and more. 
+  </string>
     
 
 
@@ -544,7 +562,7 @@
     <string name="BFE_Active">進行中のタスク</string>
         
     <!-- Search Filter -->
-    <string name="BFE_Search">検索</string>
+    <string name="BFE_Search">検索…</string>
     
     <!-- Recently Modified -->
     <string name="BFE_Recent">最近編集したタスク</string>
@@ -567,7 +585,7 @@
     <string name="CFA_filterName_hint">フィルタの名称</string>
     
     <!-- Filter Name default for copied filters (%s => old filter name) -->
-    <string name="CFA_filterName_copy">Copy of %s</string>
+    <string name="CFA_filterName_copy">%s のコピー</string>
     
     <!-- Filter Starting Universe: all tasks -->
     <string name="CFA_universe_all">進行中のタスク</string>
@@ -582,7 +600,7 @@
     <string name="CFA_type_intersect">かつ</string>
     
     <!-- Filter Criteria Context Menu: chaining (%s chain type as above) -->
-    <string name="CFA_context_chain">Chaining: %s</string>
+    <string name="CFA_context_chain">%s</string>
     
     <!-- Filter Criteria Context Menu: delete -->
     <string name="CFA_context_delete">条件の削除</string>
@@ -613,7 +631,7 @@
         <item>明日</item>
         <item>明後日</item>
         <item>来週</item>
-        <item>Next Month</item>
+        <item>来月</item>
     </string-array>
     
     <!-- Criteria: importance - display text (? -> user input)-->
@@ -627,14 +645,14 @@
     <string name="CFC_tag_name">タグ</string>
     
     <!-- Criteria: tag_contains - name of criteria -->
-    <string name="CFC_tag_contains_name">Tag contains...</string>
+    <string name="CFC_tag_contains_name">タグ中の語句</string>
     <!-- Criteria: tag_contains - text (? -> user input) -->
-    <string name="CFC_tag_contains_text">Tag contains: ?</string>
+    <string name="CFC_tag_contains_text">タグに ? を含む</string>
     
     <!-- Criteria: title_contains - name of criteria -->
-    <string name="CFC_title_contains_name">Title contains...</string>
+    <string name="CFC_title_contains_name">タイトル中の語句</string>
     <!-- Criteria: title_contains - text (? -> user input) -->
-    <string name="CFC_title_contains_text">Title contains: ?</string>
+    <string name="CFC_title_contains_text">タイトルに ? を含む</string>
     
 
 
@@ -658,10 +676,10 @@
   <string name="gcal_TEA_showCalendar_label">カレンダーのイベントを開く</string>
   
   <!-- Toast when unable to open calendar event -->
-  <string name="gcal_TEA_calendar_error">Error opening event!</string>
+  <string name="gcal_TEA_calendar_error">カレンダーを開けませんでした</string>
   
   <!-- Toast when calendar event updated because task changed -->
-  <string name="gcal_TEA_calendar_updated">Calendar event also updated!</string>
+  <string name="gcal_TEA_calendar_updated">カレンダーの項目も更新しました</string>
   
   <!-- ======================================================== Calendars == -->
   
@@ -672,6 +690,108 @@
   <string name="gcal_GCP_default">Default Calendar</string>
 
 
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
+    <!-- ============================================================= UI == -->
+
+    <!-- filters header: GTasks -->
+    <string name="gtasks_FEx_header">Google Tasks</string>
+    
+    <!-- filter category for GTasks lists -->
+    <string name="gtasks_FEx_list">リスト別</string>
+    
+    <!-- filter title for GTasks lists (%s => list name) -->
+    <string name="gtasks_FEx_title">Google Tasks: %s</string>
+    
+    <!-- short help title for Gtasks -->
+    <string name="gtasks_help_title">Welcome to Google Tasks!</string>
+    
+    <!-- short help for GTasks list activity -->
+    <string name="gtasks_help_body">タスクの左端にあるつまみをドラッグすると、順序を変えられます。つまみを左右に動かすと、インデントを変えることができます。</string>
+        
+    <!-- ============================================ GtasksLoginActivity == -->
+    
+    <!-- Activity Title: Gtasks Login -->    
+    <string name="gtasks_GLA_title">Google Tasks のログイン</string>
+
+    <!-- Instructions: Gtasks login -->    
+    <string name="gtasks_GLA_body">Google Tasks にログインしてください (Beta版です!)。現在 Google Apps for Domain には対応していませんが、対応を進めています。</string>
+
+    <!-- Instructions: Gtasks further help -->    
+    <string name="gtasks_GLA_further_help">To view your tasks with indentation
+    and order preserved, go to the Filters page and select a Google Tasks list.
+    By default, Astrid uses its own sort settings for tasks.</string>
+
+    <!-- Sign In Button -->    
+    <string name="gtasks_GLA_signIn">サインイン</string>
+
+    <!-- E-mail Address Label -->    
+    <string name="gtasks_GLA_email">メールアドレス</string>
+
+    <!-- Password Label -->    
+    <string name="gtasks_GLA_password">パスワード</string>
+    
+    <!-- Google Apps for Domain checkbox -->
+    <string name="gtasks_GLA_domain">Google Apps for Domain のアカウント</string>
+
+    <!-- Error Message when fields aren't filled out -->    
+    <string name="gtasks_GLA_errorEmpty">エラー: すべての入力欄を入力してください</string>
+
+    <!-- Error Message when we receive a HTTP 401 Unauthorized -->    
+    <string name="gtasks_GLA_errorAuth">エラー: メールアドレスかパスワードが正しくありません</string>
+        
+    <!-- ============================================== GtasksPreferences == -->
+
+    <!-- GTasks Preferences Title -->    
+    <string name="gtasks_GPr_header">Google Tasks (ベータ版!)</string>
+    
+    <!-- ================================================ Synchronization == -->    
+    
+    <!-- title for notification tray when synchronizing -->
+    <string name="gtasks_notification_title">Astrid: Google Tasks</string>
+        
+
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
+    <!-- Resources initial tasks added -->
+  
+   <!-- Intro Tag or click prompt -->
+  <string name="intro_click_prompt">Intro: Press me to see details</string>
+  
+  <!-- Task 1 Summary  -->
+  <string name="intro_task_1_summary">Create your first task</string>
+
+  <!-- Task 1 Note -->
+  <string name="intro_task_1_note">タスクを登録する2つの方法\n
+1) 素早い登録: 入力欄にタスク名を入力し、入力欄の左に表示される + ボタンを押します。\n\n2) 標準の登録: 入力欄の右側にあるボタンを押します。期限やタグ、メモやより高度な設定を行えます。保存ボタンか電話機のバックボタンで保存します。\n\n</string>
+  
+  <!-- Task 2 Summary  -->
+  <string name="intro_task_2_summary">ホーム画面にウィジェットを追加する</string>
+
+  <!-- Task 2 Note -->
+  <string name="intro_task_2_note">A desktop widget is a great way to keep 
+  	track of your what you have to do as well as a way to quickly add new 
+  	tasks.\n\n
+	How to add a widget:\n
+	1) Long press on your phone\'s desktop.\n
+	2) Choose \"Widget\" form resulting menu\n
+	3) Choose the Astrid widget.\n
+	4) You can select a Astrid filter. Choose \"Active Tasks\" for all your 
+	tasks\n\n
+
+	Bonus: Use the widget to add a task!</string>
+  
+    <!-- Task 3 Summary  -->
+  <string name="intro_task_3_summary">同期の設定</string>
+
+  <!-- Task 3 Note -->
+  <string name="intro_task_3_note">Astrid は Google Task のシンプルなタスクリストと同期することができます。より高度な機能が必要な場合は、Producteev と同期することをお勧めします。\n\n 同期を有効にするには、Astrid の画面から「メニューキー」→「設定」→「同期」を開き、利用したいサービスを選んでください。</string>
 
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
@@ -694,20 +814,37 @@
       
   <!-- Locale Window Interval Values -->                                                                                                                                        
   <string-array name="locale_interval">
-    <item>once an hour</item>
-    <item>once every six hours</item>
-    <item>once every twelve hours</item>
-    <item>once a day</item>
-    <item>once every three days</item>
-    <item>once a week</item>
+    <item>1時間に一度</item>
+    <item>6時間に一度</item>
+    <item>12時間に一度</item>
+    <item>1日に一度</item>
+    <item>3日に一度</item>
+    <item>1週間に一度</item>
   </string-array>        
       
   <!-- Locale Notification text -->                                                                                                                                        
   <string name="locale_notification">$FILTER の検索結果: $NUM 件</string>     
       
   <!-- Locale Plugin was not found, it is required -->
-  <string name="locale_plugin_required">Please install the Astrid Locale plugin!</string>        
+  <string name="locale_plugin_required">Astrid Locale plugin をインストールしてください</string>        
      
+
+
+<!-- See the file "LICENSE" for the full license governing this code. -->
+
+
+  <!-- ================================================== EditPreferences == -->
+    
+  <!-- Preference Category: Power Pack -->
+  <string name="EPr_powerpack_header">Astrid Power Pack</string>
+  
+  <!-- Preference: Anonymous User Statistics -->
+  <string name="EPr_statistics_title">匿名の使用統計データ</string>
+  <!-- Preference: User Statistics (disabled) -->
+  <string name="EPr_statistics_desc_disabled">使用統計情報は送信されません</string>  
+  <!-- Preference: User Statistics (enabled) -->
+  <string name="EPr_statistics_desc_enabled">送られた使用統計情報は Astrid の改善に使用されます</string>
+      
 
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
@@ -762,26 +899,28 @@
     <!-- ================================================= Login Activity == -->
 
     <!-- Activity Title: Producteev Login -->    
-    <string name="producteev_PLA_title">Log In to Producteev</string>
+    <string name="producteev_PLA_title">Producteev にログイン</string>
 
     <!-- Instructions: Producteev login -->    
-    <string name="producteev_PLA_body">Sign in with your existing
-    Producteev account, or create a new account!</string>
+    <string name="producteev_PLA_body">既存の Producteev アカウントにサインインするか、アカウントを作成してください</string>
 
     <!-- Producteev Terms Link -->    
     <string name="producteev_PLA_terms">Terms &amp; Conditions</string>
 
     <!-- Sign In Button -->    
-    <string name="producteev_PLA_signIn">Sign In</string>
+    <string name="producteev_PLA_signIn">サインイン</string>
 
     <!-- Create New User Button -->    
     <string name="producteev_PLA_createNew">Create New User</string>
 
     <!-- E-mail Address Label -->    
-    <string name="producteev_PLA_email">E-mail</string>
+    <string name="producteev_PLA_email">メールアドレス</string>
 
     <!-- Password Label -->    
-    <string name="producteev_PLA_password">Password</string>
+    <string name="producteev_PLA_password">パスワード</string>
+    
+    <!-- Timezone Spinner -->
+    <string name="producteev_PLA_timezone">タイムゾーン</string>
 
     <!-- Confirm Password Label -->    
     <string name="producteev_PLA_confirmPassword">Confirm Password</string>
@@ -793,13 +932,13 @@
     <string name="producteev_PLA_lastName">Last Name</string>
 
     <!-- Error Message when fields aren't filled out -->    
-    <string name="producteev_PLA_errorEmpty">Error: fill out all fields!</string>
+    <string name="producteev_PLA_errorEmpty">エラー: すべての入力欄を入力してください</string>
 
     <!-- Error Message when passwords don't match -->    
     <string name="producteev_PLA_errorMatch">Error: passwords don\'t match!</string>
 
     <!-- Error Message when we receive a HTTP 401 Unauthorized -->    
-    <string name="producteev_PLA_errorAuth">Error: e-mail or password incorrect!</string>
+    <string name="producteev_PLA_errorAuth">エラー: メールアドレスかパスワードが正しくありません</string>
 
     <!-- ================================================ Synchronization == -->
         
@@ -831,7 +970,15 @@
 
     <!-- Spinner-item for default dashboard on taskeditactivity -->
     <string name="producteev_TEA_dashboard_default">&lt;Default&gt;</string>
-    
+
+    <string name="CFC_producteev_in_workspace_text">In workspace: ?</string>
+
+    <string name="CFC_producteev_in_workspace_name">In workspace...</string>
+
+    <string name="CFC_producteev_assigned_to_text">Assigned to: ?</string>
+
+    <string name="CFC_producteev_assigned_to_name">Assigned to...</string>
+
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
 
@@ -874,7 +1021,7 @@
   <!-- ==================================================== notifications == -->
   
   <!-- Name of filter when viewing a reminder -->
-  <string name="rmd_NoA_filter">Reminder!</string>
+  <string name="rmd_NoA_filter">お知らせ</string>
   
   <!-- Reminder: Task was already done -->
   <string name="rmd_NoA_done">既に完了しています!</string>
@@ -926,9 +1073,9 @@
   <!-- Reminder Preference: Vibrate Title -->
   <string name="rmd_EPr_vibrate_title">アラート時に振動する</string>
   <!-- Reminder Preference: Vibrate Description (true) -->
-  <string name="rmd_EPr_vibrate_desc_true">通知を送るときに振動します</string>
+  <string name="rmd_EPr_vibrate_desc_true">通知するときに振動します</string>
   <!-- Reminder Preference: Vibrate Description (false) -->
-  <string name="rmd_EPr_vibrate_desc_false">通知を送るときに振動しません</string>
+  <string name="rmd_EPr_vibrate_desc_false">通知するときに振動しません</string>
 
   <!-- Reminder Preference: Nagging Title -->  
   <string name="rmd_EPr_nagging_title">Astridの通知</string>
@@ -938,18 +1085,18 @@
   <string name="rmd_EPr_nagging_desc_false">励ましメッセージを表示しません</string>
 
   <!-- Reminder Preference: Snooze Dialog Title -->  
-  <string name="rmd_EPr_snooze_dialog_title">Snooze Dialog HH:MM</string>
+  <string name="rmd_EPr_snooze_dialog_title">スヌーズの時刻指定</string>
   <!-- Reminder Preference: Snooze Dialog Description (true) -->
-  <string name="rmd_EPr_snooze_dialog_desc_true">Snooze by selecting new snooze time (HH:MM)</string>
+  <string name="rmd_EPr_snooze_dialog_desc_true">次のスヌーズ時刻を 時:分 で指定します</string>
   <!-- Reminder Preference: Nagging Description (false) -->
-  <string name="rmd_EPr_snooze_dialog_desc_false">Snooze by selecting # days/hours to snooze</string>
+  <string name="rmd_EPr_snooze_dialog_desc_false">次のスヌーズまでの時間間隔を指定します</string>
   
   <!-- Reminder Preference: Default Reminders Title -->
   <string name="rmd_EPr_defaultRemind_title">ランダムな通知</string>
   <!-- Reminder Preference: Default Reminders Setting (disabled) -->
   <string name="rmd_EPr_defaultRemind_desc_disabled">新規タスクにランダムな通知を設定しません</string>
   <!-- Reminder Preference: Default Reminders Setting (%s => setting) -->
-  <string name="rmd_EPr_defaultRemind_desc">新規タスクにランダムな通知を設定します: %s</string>
+  <string name="rmd_EPr_defaultRemind_desc">新規タスクにランダムな通知を設定します:%s</string>
   
   <!-- Defaults Title -->
   <string name="rmd_EPr_defaults_header">タスクのデフォルト設定</string>
@@ -1026,27 +1173,27 @@
 
   <string-array name="reminders">
       <!-- reminders: Make these < 20 chars so the task name is displayed -->
-      <item>やぁみんな! ちょっといいかな?</item>
-      <item>ちょっと見ていい?</item>
-      <item>ちょっと時間あるかな?</item>
-      <item>忘れちゃった?</item>
-      <item>ごめんよ!</item>
-      <item>ちょっと時間があるとき:</item>
-      <item>予定上:</item>
-      <item>ちょっとヒマある?</item>
-      <item>Astridだよ!</item>
-      <item>やぁ! バグってる?</item>
-      <item>1分ぐらいいいかな?</item>
+      <item>Hi there! Have a sec?</item>
+      <item>Can I see you for a sec?</item>
+      <item>Have a few minutes?</item>
+      <item>Did you forget?</item>
+      <item>Excuse me!</item>
+      <item>When you have a minute:</item>
+      <item>On your agenda:</item>
+      <item>Free for a moment?</item>
+      <item>Astrid here!</item>
+      <item>Hi! Can I bug you?</item>
+      <item>A minute of your time?</item>
       <item>It\'s a great day to</item>
   </string-array>
 
   <string-array name="reminders_due">
       <!-- reminders related to task due date -->
-      <item>Time to work!</item>
+      <item>おしごとの時間だよ!</item>
       <item>Due date is here!</item>
       <item>Ready to start?</item>
       <item>You said you would do:</item>
-      <item>You\'re supposed to start:</item>
+      <item>始めるはずでしょ:</item>
       <item>Time to start:</item>
       <item>It\'s time!</item>
       <item>Excuse me! Time for</item>
@@ -1058,44 +1205,44 @@
       <item>今は怠けちゃダメ!</item>
       <item>Snooze time is up!</item>
       <item>もう先延ばししないで!</item>
-      <item>Now are you ready?</item>
+      <item>もう準備できてる？</item>
       <item>No more postponing!</item>
   </string-array>
   
   <string-array name="reminder_responses">
       <!-- responses to reminder: Astrid says...  (user should answer yes or no)  -->
       <item>君のために言ってるんだからね!</item> 
-      <item>これを過去のものにして良い?</item>
-      <item>Why don\'t you get this done?</item>
-      <item>どう? いけそう?</item>
-      <item>これする準備できてる?</item>
-      <item>これ処理できる?</item>
-      <item>幸せになれるよ! これが終われば!</item>
+      <item>Ready to put this in the past?</item>
+      <item>終わらせちゃったら?</item>
+      <item>How about it? Ready tiger?</item>
+      <item>Ready to do this?</item>
+      <item>Can you handle this?</item>
+      <item>You can be happy! Just finish this!</item>
       <item>I promise you\'ll feel better if you finish this!</item>
       <item>今日はやんないの?</item>
       <item>もううんざり。早く終わらせて!</item>
-      <item>これやっちゃえる? そう、あなたならできる!</item>
-      <item>ずっとこれしないつもり?</item>
+      <item>Can you finish this? Yes you can!</item>
+      <item>Are you ever going to do this?</item>
       <item>自信を持って! さあ!</item>
-      <item>あなたが自慢だよ。さぁそれやっちゃおう!</item>
-      <item>これやっちゃってお茶しない?</item>
-      <item>あとひとつだけ? じゃあお願いできる?</item>
-      <item>ToDoリストを処理する時間ですよ</item>
+      <item>I\'m so proud of you! Lets get it done!</item>
+      <item>A little snack after you finish this?</item>
+      <item>Just this one task? Please?</item>
+      <item>Time to shorten your todo list!</item>
   </string-array>
 
   <string-array name="postpone_nags">
       <!-- Astrid's nagging when user clicks postpone -->
       <item>Please tell me it isn\'t true that you\'re a procrastinator!</item>
       <item>Doesn\'t being lazy get old sometimes?</item>
-      <item>どこかで誰かがこれを終えるのを待ってますよ!</item>
+      <item>Somewhere, someone is depending on you to finish this!</item>
       <item>When you said postpone, you really meant \'I\'m doing this\', right?</item>
-      <item>これを後回しにするのはこれで最後だよね?</item>
+      <item>This is the last time you postpone this, right?</item>
       <item>Just finish this today, I won\'t tell anyone!</item>
-      <item>あなたが後回しにして良いと思うなら･･･って、できないじゃん!</item>
+      <item>Why postpone when you can um... not postpone!</item>
       <item>You\'ll finish this eventually, I presume?</item>
       <item>I think you\'re really great! How about not putting this off?</item>
-      <item>もしそうするなら、あなたは目的を達成できるでしょう</item>
-      <item>後回し、後回し、後回し。そんなあなたを変えよう!</item>
+      <item>Will you be able to achieve your goals if you do that?</item>
+      <item>Postpone, postpone, postpone. When will you change!</item>
       <item>I\'ve had enough with your excuses! Just do it already!</item>
       <item>Didn\'t you make that excuse last time?</item>
       <item>I can\'t help you organize your life if you do that...</item>
@@ -1166,10 +1313,10 @@
     <string name="rmilk_FEx_header">Remember the Milk</string>
     
     <!-- filter category for RTM lists -->
-    <string name="rmilk_FEx_list">Lists</string>
+    <string name="rmilk_FEx_list">リスト</string>
     
     <!--  RTM list filter title (%s => list) -->
-    <string name="rmilk_FEx_list_title">RTM List \'%s\'</string>
+    <string name="rmilk_FEx_list_title">RTM のリスト: %s</string>
     
     <!-- ======================= MilkEditActivity ========================== -->
     
@@ -1208,8 +1355,7 @@ Error Message: %s
     <string name="rmilk_notification_title">Astrid: Remember the Milk</string>
     
     <!-- Error msg when io exception with rmilk -->
-    <string name="rmilk_ioerror">Connection Error! Check your Internet connection, 
-    or maybe RTM servers (status.rememberthemilk.com), for possible solutions.</string>
+    <string name="rmilk_ioerror">接続に失敗しました。インターネット接続を確認してください。RTM のサーバ運用情報 (status.rememberthemilk.com) も確かめてみてください。</string>
             
 
 
@@ -1243,7 +1389,28 @@ Error Message: %s
   
   <!-- %s => tag name -->
   <string name="tag_FEx_name">%s タグ</string>
-    
+
+  <!-- context menu option to rename a tag -->
+  <string name="tag_cm_rename">Rename Tag</string>
+
+  <!-- context menu option to delete a tag -->
+  <string name="tag_cm_delete">タグ削除</string>
+
+  <!-- Dialog to confirm deletion of a tag -->
+  <string name="DLG_delete_this_tag_question">タグ %s を削除しますか? (タスクは削除されません)</string>
+
+  <!-- Dialog to rename tag -->
+  <string name="DLG_rename_this_tag_header">タグ %s の名称変更</string>
+
+  <!-- Toast notification that no changes have been made -->
+  <string name="TEA_no_tags_modified">変更されませんでした</string>
+
+  <!-- Toast notification that a tag has been deleted -->
+  <string name="TEA_tags_deleted">Tag \'%s\' removed from %d tasks</string>
+
+  <!-- Toast notification that a tag has been renamed -->
+  <string name="TEA_tags_renamed">Replaced %s with %s on %d tasks</string>
+
 
 
 <!-- See the file "LICENSE" for the full license governing this code. -->
@@ -1271,25 +1438,38 @@ Error Message: %s
 <!-- See the file "LICENSE" for the full license governing this code. -->
 
     
-    <!-- Resources for power pack widget -->
+  <!-- Voice Add Prompt Text -->
+  <string name="voice_create_prompt">Speak to create a task</string>
+  <string name="voice_edit_title_prompt">Speak to set task title</string>
+  <string name="voice_edit_note_prompt">Speak to set task notes</string>
     
-    <string name="PPW_widget_42_label">Astrid 4x2 (beta!)</string>
-    <string name="PPW_widget_44_label">Astrid 4x4 (beta!)</string>
+  <!-- Preference: Task List recognition-service is not installed, but available -->
+  <string name="EPr_voiceInputInstall_dlg">Voice-input is not installed.\nDo you want to go to the market and install it?</string>
+  <!-- Preference: Task List recognition-service is not available for this system -->
+  <string name="EPr_voiceInputUnavailable_dlg">Unfortunately voice-input is not available for your system.\nIf possible, please update Android to 2.1 or later.</string>
+  <!-- Preference: Market is not available for this system -->
+  <string name="EPr_marketUnavailable_dlg">Unfortunately the market is not available for your system.\nIf possible, try downloading voice search from another source.</string>
+  <!-- Preference: Task List Show Voice-button if recognition-service is available -->
+  <string name="EPr_voiceInputEnabled_title">Voice Input</string>
+  <!-- Preference: voice button description (true) -->
+  <string name="EPr_voiceInputEnabled_desc_enabled">Voice input button will be displayed in task list page</string>
+  <!-- Preference: voice button description (false) -->
+  <string name="EPr_voiceInputEnabled_desc_disabled">Voice input button will be hidden on task list page</string>
+  <!-- Preference: Task List Voice-button directly creates tasks -->
+  <string name="EPr_voiceInputCreatesTask_title">Directly Create Tasks</string>
+  <!-- Preference: Task List Voice-creation description (true) -->
+  <string name="EPr_voiceInputCreatesTask_desc_enabled">Tasks will automatically be created from voice input</string>
+  <!-- Preference: Task List Voice-creation description (false) -->
+  <string name="EPr_voiceInputCreatesTask_desc_disabled">You can edit the task title after voice input finishes</string>
+  <!-- Preference: Voice reminders if TTS-service is available -->
+  <string name="EPr_voiceRemindersEnabled_title">Voice Reminders</string>
+  <!-- Preference: Voice reminders description (true) -->
+  <string name="EPr_voiceRemindersEnabled_desc_enabled">Astrid will speak task names during task reminders</string>
+  <!-- Preference: Voice reminders description (false) -->
+  <string name="EPr_voiceRemindersEnabled_desc_disabled">Astrid will sound a ringtone during task reminders</string>    
+  
+  <!-- Preference Category: Voice Title -->
+  <string name="EPr_voice_header">Voice Input Settings</string>
     
-    <string name="PPW_configure_title">Configure Widget</string>
-    
-    <string name="PPW_color">Widget color</string>
-    <string name="PPW_enable_calendar">Show calendar events</string>
-    <string name="PPW_disable_encouragements">Hide encouragements</string>
-    <string name="PPW_filter">Select Filter</string>
-    
-    <string name="PPW_due">Due:</string>
-    <string name="PPW_past_due">Past Due:</string>
-    
-    <string-array name="PPW_encouragements">
-    	<item>Ready to work?</item>
-    	<item>Have time to finish something?</item>
-    	<item>Gosh, you are looking suave today!</item>
-    </string-array>
 
 </resources>

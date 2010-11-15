@@ -17,6 +17,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -50,7 +52,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.TodorooCursor;
@@ -71,8 +72,8 @@ import com.todoroo.astrid.api.PermaSql;
 import com.todoroo.astrid.api.SyncAction;
 import com.todoroo.astrid.api.TaskAction;
 import com.todoroo.astrid.api.TaskDecoration;
-import com.todoroo.astrid.backup.BackupActivity;
 import com.todoroo.astrid.core.CoreFilterExposer;
+import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
@@ -86,7 +87,9 @@ import com.todoroo.astrid.service.AddOnService;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
+import com.todoroo.astrid.utility.AstridPreferences;
 import com.todoroo.astrid.utility.Constants;
 import com.todoroo.astrid.utility.Flags;
 import com.todoroo.astrid.voice.VoiceInputAssistant;
@@ -148,7 +151,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     protected Database database;
 
     @Autowired
-    private AddOnService addOnService;
+    protected AddOnService addOnService;
 
     protected TaskAdapter taskAdapter = null;
     protected DetailReceiver detailReceiver = new DetailReceiver();
@@ -207,11 +210,11 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         if(database == null)
             return;
 
-        AddOnService.checkForUpgrades(this);
-
         database.openForWriting();
         setUpUiComponents();
         onNewIntent(getIntent());
+
+        Eula.showEula(this);
     }
 
     @Override
@@ -252,9 +255,11 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
                 R.string.TLA_menu_settings);
         item.setIcon(android.R.drawable.ic_menu_preferences);
 
-        item = menu.add(Menu.NONE, MENU_SORT_ID, Menu.NONE,
-                R.string.TLA_menu_sort);
-        item.setIcon(android.R.drawable.ic_menu_sort_by_size);
+        if(!(this instanceof DraggableTaskListActivity)) {
+            item = menu.add(Menu.NONE, MENU_SORT_ID, Menu.NONE,
+                    R.string.TLA_menu_sort);
+            item.setIcon(android.R.drawable.ic_menu_sort_by_size);
+        }
 
         if(syncActions.size() > 0) {
             item = menu.add(Menu.NONE, MENU_SYNC_ID, Menu.NONE,
@@ -273,10 +278,6 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         int length = resolveInfoList.size();
         for(int i = 0; i < length; i++) {
             ResolveInfo resolveInfo = resolveInfoList.get(i);
-
-            if(!addOnService.hasPowerPack() &&
-                    BackupActivity.class.getName().equals(resolveInfo.activityInfo.name))
-                continue;
 
             item = menu.add(Menu.NONE, MENU_ADDON_INTENT_ID, Menu.NONE,
                         resolveInfo.loadLabel(pm));
@@ -380,9 +381,9 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
 
         // prepare and set listener for voice add button
         voiceAddButton = (ImageButton) findViewById(R.id.voiceAddButton);
-        int prompt = R.string.TLA_voice_edit_prompt;
+        int prompt = R.string.voice_edit_title_prompt;
         if (Preferences.getBoolean(R.string.p_voiceInputCreatesTask, false))
-            prompt = R.string.TLA_voice_add_prompt;
+            prompt = R.string.voice_create_prompt;
         voiceInputAssistant = new VoiceInputAssistant(this,voiceAddButton,quickAddBox);
         voiceInputAssistant.configureMicrophoneButton(prompt);
 
@@ -403,8 +404,9 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
             // failed check, no gestures :P
         }
 
-        sortFlags = Preferences.getInt(SortSelectionActivity.PREF_SORT_FLAGS, 0);
-        sortSort = Preferences.getInt(SortSelectionActivity.PREF_SORT_SORT, 0);
+        SharedPreferences publicPrefs = AstridPreferences.getPublicPrefs(this);
+        sortFlags = publicPrefs.getInt(SortHelper.PREF_SORT_FLAGS, 0);
+        sortSort = publicPrefs.getInt(SortHelper.PREF_SORT_SORT, 0);
 
         // dithering
         getWindow().setFormat(PixelFormat.RGBA_8888);
@@ -437,19 +439,21 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, Constants.FLURRY_KEY);
+        StatisticsService.sessionStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        StatisticsService.sessionStop(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (Preferences.getBoolean(R.string.p_voiceInputEnabled, true) && voiceInputAssistant.isVoiceInputAvailable()) {
+        if (addOnService.hasPowerPack() &&
+                Preferences.getBoolean(R.string.p_voiceInputEnabled, true) &&
+                voiceInputAssistant.isVoiceInputAvailable()) {
             voiceAddButton.setVisibility(View.VISIBLE);
         } else {
             voiceAddButton.setVisibility(View.GONE);
@@ -648,7 +652,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
      * @param withCustomId force task with given custom id to be part of list
      */
     protected void setUpTaskList() {
-        sqlQueryTemplate.set(SortSelectionActivity.adjustQueryForFlagsAndSort(filter.sqlQuery,
+        sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
         ((TextView)findViewById(R.id.listLabel)).setText(filter.title);
@@ -1010,8 +1014,11 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         sortSort = sort;
 
         if(always) {
-            Preferences.setInt(SortSelectionActivity.PREF_SORT_FLAGS, flags);
-            Preferences.setInt(SortSelectionActivity.PREF_SORT_SORT, sort);
+            SharedPreferences publicPrefs = AstridPreferences.getPublicPrefs(this);
+            Editor editor = publicPrefs.edit();
+            editor.putInt(SortHelper.PREF_SORT_FLAGS, flags);
+            editor.putInt(SortHelper.PREF_SORT_SORT, sort);
+            editor.commit();
             ContextManager.getContext().startService(new Intent(ContextManager.getContext(),
                     TasksWidget.UpdateService.class));
         }

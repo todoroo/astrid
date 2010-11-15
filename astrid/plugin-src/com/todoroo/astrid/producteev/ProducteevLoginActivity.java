@@ -29,13 +29,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.flurry.android.FlurryAgent;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
@@ -44,7 +42,7 @@ import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.producteev.api.ApiAuthenticationException;
 import com.todoroo.astrid.producteev.api.ProducteevInvoker;
 import com.todoroo.astrid.producteev.sync.ProducteevSyncProvider;
-import com.todoroo.astrid.utility.Constants;
+import com.todoroo.astrid.service.StatisticsService;
 
 /**
  * This activity allows users to sign in or log in to Producteev
@@ -84,18 +82,13 @@ public class ProducteevLoginActivity extends Activity {
         final View newUserLayout = findViewById(R.id.newUserLayout);
         final Spinner timezoneList = (Spinner) findViewById(R.id.timezoneList);
 
-        String[] timezoneIds = TimeZone.getAvailableIDs();
+        String[] timezoneEntries = getResources().getStringArray(R.array.PLA_timezones_list);
         String defaultTimeZone = TimeZone.getDefault().getID();
         int selected = 0;
-        for(int i = 0; i < timezoneIds.length; i++) {
-            if(timezoneIds[i].equals(defaultTimeZone))
+        for(int i = 0; i < timezoneEntries.length; i++) {
+            if(timezoneEntries[i].equals(defaultTimeZone))
                 selected = i;
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, timezoneIds);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        timezoneList.setAdapter(adapter);
         timezoneList.setSelection(selected);
 
         Button signIn = (Button) findViewById(R.id.signIn);
@@ -164,7 +157,7 @@ public class ProducteevLoginActivity extends Activity {
                     Preferences.setString(R.string.producteev_PPr_password, password);
                     ProducteevUtilities.INSTANCE.setToken(invoker.getToken());
 
-                    FlurryAgent.onEvent("producteev-login"); //$NON-NLS-1$
+                    StatisticsService.reportEvent("producteev-login"); //$NON-NLS-1$
 
                     synchronize();
                 } catch (ApiAuthenticationException e) {
@@ -205,7 +198,7 @@ public class ProducteevLoginActivity extends Activity {
                     Preferences.setString(R.string.producteev_PPr_password, password);
                     ProducteevUtilities.INSTANCE.setToken(invoker.getToken());
 
-                    FlurryAgent.onEvent("producteev-signup"); //$NON-NLS-1$
+                    StatisticsService.reportEvent("producteev-signup"); //$NON-NLS-1$
 
                     synchronize();
                 } catch (Exception e) {
@@ -237,13 +230,13 @@ public class ProducteevLoginActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, Constants.FLURRY_KEY);
+        StatisticsService.sessionStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        StatisticsService.sessionStop(this);
     }
 
 }

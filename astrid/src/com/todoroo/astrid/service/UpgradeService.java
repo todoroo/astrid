@@ -1,12 +1,10 @@
 package com.todoroo.astrid.service;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.webkit.WebView;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
@@ -14,11 +12,16 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.TaskListActivity;
+import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.dao.Database;
+import com.todoroo.astrid.utility.AstridPreferences;
 
 
 public final class UpgradeService {
 
+    public static final int V3_6_0 = 166;
+    public static final int V3_5_0 = 165;
+    public static final int V3_4_0 = 162;
     public static final int V3_3_0 = 155;
     public static final int V3_2_0 = 147;
     public static final int V3_1_0 = 146;
@@ -66,8 +69,7 @@ public final class UpgradeService {
                     if(context instanceof Activity) {
                         ((Activity)context).runOnUiThread(new Runnable() {
                             public void run() {
-                                if(dialog != null)
-                                    dialog.dismiss();
+                                DialogUtilities.dismissDialog((Activity)context, dialog);
 
                                 // display changelog
                                 showChangeLog(context, from);
@@ -97,8 +99,8 @@ public final class UpgradeService {
 
         StringBuilder changeLog = new StringBuilder();
 
-        if(from <= V2_14_4)
-            newVersionString(changeLog, "3.3.0 (9/12/10)", new String[] {
+        if(from <= V2_14_4) {
+            newVersionString(changeLog, "3.6.0 (11/13/10)", new String[] {
                     "Astrid is brand new inside and out! In addition to a new " +
                     "look and feel, a new add-on system allows Astrid to become " +
                     "more powerful, while other improvements have made it faster " +
@@ -106,38 +108,60 @@ public final class UpgradeService {
                     "If you liked the old version, you can also go back by " +
                     "<a href='http://bit.ly/oldastrid'>clicking here</a>",
             });
-        if(from >= V3_3_0)
-            newVersionString(changeLog, "3.3.6 (9/27/10)", new String[] {
-                    "Restored alarm functionality",
-                    "Producteev: sync can now remove due dates in Producteev",
+        } else {
+            // current message
+            newVersionString(changeLog, "3.6.0 (11/13/10)", new String[] {
+                    "Astrid Power Pack is now launched to the Android Market. " +
+                        "New Power Pack features include 4x2 and 4x4 widgets and voice " +
+                        "task reminders and creation. Go to the add-ons page to find out more!",
+                    "Fix for Google Tasks: due times got lost on sync, repeating tasks not repeated",
+                    "Fix for task alarms not always firing if multiple set",
+                    "Fix for various force closes",
             });
-        if(from >= V3_0_0 && from < V3_3_0)
-            newVersionString(changeLog, "3.3.0 (9/17/10)", new String[] {
-                    "Fixed some RTM duplicated tasks issues",
-                    "UI updates based on your feedback",
-                    "Snooze now overrides other alarms",
-                    "Added preference option for selecting snooze style",
-                    "Hide until: now allows you to pick a specific time",
-            });
-        if(from >= V3_0_0 && from < V3_2_0)
-            newVersionString(changeLog, "3.2.0 (8/16/10)", new String[] {
-                    "Build your own custom filters from the Filter page",
-                    "Easy task sorting (in the task list menu)",
-                    "Create widgets from any of your filters",
-                    "Synchronize with Producteev! (producteev.com)",
-                    "Select tags by drop-down box",
-                    "Cosmetic improvements, calendar & sync bug fixes",
-            });
-        if(from >= V3_0_0 && from < V3_1_0)
-            newVersionString(changeLog, "3.1.0 (8/9/10)", new String[] {
-                    "Linkify phone numbers, e-mails, and web pages",
-                    "Swipe L => R to go from tasks to filters",
-                    "Moved task priority bar to left side",
-                    "Added ability to create fixed alerts for a task",
-                    "Restored tag hiding when tag begins with underscore (_)",
-                    "FROYO: disabled moving app to SD card, it would break alarms and widget",
-                    "Also gone: a couple force closes, bugs with repeating tasks",
-            });
+            upgrade3To3_6(context);
+
+            // old messages
+            if(from >= V3_0_0 && from < V3_5_0)
+                newVersionString(changeLog, "3.5.0 (10/25/10)", new String[] {
+                        "Google Tasks Sync (beta!)",
+                        "Bug fix with RMilk & new tasks not getting synced",
+                        "Fixed Force Closes and other bugs",
+                });
+            if(from >= V3_0_0 && from < V3_4_0) {
+                newVersionString(changeLog, "3.4.0 (10/08/10)", new String[] {
+                        "End User License Agreement",
+                        "Option to disable usage statistics",
+                        "Bug fixes with Producteev",
+                });
+            }
+            if(from >= V3_0_0 && from < V3_3_0)
+                newVersionString(changeLog, "3.3.0 (9/17/10)", new String[] {
+                        "Fixed some RTM duplicated tasks issues",
+                        "UI updates based on your feedback",
+                        "Snooze now overrides other alarms",
+                        "Added preference option for selecting snooze style",
+                        "Hide until: now allows you to pick a specific time",
+                });
+            if(from >= V3_0_0 && from < V3_2_0)
+                newVersionString(changeLog, "3.2.0 (8/16/10)", new String[] {
+                        "Build your own custom filters from the Filter page",
+                        "Easy task sorting (in the task list menu)",
+                        "Create widgets from any of your filters",
+                        "Synchronize with Producteev! (producteev.com)",
+                        "Select tags by drop-down box",
+                        "Cosmetic improvements, calendar & sync bug fixes",
+                });
+            if(from >= V3_0_0 && from < V3_1_0)
+                newVersionString(changeLog, "3.1.0 (8/9/10)", new String[] {
+                        "Linkify phone numbers, e-mails, and web pages",
+                        "Swipe L => R to go from tasks to filters",
+                        "Moved task priority bar to left side",
+                        "Added ability to create fixed alerts for a task",
+                        "Restored tag hiding when tag begins with underscore (_)",
+                        "FROYO: disabled moving app to SD card, it would break alarms and widget",
+                        "Also gone: a couple force closes, bugs with repeating tasks",
+                });
+        }
 
         if(changeLog.length() == 0)
             return;
@@ -145,16 +169,8 @@ public final class UpgradeService {
         changeLog.append("Enjoy!</body></html>");
         String changeLogHtml = "<html><body style='color: white'>" + changeLog;
 
-        WebView webView = new WebView(context);
-        webView.loadData(changeLogHtml, "text/html", "utf-8");
-        webView.setBackgroundColor(0);
-
-        new AlertDialog.Builder(context)
-        .setTitle(R.string.UpS_changelog_title)
-        .setView(webView)
-        .setIcon(android.R.drawable.ic_dialog_info)
-        .setPositiveButton(android.R.string.ok, null)
-        .show();
+        DialogUtilities.htmlDialog(context, changeLogHtml,
+                R.string.UpS_changelog_title);
     }
 
     /**
@@ -173,33 +189,18 @@ public final class UpgradeService {
 
     // --- upgrade functions
 
-    @SuppressWarnings({"nls", "unused"})
-    private void upgrade3To3_4(final Context context) {
-        // if RTM, store RTM to secondary preferences
-        if(Preferences.getStringValue("rmilk_token") != null) {
-            SharedPreferences settings = context.getSharedPreferences("rtm", Context.MODE_WORLD_READABLE);
-            Editor editor = settings.edit();
-            editor.putString("rmilk_token", Preferences.getStringValue("rmilk_token"));
-            editor.putLong("rmilk_last_sync", Preferences.getLong("rmilk_last_sync", 0));
-            editor.commit();
-
-            final String message = "Hi, it looks like you are a Remember the Milk user! " +
-            		"In this version of Astrid, RTM is now a community-supported " +
-            		"add-on. Please go to the Android market to install it!";
-            if(context instanceof Activity) {
-                ((Activity)context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        new AlertDialog.Builder(context)
-                        .setTitle(com.todoroo.astrid.api.R.string.DLG_information_title)
-                        .setMessage(message)
-                        .setPositiveButton("Go To Market", new AddOnService.MarketClickListener(context, "org.weloveastrid.rmilk"))
-                        .setNegativeButton("Later", null)
-                        .show();
-                    }
-                });
-            }
-        }
+    /**
+     * Moves sorting prefs to public pref store
+     * @param context
+     */
+    private void upgrade3To3_6(final Context context) {
+        SharedPreferences publicPrefs = AstridPreferences.getPublicPrefs(context);
+        Editor editor = publicPrefs.edit();
+        editor.putInt(SortHelper.PREF_SORT_FLAGS,
+                Preferences.getInt(SortHelper.PREF_SORT_FLAGS, 0));
+        editor.putInt(SortHelper.PREF_SORT_SORT,
+                Preferences.getInt(SortHelper.PREF_SORT_SORT, 0));
+        editor.commit();
     }
 
     // --- secondary upgrade

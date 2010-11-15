@@ -7,9 +7,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.api.Filter;
@@ -42,8 +44,11 @@ public class GtasksTaskListUpdater {
     /**
      * Indent a task and all its children
      */
-    public void indent(String listId, final long targetTaskId, final int delta) {
-        StoreObject list = gtasksListService.getList(listId);
+    public void indent(final long targetTaskId, final int delta) {
+        Metadata targetMetadata = gtasksMetadataService.getTaskMetadata(targetTaskId);
+        if(targetMetadata == null)
+            return;
+        StoreObject list = gtasksListService.getList(targetMetadata.getValue(GtasksMetadata.LIST_ID));
         if(list == GtasksListService.LIST_NOT_FOUND_OBJECT)
             return;
 
@@ -108,8 +113,11 @@ public class GtasksTaskListUpdater {
      *
      * @param newTaskId task we will move above. if -1, moves to end of list
      */
-    public void moveTo(String listId, final long targetTaskId, final long moveBeforeTaskId) {
-        StoreObject list = gtasksListService.getList(listId);
+    public void moveTo(final long targetTaskId, final long moveBeforeTaskId) {
+        Metadata targetMetadata = gtasksMetadataService.getTaskMetadata(targetTaskId);
+        if(targetMetadata == null)
+            return;
+        StoreObject list = gtasksListService.getList(targetMetadata.getValue(GtasksMetadata.LIST_ID));
         if(list == GtasksListService.LIST_NOT_FOUND_OBJECT)
             return;
 
@@ -212,6 +220,7 @@ public class GtasksTaskListUpdater {
             return;
         PluginServices.getMetadataService().save(metadata);
         taskContainer.setId(taskId);
+        taskContainer.setValue(Task.MODIFICATION_DATE, DateUtilities.now());
         taskContainer.setValue(Task.DETAILS_DATE, DateUtilities.now());
         PluginServices.getTaskService().save(taskContainer);
     }
@@ -279,22 +288,29 @@ public class GtasksTaskListUpdater {
             public void processTask(long taskId, Metadata metadata) {
                 int indent = metadata.getValue(GtasksMetadata.INDENT);
 
-                long parent, sibling;
-                if(indent > previousIndent.get()) {
-                    parent = previousTask.get();
-                    sibling = -1L;
-                } else if(indent == previousIndent.get()) {
-                    sibling = previousTask.get();
-                    parent = parents.get(sibling);
-                } else {
-                    // move up once for each indent
-                    sibling = previousTask.get();
-                    for(int i = indent; i < previousIndent.get(); i++)
-                        sibling = parents.get(sibling);
-                    parent = parents.get(sibling);
+                try {
+                    long parent, sibling;
+                    if(indent > previousIndent.get()) {
+                        parent = previousTask.get();
+                        sibling = -1L;
+                    } else if(indent == previousIndent.get()) {
+                        sibling = previousTask.get();
+                        parent = parents.get(sibling);
+                    } else {
+                        // move up once for each indent
+                        sibling = previousTask.get();
+                        for(int i = indent; i < previousIndent.get(); i++)
+                            sibling = parents.get(sibling);
+                        if(parents.containsKey(sibling))
+                            parent = parents.get(sibling);
+                        else
+                            parent = -1L;
+                    }
+                    parents.put(taskId, parent);
+                    siblings.put(taskId, sibling);
+                } catch (Exception e) {
+                    Log.e("gtasks-task-updating", "Caught exception", e); //$NON-NLS-1$ //$NON-NLS-2$
                 }
-                parents.put(taskId, parent);
-                siblings.put(taskId, sibling);
 
                 previousTask.set(taskId);
                 previousIndent.set(indent);
@@ -335,7 +351,7 @@ public class GtasksTaskListUpdater {
     }
 
     private void iterateThroughList(StoreObject list, ListIterator iterator) {
-        Filter filter = GtasksFilterExposer.filterFromList(list);
+        Filter filter = GtasksFilterExposer.filterFromList(ContextManager.getContext(), list);
         TodorooCursor<Task> cursor = PluginServices.getTaskService().fetchFiltered(filter.sqlQuery, null, Task.ID);
         try {
             for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {

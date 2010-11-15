@@ -3,11 +3,12 @@
  */
 package com.todoroo.astrid.gtasks;
 
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.AbstractModel;
@@ -44,26 +45,22 @@ public class GtasksFilterExposer extends BroadcastReceiver {
 
     private StoreObject[] lists;
 
-    public static Filter filterFromList(StoreObject list) {
+    public static Filter filterFromList(Context context, StoreObject list) {
         String listName = list.getValue(GtasksList.NAME);
         ContentValues values = new ContentValues();
         values.putAll(GtasksMetadata.createEmptyMetadata(AbstractModel.NO_ID).getMergedValues());
         values.remove(Metadata.TASK.name);
         values.put(GtasksMetadata.LIST_ID.name, list.getValue(GtasksList.REMOTE_ID));
-        FilterWithCustomIntent filter = new FilterWithCustomIntent(listName, listName, new QueryTemplate().join(
+        FilterWithCustomIntent filter = new FilterWithCustomIntent(listName,
+                ContextManager.getString(R.string.gtasks_FEx_title, listName), new QueryTemplate().join(
                 Join.left(Metadata.TABLE, Task.ID.eq(Metadata.TASK))).where(Criterion.and(
                         MetadataCriteria.withKey(GtasksMetadata.METADATA_KEY),
-                        TaskCriteria.isVisible(),
                         TaskCriteria.notDeleted(),
                         GtasksMetadata.LIST_ID.eq(list.getValue(GtasksList.REMOTE_ID)))).orderBy(
                                 Order.asc(Functions.cast(GtasksMetadata.ORDER, "INTEGER"))), //$NON-NLS-1$
                 values);
-        Intent intent = new Intent(ContextManager.getContext(), GtasksListActivity.class);
-        intent.putExtra(GtasksListActivity.TOKEN_LIST_ID, list.getValue(GtasksList.REMOTE_ID));
-        intent.putExtra(GtasksListActivity.TOKEN_FILTER, filter);
-        PendingIntent pendingIntent = PendingIntent.getActivity(ContextManager.getContext(),
-                0, intent, 0);
-        filter.intent = pendingIntent;
+        filter.listingIcon = ((BitmapDrawable)context.getResources().getDrawable(R.drawable.gtasks_icon)).getBitmap();
+        filter.customTaskList = new ComponentName(ContextManager.getContext(), GtasksListActivity.class);
 
         return filter;
     }
@@ -85,7 +82,7 @@ public class GtasksFilterExposer extends BroadcastReceiver {
 
         Filter[] listFilters = new Filter[lists.length];
         for(int i = 0; i < lists.length; i++)
-            listFilters[i] = filterFromList(lists[i]);
+            listFilters[i] = filterFromList(context, lists[i]);
 
         FilterListHeader header = new FilterListHeader(context.getString(R.string.gtasks_FEx_header));
         FilterCategory listsCategory = new FilterCategory(context.getString(R.string.gtasks_FEx_list),
