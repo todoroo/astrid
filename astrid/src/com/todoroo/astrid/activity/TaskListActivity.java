@@ -627,7 +627,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
      * @param requery
      */
     public void loadTaskListContent(boolean requery) {
-        int oldListItemSelected = getListView().getSelectedItemPosition();
+        int oldListItemSelected = getListView().getFirstVisiblePosition();
         Cursor taskCursor = taskAdapter.getCursor();
 
         if(requery) {
