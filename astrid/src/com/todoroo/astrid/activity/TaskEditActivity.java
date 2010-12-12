@@ -239,6 +239,7 @@ public final class TaskEditActivity extends TabActivity {
                                 R.id.tab_addons));
         getTabWidget().setBackgroundColor(Color.BLACK);
 
+        notesEditText = (EditText) findViewById(R.id.notes);
         // populate control set
         title = (EditText) findViewById(R.id.title);
         controls.add(new EditTextControlSet(Task.TITLE, R.id.title));
@@ -249,7 +250,6 @@ public final class TaskEditActivity extends TabActivity {
         if(addOnService.hasPowerPack()) {
             voiceAddNoteButton = (ImageButton) findViewById(R.id.voiceAddNoteButton);
             voiceAddNoteButton.setVisibility(View.VISIBLE);
-            notesEditText = (EditText) findViewById(R.id.notes);
             int prompt = R.string.voice_edit_note_prompt;
             voiceNoteAssistant = new VoiceInputAssistant(this, voiceAddNoteButton,
                     notesEditText);
