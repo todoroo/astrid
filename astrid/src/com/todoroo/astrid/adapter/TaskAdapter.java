@@ -536,6 +536,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
      * Called to tell the cache to be cleared
      */
     public void flushCaches() {
+        completedItems.clear();
         extendedDetailManager.clearCache();
         decorationManager.clearCache();
         taskActionManager.clearCache();
@@ -548,6 +549,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
      * Called to tell the cache to be cleared
      */
     public void flushSpecific(long taskId) {
+        completedItems.put(taskId, null);
         extendedDetailManager.clearCache(taskId);
         decorationManager.clearCache(taskId);
         taskActionManager.clearCache(taskId);
