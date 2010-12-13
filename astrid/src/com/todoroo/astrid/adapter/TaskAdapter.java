@@ -17,18 +17,18 @@ import android.database.Cursor;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
-import android.text.Html.ImageGetter;
-import android.text.Html.TagHandler;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.Html.ImageGetter;
+import android.text.Html.TagHandler;
 import android.text.util.Linkify;
 import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -54,7 +54,6 @@ import com.todoroo.astrid.api.TaskDecoration;
 import com.todoroo.astrid.api.TaskDecorationExposer;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.TaskAdapterAddOnManager;
-import com.todoroo.astrid.service.AddOnService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.timers.TimerDecorationExposer;
 import com.todoroo.astrid.utility.Constants;
@@ -101,9 +100,6 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
     @Autowired
     private TaskService taskService;
-
-    @Autowired
-    private AddOnService addOnService;
 
     protected final ListActivity activity;
     protected final HashMap<Long, Boolean> completedItems = new HashMap<Long, Boolean>(0);
@@ -422,9 +418,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             TodorooCursor<Task> fetchCursor = taskService.fetchFiltered(
                     query.get(), null, Task.ID, Task.DETAILS, Task.DETAILS_DATE,
                     Task.MODIFICATION_DATE, Task.COMPLETION_DATE);
-            activity.startManagingCursor(fetchCursor);
-            Random random = new Random();
             try {
+                activity.startManagingCursor(fetchCursor);
+                Random random = new Random();
+
                 Task task = new Task();
                 for(fetchCursor.moveToFirst(); !fetchCursor.isAfterLast(); fetchCursor.moveToNext()) {
                     task.clear();
@@ -457,6 +454,8 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 }
             } catch (Exception e) {
                 // suppress silently
+            } finally {
+                fetchCursor.close();
             }
         }
 
@@ -742,7 +741,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 return;
 
             // hack because we know we have > 1 button
-            if(addOnService.hasPowerPack() && actions.size() == 0)
+            if(actions.size() == 0)
                 return;
 
             for(int i = viewHolder.actions.getChildCount(); i < actions.size() + 1; i++) {
@@ -894,6 +893,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             name.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemTitle);
         }
         name.setTextSize(fontSize);
+        float detailTextSize = Math.max(12, fontSize * 14 / 20);
+        viewHolder.details.setTextSize(detailTextSize);
+        viewHolder.dueDate.setTextSize(detailTextSize);
     }
 
     /**

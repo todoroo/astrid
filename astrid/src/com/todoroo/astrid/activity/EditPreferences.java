@@ -216,10 +216,6 @@ public class EditPreferences extends TodorooPreferences {
                 taskService.clearDetails(Criterion.all);
                 Flags.set(Flags.REFRESH);
             }
-        } else if (r.getString(R.string.p_voiceRemindersEnabled).equals(preference.getKey())) {
-                if (value != null && (Boolean)value)
-                    VoiceOutputAssistant.getInstance().checkIsTTSInstalled();
-
         }
 
         // statistics service
