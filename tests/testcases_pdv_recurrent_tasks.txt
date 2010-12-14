@@ -1,0 +1,5 @@
+Testfälle:
+- recurrent task checked on both sides concurrently: serverside-task gets duedate added plus one day
+ProducteevSyncProvider.createDeadline returns: 2010/12/18 23:59:59 +0000
+ --> timeWriter has Timezone +0000 instead of +0100, but presumingly another error not directly related to 
+ 
