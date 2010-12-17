@@ -212,7 +212,6 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
             // load user information
             JSONObject user = invoker.usersView(null).getJSONObject("user");
             saveUserData(user);
-            long userId = user.getLong("id_user");
 
             String lastServerSync = Preferences.getStringValue(ProducteevUtilities.PREF_SERVER_LAST_SYNC);
             String lastNotificationId = Preferences.getStringValue(ProducteevUtilities.PREF_SERVER_LAST_NOTIFICATION);
@@ -483,8 +482,6 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
 
         // if local is marked do not sync, handle accordingly
         if(idDashboard == ProducteevUtilities.DASHBOARD_NO_SYNC) {
-            if(idTask != 1)
-                invoker.tasksDelete(idTask);
             return;
         }
 
