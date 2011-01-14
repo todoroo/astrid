@@ -52,6 +52,9 @@ How to debug/test on a USB device: (JoshuaGross Jan 14, 2011)
    To test the application, set up "Android Application". To run JUnit tests, set up "Android JUnit Tests".
    Settings should autofill for you, you should be able to open a new configuration and run it.
    If you run it in debug mode, see #2 above for getting adb to work in case it is finicky.
+4. When running unit tests: make sure to *close all JUnit windows* before running tests. JUnit/Eclipse/Android
+   work together in a very, very janky way. You may get incorrect results if you do not close the window out
+   before running tests. You have been warned.
 
 Contributors workflow
 ---------------
