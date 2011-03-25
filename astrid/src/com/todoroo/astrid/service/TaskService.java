@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 import org.weloveastrid.rmilk.data.MilkTaskFields;
 
+import ru.otdelit.astrid.opencrx.OpencrxUtilities;
+import ru.otdelit.astrid.opencrx.sync.OpencrxActivity;
 import android.content.ContentValues;
 
 import com.todoroo.andlib.data.Property;
@@ -19,8 +21,8 @@ import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.PermaSql;
 import com.todoroo.astrid.dao.MetadataDao;
-import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.TaskDao;
+import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.Task;
@@ -118,6 +120,8 @@ public class TaskService {
                     if(ProducteevTask.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
                         continue;
                     if(MilkTaskFields.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
+                        continue;
+                    if(OpencrxActivity.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
                         continue;
 
                     metadata.setValue(Metadata.TASK, newId);
@@ -340,7 +344,7 @@ public class TaskService {
                         // not in producteev world: !1 to !4 => importance 3 to 0
                         int importance = Math.max(Task.IMPORTANCE_MOST, Task.IMPORTANCE_LEAST + 1 - value);
                         // in the producteev world, !1 to !4 => importance 4 to 1
-                        if(ProducteevUtilities.INSTANCE.isLoggedIn())
+                        if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxUtilities.INSTANCE.isLoggedIn())
                             importance++;
 
                         task.setValue(Task.IMPORTANCE, importance);
