@@ -7,7 +7,6 @@ import ru.otdelit.astrid.opencrx.sync.OpencrxActivity;
 import ru.otdelit.astrid.opencrx.sync.OpencrxActivityCreator;
 import ru.otdelit.astrid.opencrx.sync.OpencrxContact;
 import ru.otdelit.astrid.opencrx.sync.OpencrxDataService;
-
 import android.app.Activity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,12 +77,13 @@ public class OpencrxControlSet implements TaskEditControlSet {
     @Override
     public void readFromTask(Task task) {
 
+
         Metadata metadata = OpencrxDataService.getInstance().getTaskMetadata(task.getId());
         if(metadata == null)
             metadata = OpencrxActivity.newMetadata();
 
         // Fill the dashboard-spinner and set the current dashboard
-        long dashboardId = OpencrxUtilities.INSTANCE.getDefaultDashboard();
+        long dashboardId = OpencrxUtilities.INSTANCE.getDefaultCreator();
         if(metadata.containsNonNullValue(OpencrxActivity.ACTIVITY_CREATOR_ID))
             dashboardId = metadata.getValue(OpencrxActivity.ACTIVITY_CREATOR_ID);
 
@@ -100,7 +100,7 @@ public class OpencrxControlSet implements TaskEditControlSet {
         }
 
         //dashboard to not sync as first spinner-entry
-        dashboards.add(0, new OpencrxActivityCreator(OpencrxUtilities.DASHBOARD_NO_SYNC, activity.getString(R.string.opencrx_no_creator), "")); //$NON-NLS-1$
+        dashboards.add(0, new OpencrxActivityCreator(OpencrxUtilities.CREATOR_NO_SYNC, activity.getString(R.string.opencrx_no_creator), "")); //$NON-NLS-1$
 
         ArrayAdapter<OpencrxActivityCreator> dashAdapter = new ArrayAdapter<OpencrxActivityCreator>(activity,
                 android.R.layout.simple_spinner_item, dashboards);
@@ -196,10 +196,7 @@ public class OpencrxControlSet implements TaskEditControlSet {
         Metadata metadata = OpencrxDataService.getInstance().getTaskMetadata(task.getId());
         try {
             if (metadata == null) {
-                metadata = new Metadata();
-                metadata.setValue(Metadata.KEY, OpencrxActivity.METADATA_KEY);
-                metadata.setValue(Metadata.TASK, task.getId());
-                metadata.setValue(OpencrxActivity.ID, 0L);
+                metadata = OpencrxActivity.newMetadata();
             }
 
             OpencrxActivityCreator dashboard = (OpencrxActivityCreator) creatorSelector.getSelectedItem();
