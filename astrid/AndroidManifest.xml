@@ -492,6 +492,63 @@
       </intent-filter>
     </receiver>    
 
+	<!-- OpenCRX  -->
+		    <receiver android:name="ru.otdelit.astrid.opencrx.OpencrxFilterExposer">
+	      <intent-filter>
+	        <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </receiver>
+	    
+	    <receiver android:name="ru.otdelit.astrid.opencrx.OpencrxCustomFilterCriteriaExposer">
+	      <intent-filter>
+	        <action android:name="com.todoroo.astrid.REQUEST_CUSTOM_FILTER_CRITERIA" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </receiver>
+	    
+	    <activity android:name="ru.otdelit.astrid.opencrx.OpencrxPreferences"
+	              android:theme="@android:style/Theme"
+	              android:label="@string/opencrx_PPr_header">
+	      <meta-data android:name="category"
+	                 android:resource="@string/SyP_label" />
+	      <intent-filter>   
+	        <action android:name="com.todoroo.astrid.SETTINGS" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </activity>
+	    
+	    <activity android:name="ru.otdelit.astrid.opencrx.OpencrxLoginActivity"
+	              android:theme="@android:style/Theme" android:configChanges="orientation|keyboardHidden" />
+	              
+	    <service android:name="ru.otdelit.astrid.opencrx.OpencrxBackgroundService">
+	      <intent-filter>
+	        <action android:name="com.todoroo.astrid.opencrx.SYNC" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </service>
+	    
+	    <receiver android:name="ru.otdelit.astrid.opencrx.OpencrxStartupReceiver">
+	      <intent-filter>
+	        <action android:name="android.intent.action.BOOT_COMPLETED" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </receiver>
+	    
+	    <receiver android:name="ru.otdelit.astrid.opencrx.OpencrxDetailExposer">
+	      <intent-filter>
+	        <action android:name="com.todoroo.astrid.REQUEST_DETAILS" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </receiver>
+	        
+	    <receiver android:name="ru.otdelit.astrid.opencrx.OpencrxSyncActionExposer">
+	      <intent-filter>
+	        <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
+	        <category android:name="android.intent.category.DEFAULT" />
+	      </intent-filter>
+	    </receiver>    
+
     <!-- rmilk -->
     <receiver android:name="org.weloveastrid.rmilk.MilkFilterExposer">
       <intent-filter>
@@ -533,8 +590,8 @@
         <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
-    </receiver>    
-
+    </receiver>
+    
     <!-- other task actions -->
     <receiver android:name="com.todoroo.astrid.core.LinkActionExposer">
       <intent-filter>
