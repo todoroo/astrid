@@ -43,11 +43,6 @@
 			<locationURI>_android_GreenDroid_612cb559/src</locationURI>
 		</link>
 		<link>
-			<name>astrid-opencrx_src</name>
-			<type>2</type>
-			<locationURI>_android_astrid_opencrx_9860bedd/src</locationURI>
-		</link>
-		<link>
 			<name>astridApi_src</name>
 			<type>2</type>
 			<locationURI>_android_astridApi_98e6a2cf/src</locationURI>

@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 
 import org.weloveastrid.rmilk.data.MilkTaskFields;
 
-import ru.otdelit.astrid.opencrx.OpencrxUtilities;
-import ru.otdelit.astrid.opencrx.sync.OpencrxActivity;
+import ru.otdelit.astrid.opencrx.OpencrxCoreUtils;
 import android.content.ContentValues;
 
 import com.todoroo.andlib.data.Property;
@@ -121,7 +120,7 @@ public class TaskService {
                         continue;
                     if(MilkTaskFields.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
                         continue;
-                    if(OpencrxActivity.METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
+                    if(OpencrxCoreUtils.OPENCRX_ACTIVITY_METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
                         continue;
 
                     metadata.setValue(Metadata.TASK, newId);
@@ -344,7 +343,7 @@ public class TaskService {
                         // not in producteev world: !1 to !4 => importance 3 to 0
                         int importance = Math.max(Task.IMPORTANCE_MOST, Task.IMPORTANCE_LEAST + 1 - value);
                         // in the producteev world, !1 to !4 => importance 4 to 1
-                        if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxUtilities.INSTANCE.isLoggedIn())
+                        if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxCoreUtils.INSTANCE.isLoggedIn())
                             importance++;
 
                         task.setValue(Task.IMPORTANCE, importance);

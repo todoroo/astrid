@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ru.otdelit.astrid.opencrx.OpencrxControlSet;
-import ru.otdelit.astrid.opencrx.OpencrxUtilities;
+import ru.otdelit.astrid.opencrx.OpencrxCoreUtils;
 import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.BroadcastReceiver;
@@ -288,7 +288,7 @@ public final class TaskEditActivity extends TabActivity {
                         }
 
                         try {
-                            if(OpencrxUtilities.INSTANCE.isLoggedIn()) {
+                            if(OpencrxCoreUtils.INSTANCE.isLoggedIn()) {
                                 controls.add(new OpencrxControlSet(TaskEditActivity.this, addonsAddons));
                                 notesEditText.setHint(R.string.opencrx_TEA_notes);
                                 ((TextView)findViewById(R.id.notes_label)).setHint(R.string.opencrx_TEA_notes);
@@ -742,7 +742,7 @@ public final class TaskEditActivity extends TabActivity {
 
             int min = Task.IMPORTANCE_MOST;
             int max = Task.IMPORTANCE_LEAST;
-            if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxUtilities.INSTANCE.isLoggedIn())
+            if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxCoreUtils.INSTANCE.isLoggedIn())
                 max = 5;
 
             for(int i = min; i <= max; i++) {
@@ -751,7 +751,7 @@ public final class TaskEditActivity extends TabActivity {
                         LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1));
 
                 StringBuilder label = new StringBuilder();
-                if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxUtilities.INSTANCE.isLoggedIn())
+                if(ProducteevUtilities.INSTANCE.isLoggedIn() || OpencrxCoreUtils.INSTANCE.isLoggedIn())
                     label.append(5 - i).append("\n\u2605"); //$NON-NLS-1$
                 else {
                     for(int j = Task.IMPORTANCE_LEAST; j >= i; j--)
