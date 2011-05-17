@@ -619,12 +619,23 @@ public final class ActFmSyncService {
             model.setValue(TagData.REMOTE_ID, json.getLong("id"));
             model.setValue(TagData.NAME, json.getString("name"));
             readUser(json, model, TagData.USER_ID, TagData.USER);
-            model.setValue(TagData.PICTURE, json.optString("picture", ""));
-            model.setFlag(TagData.FLAGS, TagData.FLAG_SILENT,json.getBoolean("is_silent"));
 
-            JSONArray members = json.getJSONArray("members");
-            model.setValue(TagData.MEMBERS, members.toString());
-            model.setValue(TagData.MEMBER_COUNT, members.length());
+            if(json.has("picture"))
+                model.setValue(TagData.PICTURE, json.optString("picture", ""));
+            if(json.has("thumb"))
+                model.setValue(TagData.THUMB, json.optString("thumb", ""));
+
+            if(json.has("is_silent"))
+                model.setFlag(TagData.FLAGS, TagData.FLAG_SILENT,json.getBoolean("is_silent"));
+
+            if(json.has("members")) {
+                JSONArray members = json.getJSONArray("members");
+                model.setValue(TagData.MEMBERS, members.toString());
+                model.setValue(TagData.MEMBER_COUNT, members.length());
+            }
+
+            if(json.has("tasks"))
+                model.setValue(TagData.TASK_COUNT, json.getInt("tasks"));
         }
 
         /**
@@ -638,6 +649,8 @@ public final class ActFmSyncService {
             metadata.clear();
             model.setValue(Task.REMOTE_ID, json.getLong("id"));
             readUser(json, model, Task.USER_ID, Task.USER);
+            if(model.getValue(Task.USER_ID) != 0)
+                model.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, true);
             model.setValue(Task.COMMENT_COUNT, json.getInt("comment_count"));
             model.setValue(Task.TITLE, json.getString("title"));
             model.setValue(Task.IMPORTANCE, json.getInt("importance"));

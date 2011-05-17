@@ -106,6 +106,10 @@ public final class TagData extends RemoteModel {
     public static final IntegerProperty IS_UNREAD = new IntegerProperty(
             TABLE, "isUnread");
 
+    /** Task count */
+    public static final IntegerProperty TASK_COUNT = new IntegerProperty(
+            TABLE, "taskCount");
+
     /** List of all properties for this model */
     public static final Property<?>[] PROPERTIES = generateProperties(TagData.class);
 
@@ -138,6 +142,7 @@ public final class TagData extends RemoteModel {
         defaultValues.put(THUMB.name, "");
         defaultValues.put(LAST_ACTIVITY_DATE.name, 0);
         defaultValues.put(IS_UNREAD.name, 0);
+        defaultValues.put(TASK_COUNT.name, 0);
     }
 
     @Override

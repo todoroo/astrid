@@ -44,9 +44,11 @@ import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.adapter.UpdateAdapter;
+import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.dao.UpdateDao;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Update;
@@ -291,6 +293,18 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
         startManagingCursor(cursor);
     }
 
+    @Override
+    public void loadTaskListContent(boolean requery) {
+        super.loadTaskListContent(requery);
+        int count = taskAdapter.getCursor().getCount();
+
+        if(tagData != null && sortFlags <= SortHelper.FLAG_REVERSE_SORT &&
+                count != tagData.getValue(TagData.TASK_COUNT)) {
+            tagData.setValue(TagData.TASK_COUNT, count);
+            tagDataService.save(tagData);
+        }
+    }
+
     @SuppressWarnings("nls")
     private void refreshMembersPage() {
         tagName.setText(tagData.getValue(TagData.NAME));
@@ -323,6 +337,12 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
     /** refresh the list with latest data from the web */
     private void refreshData(final boolean manual, boolean bypassTagShow) {
         final boolean noRemoteId = tagData.getValue(TagData.REMOTE_ID) == 0;
+
+        String fetchKey = "tag-fetch-" + tagData.getId(); //$NON-NLS-1$
+        long lastFetchDate = Preferences.getLong(fetchKey, 0);
+        if(!manual && DateUtilities.now() < lastFetchDate + 300000L)
+            return;
+        Preferences.setLong(fetchKey, DateUtilities.now());
 
         final ProgressDialog progressDialog;
         if(manual && !noRemoteId)

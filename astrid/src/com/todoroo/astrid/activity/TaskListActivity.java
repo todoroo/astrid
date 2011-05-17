@@ -657,7 +657,6 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     protected void setUpTaskList() {
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
-
         ((TextView)findViewById(R.id.listLabel)).setText(filter.title);
 
         // perform query

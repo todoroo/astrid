@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +31,7 @@ import android.text.Html.TagHandler;
 import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -38,6 +42,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,6 +56,7 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
+import com.todoroo.andlib.utility.ImageLoader;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.TaskEditActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
@@ -97,7 +103,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         Task.DETAILS,
         Task.ELAPSED_SECONDS,
         Task.TIMER_START,
-        Task.NOTES
+        Task.NOTES,
+        Task.USER_ID,
+        Task.USER
     };
 
     private static int[] IMPORTANCE_COLORS = null;
@@ -110,6 +118,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     @Autowired
     private TaskService taskService;
 
+    private final ImageLoader imageLoader;
     protected final ListActivity activity;
     protected final HashMap<Long, Boolean> completedItems = new HashMap<Long, Boolean>(0);
     private OnCompletedTaskListener onCompletedTaskListener = null;
@@ -159,6 +168,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         this.resource = resource;
         this.activity = activity;
         this.onCompletedTaskListener = onCompletedTaskListener;
+        this.imageLoader = new ImageLoader(activity);
 
         fontSize = Preferences.getIntegerFromString(R.string.p_fontSize, 20);
 
@@ -205,6 +215,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         viewHolder.task = new Task();
         viewHolder.view = view;
         viewHolder.nameView = (TextView)view.findViewById(R.id.title);
+        viewHolder.picture = (ImageView)view.findViewById(R.id.picture);
         viewHolder.completeBox = (CheckBox)view.findViewById(R.id.completeBox);
         viewHolder.dueDate = (TextView)view.findViewById(R.id.dueDate);
         viewHolder.details = (TextView)view.findViewById(R.id.details);
@@ -261,6 +272,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         public View view;
         public TextView nameView;
         public CheckBox completeBox;
+        public ImageView picture;
         public TextView dueDate;
         public TextView details;
         public TextView extendedDetails;
@@ -322,6 +334,26 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             completeBox.setChecked(task.isCompleted());
             // disable checkbox if task is readonly
             completeBox.setEnabled(!viewHolder.task.getFlag(Task.FLAGS, Task.FLAG_IS_READONLY));
+        }
+
+        // image view
+        final ImageView pictureView = viewHolder.picture; {
+            if(task.getValue(Task.USER_ID) == 0) {
+                pictureView.setVisibility(View.GONE);
+                completeBox.setVisibility(View.VISIBLE);
+            } else {
+                pictureView.setVisibility(View.VISIBLE);
+                completeBox.setVisibility(View.GONE);
+                pictureView.setImageResource(R.drawable.ic_contact_picture_2);
+                try {
+                    JSONObject user = new JSONObject(task.getValue(Task.USER));
+                    String pictureUrl = user.optString("picture"); //$NON-NLS-1$
+                    if(!TextUtils.isEmpty(pictureUrl))
+                        imageLoader.displayImage(pictureUrl, pictureView);
+                } catch (JSONException e) {
+                    Log.w("astrid", "task-adapter-image", e); //$NON-NLS-1$ //$NON-NLS-2$
+                }
+            }
         }
 
         // importance bar

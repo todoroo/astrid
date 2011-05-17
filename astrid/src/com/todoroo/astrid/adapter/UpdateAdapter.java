@@ -103,9 +103,8 @@ public class UpdateAdapter extends CursorAdapter {
         // picture
         final ImageView pictureView = (ImageView)view.findViewById(R.id.picture); {
             String pictureUrl = user.optString("picture");
-            if(TextUtils.isEmpty(pictureUrl))
-                pictureView.setImageResource(R.drawable.image_placeholder);
-            else
+            pictureView.setImageResource(R.drawable.image_placeholder);
+            if(!TextUtils.isEmpty(pictureUrl))
                 imageLoader.displayImage(pictureUrl, pictureView);
         }
 
