@@ -10,7 +10,6 @@ import android.content.ContentValues;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.DatabaseDao;
 import com.todoroo.andlib.service.Autowired;
-import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Field;
@@ -20,12 +19,9 @@ import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.data.TaskApiDao;
-import com.todoroo.astrid.provider.Astrid2TaskProvider;
-import com.todoroo.astrid.provider.Astrid3ContentProvider;
 import com.todoroo.astrid.reminders.Notifications;
 import com.todoroo.astrid.reminders.ReminderService;
 import com.todoroo.astrid.service.StatisticsService;
-import com.todoroo.astrid.widget.TasksWidget;
 
 /**
  * Data Access layer for {@link Task}-related operations.
@@ -66,7 +62,8 @@ public class TaskDao extends DatabaseDao<Task> {
     	}
 
     	public static Criterion isReadOnly() {
-    	    return Field.field(Task.FLAGS.name+" & "+Task.FLAG_IS_READONLY).eq(Task.FLAG_IS_READONLY);
+    	    return Field.field(Task.FLAGS.name+ " & " + //$NON-NLS-1$
+    	            Task.FLAG_IS_READONLY).eq(Task.FLAG_IS_READONLY);
     	}
 
     	/** @return tasks that were not deleted */
@@ -241,29 +238,14 @@ public class TaskDao extends DatabaseDao<Task> {
                 values.containsKey(Task.REMINDER_SNOOZE.name))
             ReminderService.getInstance().scheduleAlarm(task);
         }
-
-        for(DatabaseUpdateListener listener : taskChangeListeners) {
-            listener.onDatabaseUpdated();
-        }
     }
 
+    /**
+     * Called after a batch operation is performed on tasks
+     */
     public static void afterTaskListChanged() {
-        for(DatabaseUpdateListener listener : taskChangeListeners) {
-            listener.onDatabaseUpdated();
-        }
         TaskApiDao.afterTaskListChanged();
     }
-
-    private static final DatabaseUpdateListener[] taskChangeListeners = new DatabaseUpdateListener[] {
-        new DatabaseUpdateListener() {
-            @Override
-            public void onDatabaseUpdated() {
-                Astrid2TaskProvider.notifyDatabaseModification();
-                Astrid3ContentProvider.notifyDatabaseModification();
-                TasksWidget.updateWidgets(ContextManager.getContext());
-            }
-        }
-    };
 
     /**
      * Called after the task was just completed

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See the file "LICENSE" for the full license governing this code. -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:drawable/list_selector_background"
+    android:padding="4dip"
+    android:paddingRight="6dip">
+        
+    <!-- person or tag name -->
+    <TextView android:id="@android:id/text1"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:paddingLeft="45dip"
+        style="@android:attr/dropDownItemStyle"
+        android:textAppearance="@android:attr/textAppearanceLargeInverse"
+        android:textSize="20sp"/>
+        
+    <!-- picture thumbnail -->
+    <ImageView android:id="@android:id/icon"
+        android:layout_width="40dip"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:gravity="center"
+        android:scaleType="fitCenter" />
+        
+</RelativeLayout>

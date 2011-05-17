@@ -213,7 +213,7 @@ public class FilterListActivity extends ExpandableListActivity {
                 FilterWithCustomIntent customFilter = ((FilterWithCustomIntent)filter);
                 intent.setComponent(customFilter.customTaskList);
                 if(customFilter.customExtras != null)
-                    intent.getExtras().putAll(customFilter.customExtras);
+                    intent.putExtras(customFilter.customExtras);
             }
             startActivity(intent);
             AndroidUtilities.callApiMethod(5, this, "overridePendingTransition", //$NON-NLS-1$

@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,18 +23,23 @@ import android.widget.Toast;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.QueryTemplate;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.astrid.actfm.TagViewActivity;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterCategory;
 import com.todoroo.astrid.api.FilterListHeader;
 import com.todoroo.astrid.api.FilterListItem;
+import com.todoroo.astrid.api.FilterWithCustomIntent;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
+import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.service.AstridDependencyInjector;
+import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.tags.TagService.Tag;
 
 /**
@@ -56,7 +62,7 @@ public class TagFilterExposer extends BroadcastReceiver {
         contentValues.put(Metadata.KEY.name, TagService.KEY);
         contentValues.put(TagService.TAG.name, tag.tag);
 
-        Filter filter = new Filter(listTitle,
+        FilterWithCustomIntent filter = new FilterWithCustomIntent(listTitle,
                 title, tagTemplate,
                 contentValues);
         if(tag.count == 0)
@@ -70,6 +76,11 @@ public class TagFilterExposer extends BroadcastReceiver {
                 newTagIntent(context, RenameTagActivity.class, tag),
                 newTagIntent(context, DeleteTagActivity.class, tag)
         };
+        filter.customTaskList = new ComponentName(ContextManager.getContext(), TagViewActivity.class);
+        Intent extras = new Intent();
+        extras.putExtra(TagViewActivity.EXTRA_TAG_NAME, tag.tag);
+        extras.putExtra(TagViewActivity.EXTRA_TAG_REMOTE_ID, tag.remoteId);
+        filter.customExtras = extras;
 
         return filter;
     }
@@ -148,13 +159,10 @@ public class TagFilterExposer extends BroadcastReceiver {
         protected String tag;
 
         @Autowired public TagService tagService;
+        @Autowired public TagDataService tagDataService;
 
         static {
             AstridDependencyInjector.initialize();
-        }
-
-        protected TagActivity() {
-            DependencyInjectionService.getInstance().inject(this);
         }
 
         @Override
@@ -167,8 +175,14 @@ public class TagFilterExposer extends BroadcastReceiver {
                 finish();
                 return;
             }
+            DependencyInjectionService.getInstance().inject(this);
 
-            DependencyInjectionService.getInstance().inject(this); // why?
+
+            TagData tagData = tagDataService.getTag(tag, TagData.MEMBER_COUNT);
+            if(tagData != null && tagData.getValue(TagData.MEMBER_COUNT) > 0) {
+                DialogUtilities.okDialog(this, getString(R.string.actfm_tag_operation_disabled), getOkListener());
+                return;
+            }
 
             showDialog();
         }

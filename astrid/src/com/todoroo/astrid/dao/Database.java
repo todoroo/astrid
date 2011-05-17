@@ -9,9 +9,15 @@ import com.todoroo.andlib.data.AbstractDatabase;
 import com.todoroo.andlib.data.AbstractModel;
 import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.Table;
+import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.StoreObject;
+import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.provider.Astrid2TaskProvider;
+import com.todoroo.astrid.provider.Astrid3ContentProvider;
+import com.todoroo.astrid.widget.TasksWidget;
 
 /**
  * Database wrapper
@@ -28,7 +34,7 @@ public class Database extends AbstractDatabase {
      * Database version number. This variable must be updated when database
      * tables are updated, as it determines whether a database needs updating.
      */
-    public static final int VERSION = 8;
+    public static final int VERSION = 14;
 
     /**
      * Database name (must be unique)
@@ -43,7 +49,23 @@ public class Database extends AbstractDatabase {
         Task.TABLE,
         Metadata.TABLE,
         StoreObject.TABLE,
+        TagData.TABLE,
+        Update.TABLE,
     };
+
+    // --- listeners
+
+    public Database() {
+        super();
+        addListener(new DatabaseUpdateListener() {
+            @Override
+            public void onDatabaseUpdated() {
+                Astrid2TaskProvider.notifyDatabaseModification();
+                Astrid3ContentProvider.notifyDatabaseModification();
+                TasksWidget.updateWidgets(ContextManager.getContext());
+            }
+        });
+    }
 
     // --- implementation
 
@@ -75,10 +97,32 @@ public class Database extends AbstractDatabase {
         database.execSQL(sql.toString());
         sql.setLength(0);
 
+        sql.append("CREATE INDEX IF NOT EXISTS md_tkid ON ").
+            append(Metadata.TABLE).append('(').
+                append(Metadata.TASK.name).append(',').
+                append(Metadata.KEY.name).
+            append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
         sql.append("CREATE INDEX IF NOT EXISTS so_id ON ").
             append(StoreObject.TABLE).append('(').
                 append(StoreObject.TYPE.name).append(',').
                 append(StoreObject.ITEM.name).
+            append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
+        sql.append("CREATE INDEX IF NOT EXISTS up_tid ON ").
+            append(Update.TABLE).append('(').
+                append(Update.TASK.name).
+            append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
+        sql.append("CREATE INDEX IF NOT EXISTS up_pid ON ").
+            append(Update.TABLE).append('(').
+                append(Update.TAG.name).
             append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
@@ -87,6 +131,9 @@ public class Database extends AbstractDatabase {
     @Override
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SF_SWITCH_FALLTHROUGH")
     protected synchronized boolean onUpgrade(int oldVersion, int newVersion) {
+        if(newVersion < oldVersion)
+            return true;
+
         SqlConstructorVisitor visitor = new SqlConstructorVisitor();
         switch(oldVersion) {
         case 1: {
@@ -100,24 +147,9 @@ public class Database extends AbstractDatabase {
                         property.accept(visitor, null));
         }
         case 3: {
-            StringBuilder sql = new StringBuilder();
-            sql.append("CREATE TABLE IF NOT EXISTS ").append(StoreObject.TABLE.name).append('(').
-            append(AbstractModel.ID_PROPERTY).append(" INTEGER PRIMARY KEY AUTOINCREMENT");
-            for(Property<?> property : StoreObject.PROPERTIES) {
-                if(AbstractModel.ID_PROPERTY.name.equals(property.name))
-                    continue;
-                sql.append(',').append(property.accept(visitor, null));
-            }
-            sql.append(')');
-            database.execSQL(sql.toString());
-            sql.setLength(0);
+            database.execSQL(createTableSql(visitor, StoreObject.TABLE.name, StoreObject.PROPERTIES));
 
-            sql.append("CREATE INDEX IF NOT EXISTS so_id ON ").
-                append(StoreObject.TABLE).append('(').
-                    append(StoreObject.TYPE.name).append(',').
-                    append(StoreObject.ITEM.name).
-                append(')');
-            database.execSQL(sql.toString());
+            onCreateTables();
         }
         case 4: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
@@ -135,11 +167,62 @@ public class Database extends AbstractDatabase {
             database.execSQL("ALTER TABLE " + Metadata.TABLE.name + " ADD " +
                 Metadata.CREATION_DATE.accept(visitor, null));
         }
+        case 8: {
+            // not needed anymore
+        }
+        case 9: {
+            database.execSQL(createTableSql(visitor, Update.TABLE.name, Update.PROPERTIES));
+            onCreateTables();
+
+            for(Property<?> property : new Property<?>[] { Task.REMOTE_ID,
+                    Task.USER_ID, Task.USER, Task.COMMENT_COUNT })
+                database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
+                        property.accept(visitor, null));
+        }
+        case 10: {
+            for(Property<?> property : new Property<?>[] { Task.SHARED_WITH })
+                database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
+                        property.accept(visitor, null));
+        }
+        case 11: {
+            database.execSQL(createTableSql(visitor, TagData.TABLE.name, TagData.PROPERTIES));
+        }
+        case 12: {
+            database.execSQL("ALTER TABLE " + Update.TABLE.name + " ADD " +
+                    Update.TAG.accept(visitor, null));
+        }
+        case 13: {
+            database.execSQL("ALTER TABLE " + TagData.TABLE.name + " ADD " +
+                    TagData.MEMBERS.accept(visitor, null));
+            database.execSQL("ALTER TABLE " + TagData.TABLE.name + " ADD " +
+                    TagData.MEMBER_COUNT.accept(visitor, null));
+        }
 
         return true;
         }
 
         return false;
+    }
+
+    /**
+     * Create table generation SQL
+     * @param sql
+     * @param tableName
+     * @param properties
+     * @return
+     */
+    public String createTableSql(SqlConstructorVisitor visitor,
+            String tableName, Property<?>[] properties) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append('(').
+            append(AbstractModel.ID_PROPERTY).append(" INTEGER PRIMARY KEY AUTOINCREMENT");
+        for(Property<?> property : properties) {
+            if(AbstractModel.ID_PROPERTY.name.equals(property.name))
+                continue;
+            sql.append(',').append(property.accept(visitor, null));
+        }
+        sql.append(')');
+        return sql.toString();
     }
 
 }

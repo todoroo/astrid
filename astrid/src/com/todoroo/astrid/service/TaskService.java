@@ -125,6 +125,7 @@ public class TaskService {
                     }
                     if(OpencrxCoreUtils.OPENCRX_ACTIVITY_METADATA_KEY.equals(metadata.getValue(Metadata.KEY)))
                         metadata.setValue(OpencrxCoreUtils.ACTIVITY_ID, 0L);
+                    metadata.clearValue(Task.REMOTE_ID);
 
                     metadata.setValue(Metadata.TASK, newId);
                     metadata.clearValue(Metadata.ID);

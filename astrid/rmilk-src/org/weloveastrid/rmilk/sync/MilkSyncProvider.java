@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property;
@@ -50,11 +49,11 @@ import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
-import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.sync.SyncProvider;
+import com.todoroo.astrid.sync.SyncProviderUtilities;
 
 public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
 
@@ -84,47 +83,9 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
         milkMetadataService.clearMetadata();
     }
 
-    /**
-     * Deal with a synchronization exception. If requested, will show an error
-     * to the user (unless synchronization is happening in background)
-     *
-     * @param context
-     * @param tag
-     *            error tag
-     * @param e
-     *            exception
-     * @param showError
-     *            whether to display a dialog
-     */
     @Override
-    protected void handleException(String tag, Exception e, boolean showError) {
-        final Context context = ContextManager.getContext();
-        MilkUtilities.INSTANCE.setLastError(e.toString());
-
-        String message = null;
-
-        // occurs when application was closed
-        if(e instanceof IllegalStateException) {
-            Log.e(tag, "caught", e); //$NON-NLS-1$
-
-        // occurs when network error
-        } else if(e instanceof ServiceInternalException &&
-                ((ServiceInternalException)e).getEnclosedException() instanceof
-                IOException) {
-            Exception enclosedException = ((ServiceInternalException)e).getEnclosedException();
-            message = context.getString(R.string.rmilk_ioerror);
-            Log.e(tag, "ioexception", enclosedException); //$NON-NLS-1$
-        } else {
-            if(e instanceof ServiceInternalException)
-                e = ((ServiceInternalException)e).getEnclosedException();
-            if(e != null)
-                message = e.toString();
-            Log.e(tag, "unhandled", e); //$NON-NLS-1$
-        }
-
-        if(showError && context instanceof Activity && message != null) {
-            DialogUtilities.okDialog((Activity)context, message, null);
-        }
+    protected SyncProviderUtilities getUtilities() {
+        return MilkUtilities.INSTANCE;
     }
 
     // ----------------------------------------------------------------------

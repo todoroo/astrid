@@ -3,7 +3,7 @@ package com.todoroo.astrid.api;
 
 import android.content.ComponentName;
 import android.content.ContentValues;
-import android.os.Bundle;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,7 +12,7 @@ import com.todoroo.andlib.sql.QueryTemplate;
 public class FilterWithCustomIntent extends Filter {
 
     public ComponentName customTaskList = null;
-    public Bundle customExtras = null;
+    public Intent customExtras = null;
 
     protected FilterWithCustomIntent() {
         super();
@@ -53,7 +53,7 @@ public class FilterWithCustomIntent extends Filter {
     public void readFromParcel(Parcel source) {
         super.readFromParcel(source);
         customTaskList = source.readParcelable(ComponentName.class.getClassLoader());
-        customExtras = source.readParcelable(Bundle.class.getClassLoader());
+        customExtras = source.readParcelable(Intent.class.getClassLoader());
     }
 
     /**

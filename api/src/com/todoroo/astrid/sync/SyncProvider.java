@@ -17,7 +17,12 @@ import android.widget.Toast;
 
 import com.todoroo.andlib.data.Property.LongProperty;
 import com.todoroo.andlib.data.TodorooCursor;
+import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.service.DependencyInjectionService;
+import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.service.NotificationManager;
+import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.astrid.api.R;
 import com.todoroo.astrid.data.Task;
 
@@ -39,6 +44,11 @@ import com.todoroo.astrid.data.Task;
 public abstract class SyncProvider<TYPE extends SyncContainer> {
 
     // --- abstract methods - your services should implement these
+
+    /**
+     * @return sync utility instance
+     */
+    abstract protected SyncProviderUtilities getUtilities();
 
     /**
      * Perform log in (launching activity if necessary) and sync. This is
@@ -64,18 +74,6 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
      *         in the tray for a given id)
      */
     abstract protected int updateNotification(Context context, Notification n);
-
-    /**
-     * Deal with an exception that occurs during synchronization
-     *
-     * @param tag
-     *            short string description of where error occurred
-     * @param e
-     *            exception
-     * @param displayError
-     *            whether to display error to the user
-     */
-    abstract protected void handleException(String tag, Exception e, boolean displayError);
 
     /**
      * Create a task on the remote server.
@@ -138,7 +136,11 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
 
     private final Notification notification;
 
+    @Autowired protected ExceptionService exceptionService;
+
     public SyncProvider() {
+        DependencyInjectionService.getInstance().inject(this);
+
         // initialize notification
         int icon = android.R.drawable.stat_notify_sync;
         long when = System.currentTimeMillis();
@@ -325,6 +327,49 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
                 handleException("sync-local-created", e, false); //$NON-NLS-1$
             }
             write(local);
+        }
+    }
+
+    // --- exception handling
+
+    /**
+     * Deal with a synchronization exception. If requested, will show an error
+     * to the user (unless synchronization is happening in background)
+     *
+     * @param context
+     * @param tag
+     *            error tag
+     * @param e
+     *            exception
+     * @param showError
+     *            whether to display a dialog
+     */
+    protected void handleException(String tag, Exception e, boolean displayError) {
+        final Context context = ContextManager.getContext();
+        getUtilities().setLastError(e.toString());
+
+        String message = null;
+
+        // occurs when application was closed
+        if(e instanceof IllegalStateException) {
+            exceptionService.reportError(tag + "-caught", e); //$NON-NLS-1$
+        }
+
+        // occurs when network error
+        else if(e instanceof IOException) {
+            exceptionService.reportError(tag + "-io", e); //$NON-NLS-1$
+            message = context.getString(R.string.SyP_ioerror);
+        }
+
+        // unhandled error
+        else {
+            message = context.getString(R.string.DLG_error, e.toString());
+            exceptionService.reportError(tag + "-unhandled", e); //$NON-NLS-1$
+        }
+
+        if(displayError && context instanceof Activity && message != null) {
+            DialogUtilities.okDialog((Activity)context,
+                    message, null);
         }
     }
 

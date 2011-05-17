@@ -29,7 +29,6 @@ import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.service.NotificationManager;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
-import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.ShortcutActivity;
 import com.todoroo.astrid.api.AstridApiConstants;
@@ -50,9 +49,9 @@ import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.sync.SyncContainer;
 import com.todoroo.astrid.sync.SyncProvider;
+import com.todoroo.astrid.sync.SyncProviderUtilities;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.utility.Constants;
-import com.todoroo.astrid.utility.Flags;
 
 @SuppressWarnings("nls")
 public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer> {
@@ -100,41 +99,9 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
         dataService.clearMetadata();
     }
 
-    /**
-     * Deal with a synchronization exception. If requested, will show an error
-     * to the user (unless synchronization is happening in background)
-     *
-     * @param context
-     * @param tag
-     *            error tag
-     * @param e
-     *            exception
-     * @param showError
-     *            whether to display a dialog
-     */
     @Override
-    protected void handleException(String tag, Exception e, boolean displayError) {
-        final Context context = ContextManager.getContext();
-        preferences.setLastError(e.toString());
-
-        String message = null;
-
-        // occurs when application was closed
-        if(e instanceof IllegalStateException) {
-            exceptionService.reportError(tag + "-caught", e); //$NON-NLS-1$
-
-            // occurs when network error
-        } else if(!(e instanceof ApiServiceException) && e instanceof IOException) {
-            message = context.getString(R.string.producteev_ioerror);
-        } else {
-            message = context.getString(R.string.DLG_error, e.toString());
-            exceptionService.reportError(tag + "-unhandled", e); //$NON-NLS-1$
-        }
-
-        if(displayError && context instanceof Activity && message != null) {
-            DialogUtilities.okDialog((Activity)context,
-                    message, null);
-        }
+    protected SyncProviderUtilities getUtilities() {
+        return ProducteevUtilities.INSTANCE;
     }
 
     // ----------------------------------------------------------------------
@@ -321,7 +288,6 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
             Preferences.setString(ProducteevUtilities.PREF_SERVER_LAST_ACTIVITY, lastActivityId);
 
             StatisticsService.reportEvent("pdv-sync-finished"); //$NON-NLS-1$
-            Flags.set(Flags.REFRESH);
         } catch (IllegalStateException e) {
         	// occurs when application was closed
         } catch (Exception e) {
