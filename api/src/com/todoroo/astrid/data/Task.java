@@ -153,6 +153,10 @@ public final class Task extends RemoteModel {
     public static final IntegerProperty COMMENT_COUNT = new IntegerProperty(
             TABLE, "commentCount");
 
+    /** Last Sync date */
+    public static final LongProperty LAST_SYNC = new LongProperty(
+            TABLE, "lastSync");
+
     /** List of all properties for this model */
     public static final Property<?>[] PROPERTIES = generateProperties(Task.class);
 
@@ -230,6 +234,7 @@ public final class Task extends RemoteModel {
         defaultValues.put(DETAILS.name, (String)null);
         defaultValues.put(DETAILS_DATE.name, 0);
 
+        defaultValues.put(LAST_SYNC.name, 0);
         defaultValues.put(REMOTE_ID.name, 0);
         defaultValues.put(USER_ID.name, 0);
         defaultValues.put(USER.name, "");

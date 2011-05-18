@@ -21,6 +21,7 @@ import com.todoroo.andlib.sql.Join;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.TaskDao;
+import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
@@ -73,7 +74,8 @@ public final class ActFmDataService {
      * @return
      */
     public TodorooCursor<Task> getLocallyCreated(Property<?>[] properties) {
-        return taskDao.query(Query.select(properties).where(Criterion.none));
+        return taskDao.query(Query.select(properties).where(Criterion.and(TaskCriteria.isActive(),
+                Task.REMOTE_ID.eq(0))));
     }
 
     /**
@@ -84,11 +86,12 @@ public final class ActFmDataService {
     public TodorooCursor<Task> getLocallyUpdated(Property<?>[] properties) {
         long lastSyncDate = actFmPreferenceService.getLastSyncDate();
         if(lastSyncDate == 0)
-            return taskDao.query(Query.select(Task.ID).where(Criterion.none));
+            return taskDao.query(Query.select(properties).where(Criterion.none));
         return
-            taskDao.query(Query.select(properties).join(METADATA_JOIN).
+            taskDao.query(Query.select(properties).
                     where(Criterion.and(Task.REMOTE_ID.gt(0),
-                            Task.MODIFICATION_DATE.gt(lastSyncDate))).groupBy(Task.ID));
+                            Task.MODIFICATION_DATE.gt(lastSyncDate),
+                            Task.LAST_SYNC.lt(lastSyncDate))).groupBy(Task.ID));
     }
 
     /**

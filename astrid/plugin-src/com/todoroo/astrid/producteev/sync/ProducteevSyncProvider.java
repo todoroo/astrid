@@ -453,7 +453,7 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
      * have changed.
      */
     @Override
-    protected void push(ProducteevTaskContainer local, ProducteevTaskContainer remote) throws IOException {
+    protected ProducteevTaskContainer push(ProducteevTaskContainer local, ProducteevTaskContainer remote) throws IOException {
         boolean remerge = false;
 
         long idTask = local.pdvTask.getValue(ProducteevTask.ID);
@@ -462,7 +462,7 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
 
         // if local is marked do not sync, handle accordingly
         if(idDashboard == ProducteevUtilities.DASHBOARD_NO_SYNC) {
-            return;
+            return local;
         }
 
         // fetch remote task for comparison
@@ -544,10 +544,9 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
                 local.task.setValue(Task.NOTES, "");
             }
 
+            remote = pull(local);
+            remote.task.setId(local.task.getId());
             if(remerge) {
-                remote = pull(local);
-                remote.task.setId(local.task.getId());
-
                 // transform local into remote
                 local.task = remote.task;
                 local.pdvTask.setValue(ProducteevTask.ID, remote.pdvTask.getValue(ProducteevTask.ID));
@@ -557,6 +556,8 @@ public class ProducteevSyncProvider extends SyncProvider<ProducteevTaskContainer
                 if(remote.pdvTask.containsNonNullValue(ProducteevTask.REPEATING_SETTING))
                     local.pdvTask.setValue(ProducteevTask.REPEATING_SETTING, remote.pdvTask.getValue(ProducteevTask.REPEATING_SETTING));
             }
+
+            return remote;
         } catch (JSONException e) {
             throw new ApiResponseParseException(e);
         }

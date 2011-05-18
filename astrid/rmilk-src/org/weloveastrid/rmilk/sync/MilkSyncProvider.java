@@ -370,7 +370,7 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
      * have changed.
      */
     @Override
-    protected void push(MilkTaskContainer local, MilkTaskContainer remote) throws IOException {
+    protected MilkTaskContainer push(MilkTaskContainer local, MilkTaskContainer remote) throws IOException {
         boolean remerge = false;
 
         // fetch remote task for comparison
@@ -453,10 +453,9 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
             }
         }
 
+        remote = pull(local);
+        remote.task.setId(local.task.getId());
         if(remerge) {
-            remote = pull(local);
-            remote.task.setId(local.task.getId());
-
             // transform local into remote
             local.task = remote.task;
             local.listId = remote.listId;
@@ -464,6 +463,8 @@ public class MilkSyncProvider extends SyncProvider<MilkTaskContainer> {
             local.repeating = remote.repeating;
             local.taskSeriesId = remote.taskSeriesId;
         }
+
+        return remote;
     }
 
     /** Create a task container for the given RtmTaskSeries */

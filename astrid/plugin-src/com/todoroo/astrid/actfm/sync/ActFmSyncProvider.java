@@ -36,7 +36,6 @@ import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.sync.SyncProvider;
 import com.todoroo.astrid.sync.SyncProviderUtilities;
-import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.utility.Constants;
 
 @SuppressWarnings("nls")
@@ -219,7 +218,7 @@ public class ActFmSyncProvider extends SyncProvider<ActFmTaskContainer> {
 
     @Override
     protected ActFmTaskContainer create(ActFmTaskContainer local) throws IOException {
-        throw new ActFmServiceException("this method is not implemented yet");
+        return push(local, null);
     }
 
     /** Create a task container for the given remote task
@@ -251,31 +250,23 @@ public class ActFmSyncProvider extends SyncProvider<ActFmTaskContainer> {
      * Send changes for the given Task across the wire.
      */
     @Override
-    protected void push(ActFmTaskContainer local, ActFmTaskContainer remote) throws IOException {
+    protected ActFmTaskContainer push(ActFmTaskContainer local, ActFmTaskContainer remote) throws IOException {
         long id = local.task.getValue(Task.REMOTE_ID);
 
-        ArrayList<String> tags = new ArrayList<String>();
-        for(Metadata item : local.metadata)
-            if(TagService.KEY.equals(item.getValue(Metadata.KEY)))
-                tags.add(item.getValue(TagService.TAG));
+        actFmSyncService.pushTaskOnSave(local.task, local.task.getDatabaseValues());
 
-        invoker.invoke("task_save",
-                "id", id,
-                "title", local.task.getValue(Task.TITLE),
-                "due", local.task.getValue(Task.DUE_DATE) / 1000L,
-                "has_due_time", local.task.hasDueTime() ? 1 : 0,
-                "completed", local.task.getValue(Task.DUE_DATE) / 1000L,
-                "notes", local.task.getValue(Task.NOTES),
-                "tags", tags);
-
-        for(Metadata item : local.metadata)
+        // push unsaved comments
+        for(Metadata item : local.metadata) {
             if(NoteMetadata.METADATA_KEY.equals(item.getValue(Metadata.KEY)))
                 if(TextUtils.isEmpty(item.getValue(NoteMetadata.EXT_ID))) {
-                    JSONObject result = invoker.invoke("comment_add",
+                    JSONObject comment = invoker.invoke("comment_add",
                             "task_id", id,
                             "message", item.getValue(NoteMetadata.BODY));
-                    item.setValue(NoteMetadata.EXT_ID, result.optString("id"));
+                    item.setValue(NoteMetadata.EXT_ID, comment.optString("id"));
                 }
+        }
+
+        return local;
     }
 
     // ----------------------------------------------------------------------

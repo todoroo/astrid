@@ -402,11 +402,10 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
             TaskCreator createdTask = l.createTask(local.task.getValue(Task.TITLE));
             createdTask.parentId(local.parentId);
             updateTaskHelper(local, null, createdTask);
+            return local;
         } catch (JSONException e) {
             throw new GoogleTasksException(e);
         }
-
-        return local;
     }
 
     private void updateTaskHelper(final GtasksTaskContainer local,
@@ -517,7 +516,7 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
      * have changed.
      */
     @Override
-    protected void push(GtasksTaskContainer local, GtasksTaskContainer remote) throws IOException {
+    protected GtasksTaskContainer push(GtasksTaskContainer local, GtasksTaskContainer remote) throws IOException {
         try {
             gtasksTaskListUpdater.updateParentAndSibling(local);
 
@@ -532,6 +531,8 @@ public class GtasksSyncProvider extends SyncProvider<GtasksTaskContainer> {
         } catch (JSONException e) {
             throw new GoogleTasksException(e);
         }
+
+        return pull(remote);
     }
 
     // ----------------------------------------------------------------------

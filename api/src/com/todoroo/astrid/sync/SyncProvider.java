@@ -80,19 +80,20 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
      *
      * @param task
      *            task to create
-     * @return task created on remote server
      */
     abstract protected TYPE create(TYPE task) throws IOException;
 
     /**
-     * Push variables from given task to the remote server.
+     * Push variables from given task to the remote server, and read the newly
+     * updated task.
      *
      * @param task
      *            task proxy to push
      * @param remoteTask
      *            remote task that we merged with. may be null
+     * @return task pulled on remote server
      */
-    abstract protected void push(TYPE task, TYPE remote) throws IOException;
+    abstract protected TYPE push(TYPE task, TYPE remote) throws IOException;
 
     /**
      * Fetch remote task. Used to re-read merged tasks
@@ -276,10 +277,10 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
                 int remoteIndex = matchTask((ArrayList<TYPE>)data.remoteUpdated, local);
                 if(remoteIndex != -1) {
                     TYPE remote = data.remoteUpdated.get(remoteIndex);
-                    push(local, remote);
+
+                    remote = push(local, remote);
 
                     // re-read remote task after merge (with local's title)
-                    remote = pull(local);
                     remote.task.setId(local.task.getId());
                     data.remoteUpdated.set(remoteIndex, remote);
                 } else {
@@ -313,10 +314,9 @@ public abstract class SyncProvider<TYPE extends SyncContainer> {
                     TYPE remote = data.remoteUpdated.get(remoteIndex);
 
                     transferIdentifiers(remote, local);
-                    push(local, remote);
+                    remote = push(local, remote);
 
                     // re-read remote task after merge, update remote task list
-                    remote = pull(remote);
                     remote.task.setId(local.task.getId());
                     data.remoteUpdated.set(remoteIndex, remote);
 

@@ -245,12 +245,14 @@ public final class ActFmSyncService {
         try {
             params.add("token"); params.add(token);
             JSONObject result = actFmInvoker.invoke("task_save", params.toArray(new Object[params.size()]));
-            if(newlyCreated) {
-                task.setValue(Task.REMOTE_ID, result.optLong("id"));
-                taskDao.saveExisting(task);
-            }
+            ArrayList<Metadata> metadata = new ArrayList<Metadata>();
+            JsonHelper.taskFromJson(result, task, metadata);
+            task.setValue(Task.LAST_SYNC, DateUtilities.now());
+            taskDao.saveExisting(task);
+        } catch (JSONException e) {
+            handleException("task-save-json", e);
         } catch (IOException e) {
-            handleException("task-save", e);
+            handleException("task-save-io", e);
         }
     }
 
