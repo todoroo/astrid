@@ -1,5 +1,6 @@
 package com.todoroo.astrid.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
@@ -74,7 +75,7 @@ public class ContactsAutoComplete extends AutoCompleteTextView {
     // --- cursor stuff
 
     private void setUpContacts() {
-        adapter = new ContactListAdapter(getContext(), null);
+        adapter = new ContactListAdapter((Activity) getContext(), null);
         adapter.setCompleteSharedTags(completeTags);
         setAdapter(adapter);
     }

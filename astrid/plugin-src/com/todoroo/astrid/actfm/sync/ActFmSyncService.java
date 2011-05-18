@@ -182,6 +182,8 @@ public final class ActFmSyncService {
 
         ArrayList<Object> params = new ArrayList<Object>();
 
+        System.err.println("PUSHN ON SAVE: " + task.getMergedValues());
+
         if(values.containsKey(Task.TITLE.name)) {
             params.add("title"); params.add(task.getValue(Task.TITLE));
         }

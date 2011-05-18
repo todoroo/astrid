@@ -1,5 +1,6 @@
 package com.todoroo.astrid.ui;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -32,6 +33,8 @@ public class ContactListAdapter extends CursorAdapter {
 
     @Autowired TagDataService tagDataService;
 
+    private final Activity activity;
+
     private static final String[] PEOPLE_PROJECTION = new String[] {
         People._ID,
         People.NAME,
@@ -40,9 +43,10 @@ public class ContactListAdapter extends CursorAdapter {
 
     private boolean completeSharedTags = false;
 
-    public ContactListAdapter(Context context, Cursor c) {
-        super(context, c);
-        mContent = context.getContentResolver();
+    public ContactListAdapter(Activity activity, Cursor c) {
+        super(activity, c);
+        this.activity = activity;
+        mContent = activity.getContentResolver();
         DependencyInjectionService.getInstance().inject(this);
     }
 
@@ -112,6 +116,7 @@ public class ContactListAdapter extends CursorAdapter {
         Cursor peopleCursor = mContent.query(Contacts.ContactMethods.CONTENT_EMAIL_URI,
                 PEOPLE_PROJECTION, buffer == null ? null : buffer.toString(), args,
                 Contacts.People.DEFAULT_SORT_ORDER);
+        activity.startManagingCursor(peopleCursor);
 
         if(!completeSharedTags)
             return peopleCursor;
@@ -122,6 +127,7 @@ public class ContactListAdapter extends CursorAdapter {
         Cursor tagCursor = tagDataService.query(Query.select(TagData.ID, TagData.NAME, TagData.PICTURE, TagData.THUMB).
                 where(Criterion.and(TagData.USER_ID.eq(0), TagData.MEMBER_COUNT.gt(0),
                         crit)).orderBy(Order.desc(TagData.NAME)));
+        activity.startManagingCursor(tagCursor);
 
         return new MergeCursor(new Cursor[] { tagCursor, peopleCursor });
     }
