@@ -263,7 +263,6 @@ public final class ActFmSyncService {
         pushTaskOnSave(task, task.getMergedValues());
     }
 
-
     /**
      * Send tagData changes to server
      * @param setValues
@@ -473,6 +472,20 @@ public final class ActFmSyncService {
         }, done, "updates:" + tagData.getId(), "tag_id", tagData.getValue(TagData.REMOTE_ID));
     }
 
+    // --- generic invokation
+
+    /** invoke authenticated method against the server */
+    public JSONObject invoke(String method, Object... getParameters) throws IOException,
+            ActFmServiceException {
+        if(!checkForToken())
+            throw new ActFmServiceException("not logged in");
+        Object[] parameters = new Object[getParameters.length + 2];
+        parameters[0] = "token";
+        parameters[1] = token;
+        for(int i = 0; i < getParameters.length; i++)
+            parameters[i+2] = getParameters[i];
+        return actFmInvoker.invoke(method, parameters);
+    }
 
     // --- helpers
 

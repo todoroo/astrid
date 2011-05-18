@@ -42,6 +42,7 @@ import com.facebook.android.Facebook;
 import com.facebook.android.FacebookError;
 import com.facebook.android.LoginButton;
 import com.facebook.android.Util;
+import com.timsu.astrid.C2DMReceiver;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
@@ -62,7 +63,6 @@ import com.todoroo.astrid.service.TaskService;
 public class ActFmLoginActivity extends Activity implements AuthListener {
 
     public static final String APP_ID = "183862944961271"; //$NON-NLS-1$
-
 
     @Autowired TaskService taskService;
     @Autowired ActFmPreferenceService actFmPreferenceService;
@@ -188,6 +188,8 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
                 Preferences.setString(ActFmPreferenceService.PREF_NAME, result.optString("name"));
                 Preferences.setString(ActFmPreferenceService.PREF_EMAIL, result.optString("email"));
                 Preferences.setString(ActFmPreferenceService.PREF_PICTURE, result.optString("picture"));
+
+                C2DMReceiver.register();
 
                 progressDialog.dismiss();
                 setResult(RESULT_OK);

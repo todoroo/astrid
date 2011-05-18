@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import com.timsu.astrid.C2DMReceiver;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
@@ -66,7 +67,7 @@ public class ActFmSyncProvider extends SyncProvider<ActFmTaskContainer> {
     public void signOut() {
         actFmPreferenceService.setToken(null);
         actFmPreferenceService.clearLastSyncDate();
-        // actFmDataService.clearMetadata();
+        C2DMReceiver.unregister();
     }
 
     // ----------------------------------------------------------------------
@@ -79,6 +80,7 @@ public class ActFmSyncProvider extends SyncProvider<ActFmTaskContainer> {
     @Override
     protected void initiateBackground() {
         try {
+            C2DMReceiver.register();
             String authToken = actFmPreferenceService.getToken();
             invoker = new ActFmInvoker(authToken);
 

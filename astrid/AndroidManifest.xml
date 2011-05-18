@@ -26,7 +26,9 @@
   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
   <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
   <!-- for task sharing -->
-  <uses-permission android:name="android.permission.READ_CONTACTS" />
+  <uses-permission android:name="android.permission.READ_CONTACTS" />  
+  <!-- for push notifications -->
+  <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
   <!-- ============================================== Exported Permissions = -->
 
@@ -51,6 +53,10 @@
               android:protectionLevel="normal"
               android:label="@string/write_permission_label" />
   <uses-permission android:name="com.todoroo.astrid.WRITE" />
+  <!-- for receiving C2D messages-->
+  <permission android:name="com.timsu.astrid.permission.C2D_MESSAGE" 
+              android:protectionLevel="signature" />
+  <uses-permission android:name="com.timsu.astrid.permission.C2D_MESSAGE" />
   
   <!-- ========================================================== Metadata = -->
 
@@ -432,6 +438,18 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
+    <receiver android:name="com.timsu.astrid.C2DMReceiver" permission="com.google.android.c2dm.permission.SEND">
+      <!-- Receive the actual message -->
+      <intent-filter>
+          <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+          <category android:name="com.timsu.astrid" />
+      </intent-filter>
+      <!-- Receive the registration id -->
+      <intent-filter>
+          <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+          <category android:name="com.timsu.astrid" />
+      </intent-filter>
+    </receiver>                  
                   
     <!-- timers -->
     <receiver android:name="com.todoroo.astrid.timers.TimerActionExposer">
