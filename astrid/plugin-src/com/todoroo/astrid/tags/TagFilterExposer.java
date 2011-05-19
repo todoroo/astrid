@@ -80,6 +80,7 @@ public class TagFilterExposer extends BroadcastReceiver {
                 newTagIntent(context, DeleteTagActivity.class, tag)
         };
         filter.customTaskList = new ComponentName(ContextManager.getContext(), TagViewActivity.class);
+        filter.countOverride = tag.count;
         Intent extras = new Intent();
         extras.putExtra(TagViewActivity.EXTRA_TAG_NAME, tag.tag);
         extras.putExtra(TagViewActivity.EXTRA_TAG_REMOTE_ID, tag.remoteId);
@@ -131,7 +132,8 @@ public class TagFilterExposer extends BroadcastReceiver {
         HashSet<String> tagNames = new HashSet<String>();
 
         // active tags
-        Tag[] myTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE, TaskCriteria.activeAndVisible());
+        Tag[] myTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE,
+                Criterion.and(TaskCriteria.notReadOnly(), TaskCriteria.activeAndVisible()));
         for(Tag tag : myTags)
             tagNames.add(tag.tag);
         if(myTags.length > 0)
@@ -177,7 +179,7 @@ public class TagFilterExposer extends BroadcastReceiver {
         return new FilterCategory(context.getString(name), filters);
     }
 
-    // --- tag maniupluation activities
+    // --- tag manipulation activities
 
     public abstract static class TagActivity extends Activity {
 

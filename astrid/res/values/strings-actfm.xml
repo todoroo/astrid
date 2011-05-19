@@ -46,6 +46,9 @@
   <!-- Tag Members: tag name label -->
   <string name="actfm_TVA_tag_label">Tag Name:</string>
 
+  <!-- Tag Members: tag owner label -->
+  <string name="actfm_TVA_tag_owner_label">Tag Owner:</string>
+
   <!-- Tag Members: team members label -->
   <string name="actfm_TVA_members_label">Team Members:</string>
 

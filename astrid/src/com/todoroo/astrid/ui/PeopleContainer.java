@@ -93,7 +93,8 @@ public class PeopleContainer extends LinearLayout {
                     addPerson(""); //$NON-NLS-1$
                 }
 
-                onAddNewPerson.textChanged(s.toString());
+                if(onAddNewPerson != null)
+                    onAddNewPerson.textChanged(s.toString());
             }
         });
 

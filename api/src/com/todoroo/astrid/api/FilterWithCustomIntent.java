@@ -11,8 +11,22 @@ import com.todoroo.andlib.sql.QueryTemplate;
 
 public class FilterWithCustomIntent extends Filter {
 
+    /**
+     * Custom activity name
+     */
     public ComponentName customTaskList = null;
+
+    /**
+     * Intent with extras set. Can be null
+     */
     public Intent customExtras = null;
+
+    /**
+     * Count override - if set, count will be displayed here instead of by
+     * executing the SQL command. Use when actual task count differs from what
+     * is in the database
+     */
+    public int countOverride = -1;
 
     protected FilterWithCustomIntent() {
         super();

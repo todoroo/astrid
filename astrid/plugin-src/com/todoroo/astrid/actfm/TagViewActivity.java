@@ -45,6 +45,7 @@ import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.adapter.UpdateAdapter;
@@ -55,6 +56,7 @@ import com.todoroo.astrid.data.Update;
 import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.ui.PeopleContainer;
+import com.todoroo.astrid.utility.Flags;
 
 public class TagViewActivity extends TaskListActivity implements OnTabChangeListener {
 
@@ -309,6 +311,19 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
     private void refreshMembersPage() {
         tagName.setText(tagData.getValue(TagData.NAME));
 
+        TextView ownerLabel = (TextView) findViewById(R.id.tag_owner);
+        try {
+            JSONObject owner = new JSONObject(tagData.getValue(TagData.USER));
+            if(tagData.getValue(TagData.USER_ID) == 0)
+                ownerLabel.setText(Preferences.getStringValue(ActFmPreferenceService.PREF_NAME));
+            else
+                ownerLabel.setText(owner.getString("name"));
+        } catch (JSONException e) {
+            Log.e("tag-view-activity", "json error refresh members", e);
+            ownerLabel.setText("<error>");
+            System.err.println(tagData.getValue(TagData.USER));
+        }
+
         tagMembers.removeAllViews();
         String peopleJson = tagData.getValue(TagData.MEMBERS);
         if(!TextUtils.isEmpty(peopleJson)) {
@@ -317,16 +332,21 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
                 for(int i = 0; i < people.length(); i++) {
                     JSONObject person = people.getJSONObject(i);
                     TextView textView = null;
-                    if(!TextUtils.isEmpty(person.optString("name")))
+
+                    if(person.getLong("id") == ActFmPreferenceService.userId())
+                        textView = tagMembers.addPerson(Preferences.getStringValue(ActFmPreferenceService.PREF_NAME));
+                    else if(!TextUtils.isEmpty(person.optString("name")))
                         textView = tagMembers.addPerson(person.getString("name"));
                     else if(!TextUtils.isEmpty(person.optString("email")))
                         textView = tagMembers.addPerson(person.getString("email"));
+
                     if(textView != null) {
                         textView.setTag(person);
                         textView.setEnabled(false);
                     }
                 }
             } catch (JSONException e) {
+                System.err.println(peopleJson);
                 Log.e("tag-view-activity", "json error refresh members", e);
             }
         }
@@ -430,6 +450,7 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
         JSONArray members = tagMembers.toJSONArray();
         tagData.setValue(TagData.MEMBERS, members.toString());
         tagData.setValue(TagData.MEMBER_COUNT, members.length());
+        Flags.set(Flags.TOAST_ON_SAVE);
         tagDataService.save(tagData);
 
         refreshMembersPage();
