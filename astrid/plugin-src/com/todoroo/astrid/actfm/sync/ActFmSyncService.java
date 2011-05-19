@@ -634,6 +634,7 @@ public final class ActFmSyncService {
          * @throws JSONException
          */
         public static void tagFromJson(JSONObject json, TagData model) throws JSONException {
+            model.clearValue(TagData.REMOTE_ID);
             model.setValue(TagData.REMOTE_ID, json.getLong("id"));
             model.setValue(TagData.NAME, json.getString("name"));
             readUser(json, model, TagData.USER_ID, TagData.USER);
@@ -665,6 +666,7 @@ public final class ActFmSyncService {
          */
         public static void taskFromJson(JSONObject json, Task model, ArrayList<Metadata> metadata) throws JSONException {
             metadata.clear();
+            model.clearValue(Task.REMOTE_ID);
             model.setValue(Task.REMOTE_ID, json.getLong("id"));
             readUser(json, model, Task.USER_ID, Task.USER);
             if(model.getValue(Task.USER_ID) != 0)

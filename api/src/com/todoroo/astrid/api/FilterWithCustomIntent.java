@@ -61,6 +61,7 @@ public class FilterWithCustomIntent extends Filter {
         super.writeToParcel(dest, flags);
         dest.writeParcelable(customTaskList, 0);
         dest.writeParcelable(customExtras, 0);
+        dest.writeInt(countOverride);
     }
 
     @Override
@@ -68,6 +69,7 @@ public class FilterWithCustomIntent extends Filter {
         super.readFromParcel(source);
         customTaskList = source.readParcelable(ComponentName.class.getClassLoader());
         customExtras = source.readParcelable(Intent.class.getClassLoader());
+        countOverride = source.readInt();
     }
 
     /**

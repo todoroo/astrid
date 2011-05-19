@@ -27,10 +27,10 @@ public class ActFmInvoker {
     private static final String APP_ID = "bf6170638298af8ed9a8c79995b1fc0f";
     private static final String APP_SECRET = "e389bfc82a0d932332f9a8bd8203735f";
 
-    /** production, deleteme */
-    /*private static final String URL = "http://astrid.com/api/";
+    /**  */
+    /* private static final String URL = "http://astrid.com/api/";
     private static final String APP_ID = "bf6170638298af8ed9a8c79995b1fc0f";
-    private static final String APP_SECRET = "d15d25c63323bddcaa48928dccac1207";*/
+    private static final String APP_SECRET = "d15d25c63323bddcaa48928dccac1207"; */
 
 
     public static final String PROVIDER_FACEBOOK = "facebook";

@@ -47,7 +47,8 @@ public final class ReminderService  {
         Task.REMINDER_FLAGS,
         Task.REMINDER_PERIOD,
         Task.REMINDER_LAST,
-        Task.REMINDER_SNOOZE
+        Task.REMINDER_SNOOZE,
+        Task.FLAGS
     };
 
     /** flag for due date reminder */
@@ -383,7 +384,9 @@ public final class ReminderService  {
      * @return todoroo cursor. PLEASE CLOSE THIS CURSOR!
      */
     private TodorooCursor<Task> getTasksWithReminders(Property<?>... properties) {
-        return taskDao.query(Query.select(properties).where(Criterion.and(TaskCriteria.isActive(),
+        return taskDao.query(Query.select(properties).where(Criterion.and(
+                TaskCriteria.isActive(),
+                TaskCriteria.notReadOnly(),
                 Criterion.or(Task.REMINDER_FLAGS.gt(0), Task.REMINDER_PERIOD.gt(0)))));
     }
 

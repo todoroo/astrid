@@ -51,6 +51,13 @@ public class TagDataService {
     }
 
     /**
+     * Delete a model
+     */
+    public void delete(long id) {
+        tagDataDao.delete(id);
+    }
+
+    /**
      *
      * @param properties
      * @param id id

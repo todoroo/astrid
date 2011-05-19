@@ -25,7 +25,7 @@ public class C2DMReceiver extends BroadcastReceiver {
 
     public static final String C2DM_SENDER = "c2dm@astrid.com"; //$NON-NLS-1$
 
-    private static final String PREF_REGISTRATION = "c2dm_reg";
+    private static final String PREF_REGISTRATION = "c2dm_key";
 
     @Autowired ActFmSyncService actFmSyncService;
 

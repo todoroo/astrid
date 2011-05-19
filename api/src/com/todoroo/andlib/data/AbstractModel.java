@@ -309,10 +309,8 @@ public abstract class AbstractModel implements Parcelable, Cloneable {
     public synchronized void clearValue(Property<?> property) {
         if(setValues != null && setValues.containsKey(property.name))
             setValues.remove(property.name);
-        else if(values != null && values.containsKey(property.name))
+        if(values != null && values.containsKey(property.name))
             values.remove(property.name);
-        else if(getDefaultValues().containsKey(property.name))
-            throw new IllegalArgumentException("Property has a default value"); //$NON-NLS-1$
     }
 
     /**
