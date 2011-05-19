@@ -313,13 +313,14 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
 
         TextView ownerLabel = (TextView) findViewById(R.id.tag_owner);
         try {
-            JSONObject owner = new JSONObject(tagData.getValue(TagData.USER));
-            if(tagData.getValue(TagData.USER_ID) == 0)
+            if(tagData.getValue(TagData.USER_ID) == 0) {
                 ownerLabel.setText(Preferences.getStringValue(ActFmPreferenceService.PREF_NAME));
-            else
+            } else {
+                JSONObject owner = new JSONObject(tagData.getValue(TagData.USER));
                 ownerLabel.setText(owner.getString("name"));
+            }
         } catch (JSONException e) {
-            Log.e("tag-view-activity", "json error refresh members", e);
+            Log.e("tag-view-activity", "json error refresh owner", e);
             ownerLabel.setText("<error>");
             System.err.println(tagData.getValue(TagData.USER));
         }
