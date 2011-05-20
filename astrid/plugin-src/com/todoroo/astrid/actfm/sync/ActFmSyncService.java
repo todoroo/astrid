@@ -204,8 +204,12 @@ public final class ActFmSyncService {
         if(values.containsKey(Task.RECURRENCE.name)) {
             params.add("repeat"); params.add(task.getValue(Task.RECURRENCE));
         }
-        if(values.containsKey(Task.USER_ID.name)) {
-            params.add("user_id"); params.add(task.getValue(Task.USER_ID));
+        if(values.containsKey(Task.USER_ID.name) && task.getValue(Task.USER_ID) >= 0) {
+            params.add("user_id");
+            if(task.getValue(Task.USER_ID) == 0)
+                params.add(ActFmPreferenceService.userId());
+            else
+                params.add(task.getValue(Task.USER_ID));
         }
         if(Flags.checkAndClear(Flags.TAGS_CHANGED) || newlyCreated) {
             TodorooCursor<Metadata> cursor = TagService.getInstance().getTags(task.getId());
@@ -604,7 +608,7 @@ public final class ActFmSyncService {
         public static void updateFromJson(JSONObject json, TagData tagData,
                 Update model) throws JSONException {
             model.setValue(Update.REMOTE_ID, json.getLong("id"));
-            readUser(json, model, Update.USER_ID, Update.USER);
+            readUser(json.getJSONObject("user"), model, Update.USER_ID, Update.USER);
             model.setValue(Update.ACTION, json.getString("action"));
             model.setValue(Update.ACTION_CODE, json.getString("action_code"));
             model.setValue(Update.TARGET_NAME, json.getString("target_name"));
@@ -614,16 +618,17 @@ public final class ActFmSyncService {
             model.setValue(Update.TAG, tagData.getId());
         }
 
-        protected static void readUser(JSONObject item, AbstractModel model, LongProperty idProperty,
+        public static void readUser(JSONObject user, AbstractModel model, LongProperty idProperty,
                 StringProperty userProperty) throws JSONException {
-            JSONObject user = item.getJSONObject("user");
             long id = user.getLong("id");
             if(id == ActFmPreferenceService.userId()) {
                 model.setValue(idProperty, 0L);
-                model.setValue(userProperty, "");
+                if(userProperty != null)
+                    model.setValue(userProperty, "");
             } else {
                 model.setValue(idProperty, id);
-                model.setValue(userProperty, user.toString());
+                if(userProperty != null)
+                    model.setValue(userProperty, user.toString());
             }
         }
 
@@ -637,7 +642,7 @@ public final class ActFmSyncService {
             model.clearValue(TagData.REMOTE_ID);
             model.setValue(TagData.REMOTE_ID, json.getLong("id"));
             model.setValue(TagData.NAME, json.getString("name"));
-            readUser(json, model, TagData.USER_ID, TagData.USER);
+            readUser(json.getJSONObject("user"), model, TagData.USER_ID, TagData.USER);
 
             if(json.has("picture"))
                 model.setValue(TagData.PICTURE, json.optString("picture", ""));
@@ -668,7 +673,8 @@ public final class ActFmSyncService {
             metadata.clear();
             model.clearValue(Task.REMOTE_ID);
             model.setValue(Task.REMOTE_ID, json.getLong("id"));
-            readUser(json, model, Task.USER_ID, Task.USER);
+            readUser(json.getJSONObject("user"), model, Task.USER_ID, Task.USER);
+            readUser(json.getJSONObject("creator"), model, Task.CREATOR_ID, null);
             if(model.getValue(Task.USER_ID) != 0)
                 model.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, true);
             model.setValue(Task.COMMENT_COUNT, json.getInt("comment_count"));

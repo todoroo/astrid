@@ -175,24 +175,28 @@ public final class ActFmDataService {
                 Criterion.or(TagData.REMOTE_ID.eq(tagObject.get("id")),
                         Criterion.and(TagData.REMOTE_ID.eq(0),
                         TagData.NAME.eq(tagObject.getString("name"))))));
-        cursor.moveToNext();
-        TagData tagData = new TagData();
-        if(!cursor.isAfterLast()) {
-            tagData.readFromCursor(cursor);
-            if(!tagData.getValue(TagData.NAME).equals(tagObject.getString("name")))
-                TagService.getInstance().rename(tagData.getValue(TagData.NAME), tagObject.getString("name"));
+        try {
             cursor.moveToNext();
-        }
-        ActFmSyncService.JsonHelper.tagFromJson(tagObject, tagData);
-        tagDataService.save(tagData);
+            TagData tagData = new TagData();
+            if(!cursor.isAfterLast()) {
+                tagData.readFromCursor(cursor);
+                if(!tagData.getValue(TagData.NAME).equals(tagObject.getString("name")))
+                    TagService.getInstance().rename(tagData.getValue(TagData.NAME), tagObject.getString("name"));
+                cursor.moveToNext();
+            }
+            ActFmSyncService.JsonHelper.tagFromJson(tagObject, tagData);
+            tagDataService.save(tagData);
 
-        // delete the rest
+            // delete the rest
 
-        for(; !cursor.isAfterLast(); cursor.moveToNext()) {
-            tagData.readFromCursor(cursor);
-            if(!tagData.getValue(TagData.NAME).equals(tagObject.getString("name")))
-                TagService.getInstance().rename(tagData.getValue(TagData.NAME), tagObject.getString("name"));
-            tagDataService.delete(tagData.getId());
+            for(; !cursor.isAfterLast(); cursor.moveToNext()) {
+                tagData.readFromCursor(cursor);
+                if(!tagData.getValue(TagData.NAME).equals(tagObject.getString("name")))
+                    TagService.getInstance().rename(tagData.getValue(TagData.NAME), tagObject.getString("name"));
+                tagDataService.delete(tagData.getId());
+            }
+        } finally {
+            cursor.close();
         }
     }
 

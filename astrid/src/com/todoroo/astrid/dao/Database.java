@@ -34,7 +34,7 @@ public class Database extends AbstractDatabase {
      * Database version number. This variable must be updated when database
      * tables are updated, as it determines whether a database needs updating.
      */
-    public static final int VERSION = 16;
+    public static final int VERSION = 17;
 
     /**
      * Database name (must be unique)
@@ -131,9 +131,6 @@ public class Database extends AbstractDatabase {
     @Override
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="SF_SWITCH_FALLTHROUGH")
     protected synchronized boolean onUpgrade(int oldVersion, int newVersion) {
-        if(newVersion < oldVersion)
-            return true;
-
         SqlConstructorVisitor visitor = new SqlConstructorVisitor();
         switch(oldVersion) {
         case 1: {
@@ -204,6 +201,10 @@ public class Database extends AbstractDatabase {
         case 15: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
                     Task.LAST_SYNC.accept(visitor, null));
+        }
+        case 16: {
+            database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
+                    Task.CREATOR_ID.accept(visitor, null));
         }
 
         return true;

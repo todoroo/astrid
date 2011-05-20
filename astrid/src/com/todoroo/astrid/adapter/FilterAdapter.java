@@ -34,7 +34,6 @@ import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterCategory;
 import com.todoroo.astrid.api.FilterListHeader;
 import com.todoroo.astrid.api.FilterListItem;
-import com.todoroo.astrid.api.FilterWithCustomIntent;
 import com.todoroo.astrid.service.TaskService;
 
 public class FilterAdapter extends BaseExpandableListAdapter {
@@ -108,12 +107,9 @@ public class FilterAdapter extends BaseExpandableListAdapter {
             @Override
             public void run() {
                 try {
-                    int size;
-                    if(filter instanceof FilterWithCustomIntent &&
-                            ((FilterWithCustomIntent)filter).countOverride > -1)
-                        size = ((FilterWithCustomIntent)filter).countOverride;
-                    else
-                        size = taskService.countTasks(filter);
+                    if(filter.listingTitle.matches(".* \\(\\d\\)$")) //$NON-NLS-1$
+                        return;
+                    int size = taskService.countTasks(filter);
                     filter.listingTitle = filter.listingTitle + (" (" + //$NON-NLS-1$
                         size + ")"); //$NON-NLS-1$
                     activity.runOnUiThread(new Runnable() {

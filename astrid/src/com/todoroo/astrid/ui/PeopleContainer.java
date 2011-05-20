@@ -166,19 +166,18 @@ public class PeopleContainer extends LinearLayout {
         if(textView.isEnabled() == false)
             return (JSONObject) textView.getTag();
 
-        String text = textView.getText().toString();
+        String text = textView.getText().toString().trim();
         if(text.length() == 0)
             return null;
 
         JSONObject user = new JSONObject();
-        int bracket= text.lastIndexOf('<');
+        int bracket = text.lastIndexOf('<');
         try {
             if(bracket > -1) {
                 user.put("name", text.substring(0, bracket - 1).trim());
                 user.put("email", text.substring(bracket + 1, text.length() - 1).trim());
             } else {
-                user.put("name", text.substring(0, bracket - 1).trim());
-                user.put("email", text.substring(bracket + 1, text.length() - 1).trim());
+                user.put("email", text);
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);

@@ -30,6 +30,7 @@ import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.astrid.actfm.sync.ActFmInvoker;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
+import com.todoroo.astrid.actfm.sync.ActFmSyncService.JsonHelper;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.data.Metadata;
@@ -90,7 +91,7 @@ public class EditPeopleActivity extends Activity {
 
         task = taskService.fetchById(
                 getIntent().getLongExtra(EXTRA_TASK_ID, 41L), Task.ID, Task.REMOTE_ID,
-                Task.TITLE, Task.USER, Task.USER_ID, Task.SHARED_WITH);
+                Task.TITLE, Task.USER, Task.USER_ID, Task.SHARED_WITH, Task.FLAGS);
         if(task == null) {
             finish();
             return;
@@ -119,8 +120,6 @@ public class EditPeopleActivity extends Activity {
                 assignedTo.setEnabled(false);
                 assignedTo.setVisibility(View.GONE);
             }
-
-            assignedTo.setEnabled(false); // temporary: disable assignment
 
             JSONObject sharedWith;
             if(task.getValue(Task.SHARED_WITH).length() > 0)
@@ -213,9 +212,11 @@ public class EditPeopleActivity extends Activity {
             if(userJson == null) {
                 task.setValue(Task.USER_ID, 0L);
                 task.setValue(Task.USER, "{}");
+                task.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, false);
             } else {
                 task.setValue(Task.USER_ID, -1L);
                 task.setValue(Task.USER, userJson.toString());
+                task.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, true);
             }
 
             ArrayList<Metadata> metadata = new ArrayList<Metadata>(nonSharedTags);
@@ -308,9 +309,11 @@ public class EditPeopleActivity extends Activity {
                     sharedWith.remove("p");
                     task.setValue(Task.SHARED_WITH, sharedWith.toString());
                     task.setValue(Task.DETAILS_DATE, 0L);
-                    taskService.save(task);
 
                     readTagData(result.getJSONArray("tags"));
+                    JsonHelper.readUser(result.getJSONObject("assignee"),
+                            task, Task.USER_ID, Task.USER);
+                    taskService.save(task);
 
                     int count = result.optInt("shared", 0);
                     final String toast = getString(R.string.actfm_EPA_emailed_toast,
@@ -365,7 +368,8 @@ public class EditPeopleActivity extends Activity {
     }
 
     @SuppressWarnings("nls")
-    protected Object[] buildSharingArgs(JSONArray emails, ArrayList<Metadata> tags) {
+    protected Object[] buildSharingArgs(JSONArray emails, ArrayList<Metadata>
+            tags) throws JSONException {
         ArrayList<Object> values = new ArrayList<Object>();
         long currentTaskID = task.getValue(Task.REMOTE_ID);
         values.add("id");
@@ -390,6 +394,16 @@ public class EditPeopleActivity extends Activity {
                 values.add(tag.getValue(TagService.TAG));
             }
         }
+
+        values.add("assignee");
+        if(task.getValue(Task.USER_ID) == 0) {
+            values.add("");
+        } else {
+            JSONObject user = new JSONObject(task.getValue(Task.USER));
+            values.add(user.getString("email"));
+        }
+
+
 
         String message = ((TextView) findViewById(R.id.message)).getText().toString();
         if(!TextUtils.isEmpty(message) && findViewById(R.id.share_additional).getVisibility() == View.VISIBLE) {

@@ -57,8 +57,9 @@ public class TagFilterExposer extends BroadcastReceiver {
 
     private TagService tagService;
 
+    @SuppressWarnings("nls")
     private Filter filterFromTag(Context context, Tag tag, Criterion criterion) {
-        String listTitle = tag.tag;
+        String listTitle = tag.tag + " (" + tag.count + ")";
         String title = context.getString(R.string.tag_FEx_name, tag.tag);
         QueryTemplate tagTemplate = tag.queryTemplate(criterion);
         ContentValues contentValues = new ContentValues();
@@ -80,10 +81,9 @@ public class TagFilterExposer extends BroadcastReceiver {
                 newTagIntent(context, DeleteTagActivity.class, tag)
         };
         filter.customTaskList = new ComponentName(ContextManager.getContext(), TagViewActivity.class);
-        filter.countOverride = tag.count;
-        Intent extras = new Intent();
-        extras.putExtra(TagViewActivity.EXTRA_TAG_NAME, tag.tag);
-        extras.putExtra(TagViewActivity.EXTRA_TAG_REMOTE_ID, tag.remoteId);
+        Bundle extras = new Bundle();
+        extras.putString(TagViewActivity.EXTRA_TAG_NAME, tag.tag);
+        extras.putLong(TagViewActivity.EXTRA_TAG_REMOTE_ID, tag.remoteId);
         filter.customExtras = extras;
 
         return filter;
@@ -163,8 +163,10 @@ public class TagFilterExposer extends BroadcastReceiver {
                 Criterion.and(TaskCriteria.notDeleted(), Criterion.not(TaskCriteria.activeAndVisible())));
         ArrayList<Tag> notListed = new ArrayList<Tag>();
         for(Tag tag : inactiveTags) {
-            if(!tagNames.contains(tag.tag))
+            if(!tagNames.contains(tag.tag)) {
                 notListed.add(tag);
+                tag.count = 0;
+            }
         }
         if(notListed.size() > 0)
             list.add(filterFromTags(notListed.toArray(new Tag[notListed.size()]),

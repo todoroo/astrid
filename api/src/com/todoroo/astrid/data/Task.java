@@ -145,7 +145,10 @@ public final class Task extends RemoteModel {
     public static final StringProperty USER = new StringProperty(
             TABLE, USER_JSON_PROPERTY_NAME);
 
-    /** Team Members (JSON) */
+    /** Creator user id */
+    public static final LongProperty CREATOR_ID = new LongProperty(
+            TABLE, USER_ID_PROPERTY_NAME);
+
     public static final StringProperty SHARED_WITH = new StringProperty(
             TABLE, "sharedWith");
 
