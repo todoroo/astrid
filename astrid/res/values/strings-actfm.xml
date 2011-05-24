@@ -102,6 +102,30 @@
   <!-- task sharing dialog: tag not found (%s => tag) -->
   <string name="actfm_EPA_invalid_tag">Tag Not Found: %s</string>
 
+  <!-- ========================================== edit profile activity == -->
+  
+  <!-- Profile: activity title -->
+  <string name="actfm_EPr_title">Your Astrid.com Profile</string>
+  
+  <!-- Profile: tag name label -->
+  <string name="actfm_EPr_name_label">Your Name:</string>
+  
+  <!-- Profile: e-mail container label -->
+  <string name="actfm_EPr_emails_label">E-mail Addresses:</string>
+  
+  <!-- Profile: e-mail dialog description -->
+  <string name="actfm_EPr_email_dialog">Add an e-mail address to 
+  connect tasks shared with other e-mail addresses to this account.</string>
+  
+  <!-- Profile: e-mail toast -->
+  <string name="actfm_EPr_email_added_toast">An e-mail has been sent to this e-mail</string>
+  
+  <!-- Profile: e-mail address is pending verification -->
+  <string name="actfm_EPr_email_pending">Pending Verification</string>
+  
+  <!-- Profile: re-send verification -->
+  <string name="actfm_EPr_email_resend">Resend?</string>
+
   <!-- ========================================= sharing login activity == -->
 
   <!-- share login: Title -->
