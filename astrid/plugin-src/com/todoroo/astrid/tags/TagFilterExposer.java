@@ -133,7 +133,7 @@ public class TagFilterExposer extends BroadcastReceiver {
 
         // active tags
         Tag[] myTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE,
-                Criterion.and(TaskCriteria.notReadOnly(), TaskCriteria.activeAndVisible()));
+                Criterion.and(TaskCriteria.ownedByMe(), TaskCriteria.activeAndVisible()));
         for(Tag tag : myTags)
             tagNames.add(tag.tag);
         if(myTags.length > 0)
@@ -141,16 +141,21 @@ public class TagFilterExposer extends BroadcastReceiver {
 
         // find all tag data not in active tag list
         TodorooCursor<TagData> cursor = tagDataService.query(Query.select(
-                TagData.NAME, TagData.TASK_COUNT, TagData.REMOTE_ID).where(TagData.TASK_COUNT.gt(0)));
+                TagData.NAME, TagData.TASK_COUNT, TagData.REMOTE_ID));
+        ArrayList<Tag> notListed = new ArrayList<Tag>();
         try {
             ArrayList<Tag> sharedTags = new ArrayList<Tag>();
             for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                String tag = cursor.get(TagData.NAME);
-                if(tagNames.contains(tag))
+                String tagName = cursor.get(TagData.NAME);
+                if(tagNames.contains(tagName))
                     continue;
-                sharedTags.add(new Tag(tag, cursor.get(TagData.TASK_COUNT),
-                        cursor.get(TagData.REMOTE_ID)));
-                tagNames.add(tag);
+                Tag tag = new Tag(tagName, cursor.get(TagData.TASK_COUNT),
+                        cursor.get(TagData.REMOTE_ID));
+                if(tag.count > 0)
+                    sharedTags.add(tag);
+                else
+                    notListed.add(tag);
+                tagNames.add(tagName);
             }
             if(sharedTags.size() > 0)
                 list.add(filterFromTags(sharedTags.toArray(new Tag[sharedTags.size()]), R.string.tag_FEx_category_shared));
@@ -161,7 +166,6 @@ public class TagFilterExposer extends BroadcastReceiver {
         // find inactive tags, intersect tag list
         Tag[] inactiveTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_ALPHA,
                 Criterion.and(TaskCriteria.notDeleted(), Criterion.not(TaskCriteria.activeAndVisible())));
-        ArrayList<Tag> notListed = new ArrayList<Tag>();
         for(Tag tag : inactiveTags) {
             if(!tagNames.contains(tag.tag)) {
                 notListed.add(tag);

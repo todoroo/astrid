@@ -121,6 +121,9 @@ public final class TagData extends RemoteModel {
     /** whether user should not be notified of tag activity */
     public static final int FLAG_SILENT = 1 << 1;
 
+    /** whether tag is emergent */
+    public static final int FLAG_EMERGENT = 1 << 2;
+
     // --- defaults
 
     /** Default values container */

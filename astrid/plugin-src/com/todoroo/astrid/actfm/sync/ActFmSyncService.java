@@ -154,6 +154,8 @@ public final class ActFmSyncService {
                 return;
             params.add("task"); params.add(task.getValue(Task.REMOTE_ID));
         }
+        if(!checkForToken())
+            return;
 
         try {
             params.add("token"); params.add(token);
@@ -236,7 +238,7 @@ public final class ActFmSyncService {
             }
         }
 
-        if(params.size() == 0)
+        if(params.size() == 0 || !checkForToken())
             return;
 
         System.err.println("PUSHN ON SAVE: " + task.getMergedValues());
@@ -319,7 +321,7 @@ public final class ActFmSyncService {
             }
         }
 
-        if(params.size() == 0)
+        if(params.size() == 0 || !checkForToken())
             return;
 
         if(!newlyCreated) {
@@ -348,9 +350,11 @@ public final class ActFmSyncService {
             @Override
             public void run() {
                 if(finalSuccess)
-                    Toast.makeText(ContextManager.getContext(), R.string.actfm_toast_success, Toast.LENGTH_LONG);
+                    Toast.makeText(ContextManager.getContext(),
+                            R.string.actfm_toast_success, Toast.LENGTH_LONG).show();
                 else
-                    Toast.makeText(ContextManager.getContext(), R.string.actfm_toast_error, Toast.LENGTH_LONG);
+                    Toast.makeText(ContextManager.getContext(),
+                            R.string.actfm_toast_error, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -652,6 +656,9 @@ public final class ActFmSyncService {
             if(json.has("is_silent"))
                 model.setFlag(TagData.FLAGS, TagData.FLAG_SILENT,json.getBoolean("is_silent"));
 
+            if(json.has("emergent"))
+                model.setFlag(TagData.FLAGS, TagData.FLAG_EMERGENT,json.getBoolean("emergent"));
+
             if(json.has("members")) {
                 JSONArray members = json.getJSONArray("members");
                 model.setValue(TagData.MEMBERS, members.toString());
@@ -675,8 +682,6 @@ public final class ActFmSyncService {
             model.setValue(Task.REMOTE_ID, json.getLong("id"));
             readUser(json.getJSONObject("user"), model, Task.USER_ID, Task.USER);
             readUser(json.getJSONObject("creator"), model, Task.CREATOR_ID, null);
-            if(model.getValue(Task.USER_ID) != 0)
-                model.setFlag(Task.FLAGS, Task.FLAG_IS_READONLY, true);
             model.setValue(Task.COMMENT_COUNT, json.getInt("comment_count"));
             model.setValue(Task.TITLE, json.getString("title"));
             model.setValue(Task.IMPORTANCE, json.getInt("importance"));

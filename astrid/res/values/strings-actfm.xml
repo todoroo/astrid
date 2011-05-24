@@ -49,6 +49,9 @@
   <!-- Tag Members: tag owner label -->
   <string name="actfm_TVA_tag_owner_label">Tag Owner:</string>
 
+  <!-- Tag Members: tag owner value when there is no owner -->
+  <string name="actfm_TVA_tag_owner_none">none</string>
+
   <!-- Tag Members: team members label -->
   <string name="actfm_TVA_members_label">Team Members:</string>
 
@@ -89,6 +92,9 @@
 
   <!-- task sharing dialog: # of e-mails sent (%s => # people plural string) -->
   <string name="actfm_EPA_emailed_toast">Task shared with %s</string>
+
+  <!-- task sharing dialog: edit people settings saved -->
+  <string name="actfm_EPA_saved_toast">People Settings Saved</string>
 
   <!-- task sharing dialog: invalid email (%s => email) -->
   <string name="actfm_EPA_invalid_email">Invalid E-mail: %s</string>

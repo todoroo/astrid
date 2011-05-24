@@ -47,7 +47,7 @@ public final class CoreFilterExposer extends BroadcastReceiver {
         Filter recent = new Filter(r.getString(R.string.BFE_Recent),
                 r.getString(R.string.BFE_Recent),
                 new QueryTemplate().where(
-                        TaskCriteria.notReadOnly()).orderBy(
+                        TaskCriteria.ownedByMe()).orderBy(
                                 Order.desc(Task.MODIFICATION_DATE)).limit(15),
                 null);
         recent.listingIcon = ((BitmapDrawable)r.getDrawable(R.drawable.tango_new)).getBitmap();
@@ -70,7 +70,7 @@ public final class CoreFilterExposer extends BroadcastReceiver {
         Filter inbox = new Filter(r.getString(R.string.BFE_Active), r.getString(R.string.BFE_Active),
                 new QueryTemplate().where(
                         Criterion.and(TaskCriteria.isActive(), TaskCriteria.isVisible(),
-                                TaskCriteria.notReadOnly(),
+                                TaskCriteria.ownedByMe(),
                                 Criterion.not(Task.ID.in(Query.select(Metadata.TASK).from(Metadata.TABLE).where(
                                         Criterion.and(MetadataCriteria.withKey(TagService.KEY),
                                                 TagService.TAG.like("x_%", "x"))))))), //$NON-NLS-1$ //$NON-NLS-2$

@@ -62,9 +62,10 @@ public class TaskDao extends DatabaseDao<Task> {
     	}
 
     	/** Check if a given task belongs to someone else & is read-only */
-    	public static Criterion notReadOnly() {
-             return Field.field(Task.FLAGS.name+ " & " + //$NON-NLS-1$
-                     Task.FLAG_IS_READONLY).eq(0);
+        public static Criterion ownedByMe() {
+             return Criterion.and(Field.field(Task.FLAGS.name+ " & " + //$NON-NLS-1$
+                     Task.FLAG_IS_READONLY).eq(0),
+                     Task.USER_ID.eq(0));
     	}
 
     	/** @return tasks that were not deleted */

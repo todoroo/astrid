@@ -49,6 +49,8 @@ public class EditPeopleActivity extends Activity {
 
     public static final String EXTRA_TASK_ID = "task"; //$NON-NLS-1$
 
+    private static final int REQUEST_LOG_IN = 0;
+
     private Task task;
 
     private final ArrayList<Metadata> nonSharedTags = new ArrayList<Metadata>();
@@ -205,6 +207,12 @@ public class EditPeopleActivity extends Activity {
     /** Save sharing settings */
     @SuppressWarnings("nls")
     private void save() {
+        if(!actFmPreferenceService.isLoggedIn()) {
+            startActivityForResult(new Intent(this, ActFmLoginActivity.class),
+                    REQUEST_LOG_IN);
+            return;
+        }
+
         setResult(RESULT_OK);
         Flags.set(Flags.REFRESH);
         try {
@@ -300,8 +308,11 @@ public class EditPeopleActivity extends Activity {
             public void run() {
                 ActFmInvoker invoker = new ActFmInvoker(actFmPreferenceService.getToken());
                 try {
-                    if(task.getValue(Task.REMOTE_ID) == 0)
+                    if(task.getValue(Task.REMOTE_ID) == 0) {
                         actFmSyncService.pushTask(task.getId());
+                        task.setValue(Task.REMOTE_ID, taskService.fetchById(task.getId(),
+                                Task.REMOTE_ID).getValue(Task.REMOTE_ID));
+                    }
 
                     Object[] args = buildSharingArgs(emails, metadata);
                     JSONObject result = invoker.invoke("task_share", args);
@@ -316,15 +327,19 @@ public class EditPeopleActivity extends Activity {
                     taskService.save(task);
 
                     int count = result.optInt("shared", 0);
-                    final String toast = getString(R.string.actfm_EPA_emailed_toast,
+                    final String toast;
+                    if(count > 0)
+                        toast = getString(R.string.actfm_EPA_emailed_toast,
                             getResources().getQuantityString(R.plurals.Npeople, count, count));
+                    else
+                        toast = getString(R.string.actfm_EPA_saved_toast);
 
                     Intent broadcastIntent = new Intent(AstridApiConstants.BROADCAST_EVENT_REFRESH);
                     ContextManager.getContext().sendBroadcast(broadcastIntent, AstridApiConstants.PERMISSION_READ);
 
                     runOnUiThread(new Runnable() {
                         public void run() {
-                            Toast.makeText(EditPeopleActivity.this, toast, Toast.LENGTH_LONG);
+                            Toast.makeText(EditPeopleActivity.this, toast, Toast.LENGTH_LONG).show();
                             finish();
                         }
                     });
@@ -418,5 +433,16 @@ public class EditPeopleActivity extends Activity {
         }
 
         return values.toArray(new Object[values.size()]);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_LOG_IN) {
+            if(resultCode == RESULT_OK)
+                save();
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

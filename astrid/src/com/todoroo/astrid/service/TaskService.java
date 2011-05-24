@@ -248,7 +248,7 @@ public class TaskService {
      */
     public int clearDetails(Criterion criterion) {
         ContentValues values = new ContentValues();
-        values.put(Task.DETAILS.name, (String) null);
+        values.put(Task.DETAILS_DATE.name, 0);
         return taskDao.updateMultiple(values, criterion);
     }
 

@@ -326,6 +326,15 @@ public abstract class AbstractModel implements Parcelable, Cloneable {
             setValue(property, getValue(property) & ~flag);
     }
 
+    /**
+     * Gets  the state of the given flag on the given property
+     * @param property
+     * @param flag
+     */
+    public boolean getFlag(IntegerProperty property, int flag) {
+        return (getValue(property) & flag) > 0;
+    }
+
     // --- property management
 
     /**

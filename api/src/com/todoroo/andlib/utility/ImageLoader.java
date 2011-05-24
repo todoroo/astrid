@@ -11,6 +11,7 @@ import java.util.Stack;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -87,13 +88,12 @@ public class ImageLoader {
     }
 
     private Uri getUri(String url) {
-        if (url != "") { //$NON-NLS-1$
+        if(!TextUtils.isEmpty(url) && url.contains("://")) { //$NON-NLS-1$
             // identify images by hashcode. Not a perfect solution.
             String filename = String.valueOf(url.hashCode());
             File f = new File(cacheDir, filename);
 
             // from SD cache
-
             if (f.exists()) {
                 Uri b = Uri.fromFile(f);
                 System.out.println(f.toString());
@@ -198,6 +198,9 @@ public class ImageLoader {
         }
 
         public void run() {
+            if(uri == null)
+                return;
+
             File f = new File(uri.getPath());
             if (f.exists()) {
                 imageView.setImageURI(Uri.parse(f.toString()));

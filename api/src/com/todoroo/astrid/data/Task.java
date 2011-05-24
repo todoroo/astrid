@@ -147,7 +147,7 @@ public final class Task extends RemoteModel {
 
     /** Creator user id */
     public static final LongProperty CREATOR_ID = new LongProperty(
-            TABLE, USER_ID_PROPERTY_NAME);
+            TABLE, "creatorId");
 
     public static final StringProperty SHARED_WITH = new StringProperty(
             TABLE, "sharedWith");
