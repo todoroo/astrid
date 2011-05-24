@@ -57,8 +57,9 @@ public class TagFilterExposer extends BroadcastReceiver {
 
     private TagService tagService;
 
+    /** Create filter from new tag object */
     @SuppressWarnings("nls")
-    private Filter filterFromTag(Context context, Tag tag, Criterion criterion) {
+    public static Filter filterFromTag(Context context, Tag tag, Criterion criterion) {
         String listTitle = tag.tag + " (" + tag.count + ")";
         String title = context.getString(R.string.tag_FEx_name, tag.tag);
         QueryTemplate tagTemplate = tag.queryTemplate(criterion);
@@ -89,7 +90,15 @@ public class TagFilterExposer extends BroadcastReceiver {
         return filter;
     }
 
-    private Intent newTagIntent(Context context, Class<? extends Activity> activity, Tag tag) {
+    /** Create a filter from tag data object */
+    public static Filter filterFromTagData(Context context, TagData tagData) {
+        Tag tag = new Tag(tagData.getValue(TagData.NAME),
+                tagData.getValue(TagData.TASK_COUNT),
+                tagData.getValue(TagData.REMOTE_ID));
+        return filterFromTag(context, tag, TaskCriteria.activeAndVisible());
+    }
+
+    private static Intent newTagIntent(Context context, Class<? extends Activity> activity, Tag tag) {
         Intent ret = new Intent(context, activity);
         ret.putExtra(TAG, tag.tag);
         return ret;
