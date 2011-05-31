@@ -48,6 +48,7 @@ import com.todoroo.astrid.api.TextInputCriterion;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 
 /**
  * Activity that allows users to build custom filters
@@ -399,7 +400,7 @@ public class CustomFilterActivity extends ListActivity {
         // view
         Filter filter = new Filter(title, title, sql.toString(), values);
         Intent taskListActivity = new Intent(this, TaskListActivity.class);
-        taskListActivity.putExtra(TaskListActivity.TOKEN_FILTER, filter);
+        taskListActivity.putExtra(TaskListFragment.TOKEN_FILTER, filter);
         startActivity(taskListActivity);
     }
 

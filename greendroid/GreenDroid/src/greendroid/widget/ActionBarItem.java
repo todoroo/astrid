@@ -23,7 +23,7 @@ import android.view.View;
 import com.cyrilmottier.android.greendroid.R;
 
 /**
- * Base class representing an {@link ActionBarItem} used in {@link ActionBar}s.
+ * Base class representing an {@link ActionBarItem} used in {@link GDActionBar}s.
  * The base implementation exposes a single Drawable as well as a content
  * description.
  * 
@@ -67,13 +67,13 @@ public abstract class ActionBarItem {
     protected View mItemView;
 
     protected Context mContext;
-    protected ActionBar mActionBar;
+    protected GDActionBar mActionBar;
 
     private int mItemId;
 
-    void setActionBar(ActionBar actionBar) {
-        mContext = actionBar.getContext();
-        mActionBar = actionBar;
+    void setActionBar(GDActionBar gDActionBar) {
+        mContext = gDActionBar.getContext();
+        mActionBar = gDActionBar;
     }
 
     public Drawable getDrawable() {
@@ -142,7 +142,7 @@ public abstract class ActionBarItem {
         return mItemId;
     }
 
-    static ActionBarItem createWithType(ActionBar actionBar, ActionBarItem.Type type) {
+    static ActionBarItem createWithType(GDActionBar gDActionBar, ActionBarItem.Type type) {
 
         int drawableId = 0;
         int descriptionId = 0;
@@ -179,8 +179,8 @@ public abstract class ActionBarItem {
                 break;
 
             case Refresh:
-                return actionBar.newActionBarItem(LoaderActionBarItem.class)
-                        .setDrawable(new ActionBarDrawable(actionBar.getResources(), R.drawable.gd_action_bar_refresh))
+                return gDActionBar.newActionBarItem(LoaderActionBarItem.class)
+                        .setDrawable(new ActionBarDrawable(gDActionBar.getResources(), R.drawable.gd_action_bar_refresh))
                         .setContentDescription(R.string.gd_refresh);
 
             case TakePhoto:
@@ -288,9 +288,9 @@ public abstract class ActionBarItem {
                 return null;
         }
 
-        final Drawable d = new ActionBarDrawable(actionBar.getResources(), drawableId);
+        final Drawable d = new ActionBarDrawable(gDActionBar.getResources(), drawableId);
 
-        return actionBar.newActionBarItem(NormalActionBarItem.class).setDrawable(d)
+        return gDActionBar.newActionBarItem(NormalActionBarItem.class).setDrawable(d)
                 .setContentDescription(descriptionId);
     }
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 
 /**
  * @author joshuagross
@@ -19,7 +20,7 @@ public final class ShareLinkActivity extends TaskListActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent callerIntent = getIntent();
@@ -27,11 +28,11 @@ public final class ShareLinkActivity extends TaskListActivity {
         String subject = callerIntent.getStringExtra(Intent.EXTRA_SUBJECT);
         if(subject == null)
             subject = "";
-        Task task = quickAddTask(subject, false);
+        Task task = tasklistFragment.quickAddTask(subject, false);
         task.setValue(Task.NOTES, callerIntent.getStringExtra(Intent.EXTRA_TEXT));
-        taskService.save(task);
+        tasklistFragment.getTaskService().save(task);
         Intent intent = new Intent(this, TaskEditActivity.class);
         intent.putExtra(TaskEditActivity.TOKEN_ID, task.getId());
-        startActivityForResult(intent, ACTIVITY_EDIT_TASK);
+        startActivityForResult(intent, TaskListFragment.ACTIVITY_EDIT_TASK);
     }
 }

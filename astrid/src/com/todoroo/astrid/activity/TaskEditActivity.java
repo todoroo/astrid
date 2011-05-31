@@ -75,6 +75,7 @@ import com.todoroo.astrid.alarms.AlarmControlSet;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.gcal.GCalControlSet;
 import com.todoroo.astrid.opencrx.OpencrxControlSet;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
@@ -406,7 +407,7 @@ public final class TaskEditActivity extends TabActivity {
             } catch (Exception e) {
                 // oops, can't serialize
             }
-            model = TaskListActivity.createWithValues(values, null, taskService, metadataService);
+            model = TaskListFragment.createWithValues(values, null, taskService, metadataService);
         }
 
         if(model.getValue(Task.TITLE).length() == 0) {

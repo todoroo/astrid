@@ -48,6 +48,7 @@ import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.core.PluginServices;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.repeats.RepeatControlSet;
 import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.ui.NumberPicker;
@@ -94,7 +95,7 @@ public class NotificationActivity extends TaskListActivity implements OnTimeSetL
                 getString(R.string.rmd_NoA_filter),
                 new QueryTemplate().where(TaskCriteria.byId(taskId)),
                 null);
-        intent.putExtra(TaskListActivity.TOKEN_FILTER, itemFilter);
+        intent.putExtra(TaskListFragment.TOKEN_FILTER, itemFilter);
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.widget.ListView;
@@ -19,13 +20,13 @@ import com.todoroo.astrid.data.Task;
 
 abstract public class TaskAdapterAddOnManager<TYPE> {
 
-    private final ListActivity activity;
+    private final Activity activity;
 
     /**
      * @param taskAdapter
      */
-    protected TaskAdapterAddOnManager(ListActivity activity) {
-        this.activity = activity;
+    protected TaskAdapterAddOnManager(Activity activity2) {
+        this.activity = activity2;
     }
 
     private final Map<Long, ArrayList<TYPE>> cache =
@@ -70,15 +71,17 @@ abstract public class TaskAdapterAddOnManager<TYPE> {
 
         Collection<TYPE> cacheList = addIfNotExists(taskId, addOn, item);
         if(cacheList != null) {
-            ListView listView = activity.getListView();
-            // update view if it is visible
-            int length = listView.getChildCount();
-            for(int i = 0; i < length; i++) {
-                ViewHolder viewHolder = (ViewHolder) listView.getChildAt(i).getTag();
-                if(viewHolder == null || viewHolder.task.getId() != taskId)
-                    continue;
-                draw(viewHolder, taskId, cacheList);
-                break;
+            if (activity instanceof ListActivity) {
+                ListView listView = ((ListActivity) activity).getListView();
+                // update view if it is visible
+                int length = listView.getChildCount();
+                for(int i = 0; i < length; i++) {
+                    ViewHolder viewHolder = (ViewHolder) listView.getChildAt(i).getTag();
+                    if(viewHolder == null || viewHolder.task.getId() != taskId)
+                        continue;
+                    draw(viewHolder, taskId, cacheList);
+                    break;
+                }
             }
         }
     }

@@ -104,8 +104,9 @@ public final class UpgradeService {
 
                                 // display changelog
                                 showChangeLog(context, from);
-                                if(context instanceof TaskListActivity)
-                                    ((TaskListActivity)context).loadTaskListContent(true);
+                                if(context instanceof TaskListActivity &&
+                                        ((TaskListActivity)context).getTasklistFragment() != null)
+                                    ((TaskListActivity)context).getTasklistFragment().loadTaskListContent(true);
                             }
                         });
                     }

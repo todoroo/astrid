@@ -32,6 +32,7 @@ import com.todoroo.astrid.core.CoreFilterExposer;
 import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.utility.AstridPreferences;
@@ -205,7 +206,7 @@ public class TasksWidget extends AppWidgetProvider {
             Intent listIntent = new Intent(context, TaskListActivity.class);
             listIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             if(filter != null) {
-                listIntent.putExtra(TaskListActivity.TOKEN_FILTER, filter);
+                listIntent.putExtra(TaskListFragment.TOKEN_FILTER, filter);
                 listIntent.setType(filter.sqlQuery);
             }
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,

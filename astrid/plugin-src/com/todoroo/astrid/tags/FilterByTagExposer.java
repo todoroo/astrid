@@ -29,6 +29,7 @@ import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.TaskAction;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
+import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.tags.TagService.Tag;
 
 public class FilterByTagExposer extends BroadcastReceiver {
@@ -107,7 +108,7 @@ public class FilterByTagExposer extends BroadcastReceiver {
                         tagTemplate, contentValues);
                 Intent tagIntent = new Intent(ContextManager.getContext(),
                         TaskListActivity.class);
-                tagIntent.putExtra(TaskListActivity.TOKEN_FILTER, tagFilter);
+                tagIntent.putExtra(TaskListFragment.TOKEN_FILTER, tagFilter);
 
                 ContextManager.getContext().startActivity(tagIntent);
                 AndroidUtilities.callApiMethod(5,

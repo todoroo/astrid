@@ -18,11 +18,11 @@ package greendroid.app;
 import com.cyrilmottier.android.greendroid.R;
 
 import greendroid.util.Config;
-import greendroid.widget.ActionBar;
+import greendroid.widget.GDActionBar;
 import greendroid.widget.ActionBarHost;
 import greendroid.widget.ActionBarItem;
-import greendroid.widget.ActionBar.OnActionBarListener;
-import greendroid.widget.ActionBar.Type;
+import greendroid.widget.GDActionBar.OnActionBarListener;
+import greendroid.widget.GDActionBar.Type;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -37,8 +37,8 @@ import android.widget.FrameLayout;
 /**
  * <p>
  * An {@link GDActivity} is a regular Activity that always hosts an
- * {@link ActionBar}. It is extremely simple to use as you have nothing
- * particular to do. Indeed, the ActionBar is automatically added to your own
+ * {@link GDActionBar}. It is extremely simple to use as you have nothing
+ * particular to do. Indeed, the GDActionBar is automatically added to your own
  * layout when using the {@link #getContentView()} method. You can also use one
  * of the setActionBarContentView utility methods. As a result, a basic
  * {@link GDActivity} will often be initialized using the following snippet of
@@ -53,7 +53,7 @@ import android.widget.FrameLayout;
  * }
  * </pre>
  * <p>
- * An ActionBar is a widget that may contains actions items and a title. You can
+ * An GDActionBar is a widget that may contains actions items and a title. You can
  * also set the title putting an extra string with the key
  * {@link GD_ACTION_BAR_TITLE} in your Intent:
  * </p>
@@ -64,7 +64,7 @@ import android.widget.FrameLayout;
  * startActivity(intent);
  * </pre>
  * <p>
- * Note: An {@link GDActivity} automatically handle the type of the ActionBar
+ * Note: An {@link GDActivity} automatically handle the type of the GDActionBar
  * (Dashboard or Normal) depending on the value returned by the
  * getHomeActivityClass of your {@link GDApplication}. However you can force the
  * type of the action bar in your constructor.
@@ -72,7 +72,7 @@ import android.widget.FrameLayout;
  * 
  * <pre>
  * public MyGDActivity() {
- *     super(ActionBar.Type.Dashboard);
+ *     super(GDActionBar.Type.Dashboard);
  * }
  * </pre>
  * <p>
@@ -102,7 +102,7 @@ public class GDActivity extends Activity implements ActionBarActivity {
         mDefaultConstructorUsed = true;
     }
 
-    public GDActivity(ActionBar.Type actionBarType) {
+    public GDActivity(GDActionBar.Type actionBarType) {
         super();
         mActionBarType = actionBarType;
     }
@@ -133,7 +133,7 @@ public class GDActivity extends Activity implements ActionBarActivity {
         ensureLayout();
     }
 
-    public ActionBar.Type getActionBarType() {
+    public GDActionBar.Type getActionBarType() {
         return mActionBarType;
     }
 
@@ -177,7 +177,7 @@ public class GDActivity extends Activity implements ActionBarActivity {
             throw new RuntimeException(
                     "Your content must have an ActionBarHost whose id attribute is R.id.gd_action_bar_host");
         }
-        mActionBarHost.getActionBar().setOnActionBarListener(mActionBarListener);
+        mActionBarHost.getGDActionBar().setOnActionBarListener(mActionBarListener);
     }
 
     public void onPostContentChanged() {
@@ -207,12 +207,12 @@ public class GDActivity extends Activity implements ActionBarActivity {
         }
 
         final int visibility = intent.getIntExtra(ActionBarActivity.GD_ACTION_BAR_VISIBILITY, View.VISIBLE);
-        getActionBar().setVisibility(visibility);
+        getGDActionBar().setVisibility(visibility);
     }
 
     @Override
     public void setTitle(CharSequence title) {
-        getActionBar().setTitle(title);
+        getGDActionBar().setTitle(title);
     }
 
     @Override
@@ -220,25 +220,25 @@ public class GDActivity extends Activity implements ActionBarActivity {
         setTitle(getString(titleId));
     }
 
-    public ActionBar getActionBar() {
+    public GDActionBar getGDActionBar() {
         ensureLayout();
-        return mActionBarHost.getActionBar();
+        return mActionBarHost.getGDActionBar();
     }
 
     public ActionBarItem addActionBarItem(ActionBarItem item) {
-        return getActionBar().addItem(item);
+        return getGDActionBar().addItem(item);
     }
 
     public ActionBarItem addActionBarItem(ActionBarItem item, int itemId) {
-        return getActionBar().addItem(item, itemId);
+        return getGDActionBar().addItem(item, itemId);
     }
 
     public ActionBarItem addActionBarItem(ActionBarItem.Type actionBarItemType) {
-        return getActionBar().addItem(actionBarItemType);
+        return getGDActionBar().addItem(actionBarItemType);
     }
 
     public ActionBarItem addActionBarItem(ActionBarItem.Type actionBarItemType, int itemId) {
-        return getActionBar().addItem(actionBarItemType, itemId);
+        return getGDActionBar().addItem(actionBarItemType, itemId);
     }
 
     public FrameLayout getContentView() {
@@ -291,7 +291,7 @@ public class GDActivity extends Activity implements ActionBarActivity {
                 }
 
             } else {
-                if (!onHandleActionBarItemClick(getActionBar().getItem(position), position)) {
+                if (!onHandleActionBarItemClick(getGDActionBar().getItem(position), position)) {
                     if (Config.GD_WARNING_LOGS_ENABLED) {
                         Log.w(LOG_TAG, "Click on item at position " + position + " dropped down to the floor");
                     }

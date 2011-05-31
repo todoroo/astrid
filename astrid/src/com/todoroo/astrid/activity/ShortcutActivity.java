@@ -34,6 +34,7 @@ import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterWithCustomIntent;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskListFragment;
 
 /**
  * This activity is launched when a user opens up a notification from the
@@ -124,13 +125,13 @@ public class ShortcutActivity extends Activity {
 
             Filter filter = new Filter("", title, sql, values); //$NON-NLS-1$
 
-            taskListIntent.putExtra(TaskListActivity.TOKEN_FILTER, filter);
+            taskListIntent.putExtra(TaskListFragment.TOKEN_FILTER, filter);
         } else if(extras != null && extras.containsKey(TOKEN_SINGLE_TASK)) {
             Filter filter = new Filter("", getString(R.string.TLA_custom), //$NON-NLS-1$
                     new QueryTemplate().where(Task.ID.eq(extras.getLong(TOKEN_SINGLE_TASK, -1))), null);
 
             taskListIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            taskListIntent.putExtra(TaskListActivity.TOKEN_FILTER, filter);
+            taskListIntent.putExtra(TaskListFragment.TOKEN_FILTER, filter);
             startActivity(taskListIntent);
         }
 
