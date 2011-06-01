@@ -19,6 +19,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +58,10 @@ public class FilterListFragment extends ExpandableListFragment {
 
     // --- menu codes
 
-    private static final int MENU_SEARCH_ID = Menu.FIRST + 0;
-    private static final int MENU_HELP_ID = Menu.FIRST + 1;
+    private static final int MENU_SEARCH_ID = R.string.FLA_menu_search;
+    private static final int MENU_HELP_ID = R.string.FLA_menu_help;
 
-    private static final int CONTEXT_MENU_SHORTCUT = Menu.FIRST + 2;
+    private static final int CONTEXT_MENU_SHORTCUT = R.string.FLA_context_shortcut;
     private static final int CONTEXT_MENU_INTENT = Menu.FIRST + 3;
 
     private static final int REQUEST_CUSTOM_INTENT = 1;
@@ -84,6 +85,11 @@ public class FilterListFragment extends ExpandableListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Tell the framework to try to keep this fragment around
+        // during a configuration change.
+        setRetainInstance(true);
+
         new StartupService().onStartupApplication(getActivity());
     }
 
@@ -104,6 +110,8 @@ public class FilterListFragment extends ExpandableListFragment {
         getActivity().setDefaultKeyMode(Activity.DEFAULT_KEYS_SEARCH_LOCAL);
         // We have a menu item to show in action bar.
         setHasOptionsMenu(true);
+
+        onContentChanged();
 
         onNewIntent(getActivity().getIntent());
 
@@ -142,14 +150,12 @@ public class FilterListFragment extends ExpandableListFragment {
      * @return true if menu should be displayed
      */
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        if(menu.size() > 0)
-            return;
-
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         MenuItem item;
 
         item = menu.add(Menu.NONE, MENU_SEARCH_ID, Menu.NONE,
                 R.string.FLA_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item.setIcon(android.R.drawable.ic_menu_search);
 
         item = menu.add(Menu.NONE, MENU_HELP_ID, Menu.NONE,
@@ -209,6 +215,7 @@ public class FilterListFragment extends ExpandableListFragment {
      */
     protected boolean onItemClicked(FilterListItem item) {
         if(item instanceof Filter) {
+
             Filter filter = (Filter)item;
             Intent intent = new Intent(getActivity(), TaskListActivity.class);
             intent.putExtra(TaskListFragment.TOKEN_FILTER, filter);
@@ -218,10 +225,18 @@ public class FilterListFragment extends ExpandableListFragment {
                 if(customFilter.customExtras != null)
                     intent.getExtras().putAll(customFilter.customExtras);
             }
-            startActivity(intent);
-            AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
-                    new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                    R.anim.slide_left_in, R.anim.slide_left_out);
+            // choose whether we have to start a new activity (usually for portrait mode),
+            // or just update the tasklist-fragment (usually in landscape)
+            TaskListFragment tasklist = (TaskListFragment) getFragmentManager()
+            .findFragmentById(R.id.tasklist_fragment);
+            if (tasklist == null || !tasklist.isInLayout()) {
+                startActivity(intent);
+                AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
+                        new Class<?>[] { Integer.TYPE, Integer.TYPE },
+                        R.anim.slide_left_in, R.anim.slide_left_out);
+            } else {
+                tasklist.onNewIntent(intent);
+            }
             return true;
         } else if(item instanceof SearchFilter) {
             getActivity().onSearchRequested();
@@ -338,36 +353,38 @@ public class FilterListFragment extends ExpandableListFragment {
     public boolean onOptionsItemSelected(final MenuItem item) {
         // handle my own menus
         switch (item.getItemId()) {
-        case MENU_SEARCH_ID: {
-            getActivity().onSearchRequested();
-            return true;
+            case MENU_SEARCH_ID: {
+                getActivity().onSearchRequested();
+                return true;
+            }
+            case MENU_HELP_ID: {
+                Intent intent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://weloveastrid.com/help-user-guide-astrid-v3/filters/")); //$NON-NLS-1$
+                startActivity(intent);
+                return true;
+            }
+            case CONTEXT_MENU_SHORTCUT: {
+                ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)item.getMenuInfo();
+
+                final Intent shortcutIntent = item.getIntent();
+                FilterListItem filter = ((FilterAdapter.ViewHolder)info.targetView.getTag()).item;
+                if(filter instanceof Filter)
+                    showCreateShortcutDialog(shortcutIntent, (Filter)filter);
+
+                return true;
+            }
+            case CONTEXT_MENU_INTENT: {
+                Intent intent = item.getIntent();
+                startActivityForResult(intent, REQUEST_CUSTOM_INTENT);
+                return true;
+            }
+            default: {
+                TaskListFragment tasklist = (TaskListFragment) getFragmentManager()
+                .findFragmentById(R.id.tasklist_fragment);
+                if (tasklist != null && tasklist.isInLayout())
+                    return tasklist.onOptionsItemSelected(item);
+            }
         }
-
-        case MENU_HELP_ID: {
-            Intent intent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://weloveastrid.com/help-user-guide-astrid-v3/filters/")); //$NON-NLS-1$
-            startActivity(intent);
-            return true;
-        }
-
-        case CONTEXT_MENU_SHORTCUT: {
-            ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)item.getMenuInfo();
-
-            final Intent shortcutIntent = item.getIntent();
-            FilterListItem filter = ((FilterAdapter.ViewHolder)info.targetView.getTag()).item;
-            if(filter instanceof Filter)
-                showCreateShortcutDialog(shortcutIntent, (Filter)filter);
-
-            return true;
-        }
-
-        case CONTEXT_MENU_INTENT: {
-            Intent intent = item.getIntent();
-            startActivityForResult(intent, REQUEST_CUSTOM_INTENT);
-            return true;
-        }
-        }
-
         return false;
     }
 

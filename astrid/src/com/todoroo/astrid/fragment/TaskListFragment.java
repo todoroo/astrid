@@ -37,6 +37,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -120,18 +121,18 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
     // --- menu codes
 
-    private static final int MENU_ADDONS_ID = Menu.FIRST + 1;
-    private static final int MENU_SETTINGS_ID = Menu.FIRST + 2;
-    private static final int MENU_SORT_ID = Menu.FIRST + 3;
-    private static final int MENU_SYNC_ID = Menu.FIRST + 4;
-    private static final int MENU_HELP_ID = Menu.FIRST + 5;
-    private static final int MENU_ADDON_INTENT_ID = Menu.FIRST + 6;
+    private static final int MENU_ADDONS_ID = R.string.TLA_menu_addons;
+    private static final int MENU_SETTINGS_ID = R.string.TLA_menu_settings;
+    private static final int MENU_SORT_ID = R.string.TLA_menu_sort;
+    private static final int MENU_SYNC_ID = R.string.TLA_menu_sync;
+    private static final int MENU_HELP_ID = R.string.TLA_menu_help;
+    private static final int MENU_ADDON_INTENT_ID = Menu.FIRST + 199;
 
-    private static final int CONTEXT_MENU_EDIT_TASK_ID = Menu.FIRST + 20;
-    private static final int CONTEXT_MENU_COPY_TASK_ID = Menu.FIRST + 21;
-    private static final int CONTEXT_MENU_DELETE_TASK_ID = Menu.FIRST + 22;
-    private static final int CONTEXT_MENU_UNDELETE_TASK_ID = Menu.FIRST + 23;
-    private static final int CONTEXT_MENU_PURGE_TASK_ID = Menu.FIRST + 24;
+    private static final int CONTEXT_MENU_EDIT_TASK_ID = R.string.TAd_contextEditTask;
+    private static final int CONTEXT_MENU_COPY_TASK_ID = R.string.TAd_contextCopyTask;
+    private static final int CONTEXT_MENU_DELETE_TASK_ID = R.string.TAd_contextDeleteTask;
+    private static final int CONTEXT_MENU_UNDELETE_TASK_ID = R.string.TAd_contextUndeleteTask;
+    private static final int CONTEXT_MENU_PURGE_TASK_ID = R.string.TAd_contextPurgeTask;
     private static final int CONTEXT_MENU_BROADCAST_INTENT_ID = Menu.FIRST + 25;
     private static final int CONTEXT_MENU_PLUGIN_ID_FIRST = Menu.FIRST + 26;
 
@@ -205,7 +206,9 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
     public void onCreate(Bundle savedInstanceState) {
         DependencyInjectionService.getInstance().inject(this);
         super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
+        // Tell the framework to try to keep this fragment around
+        // during a configuration change.
+        setRetainInstance(true);
 
         new StartupService().onStartupApplication(getActivity());
 
@@ -242,11 +245,11 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         onNewIntent(getActivity().getIntent());
     }
 
-    protected void onNewIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
+    public void onNewIntent(Intent intent) {
+        Bundle extras = (intent.getExtras() == null ? getArguments() : intent.getExtras());
         if(extras != null && extras.containsKey(TOKEN_FILTER)) {
             filter = extras.getParcelable(TOKEN_FILTER);
-        } else {
+        } else if (filter == null) {
             filter = CoreFilterExposer.buildInboxFilter(getResources());
         }
 
@@ -261,10 +264,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
      * @return true if menu should be displayed
      */
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        if(menu.size() > 0)
-            menu.clear();
-
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         MenuItem item;
 
         item = menu.add(Menu.NONE, MENU_ADDONS_ID, Menu.NONE,
@@ -275,14 +275,9 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
                 R.string.TLA_menu_settings);
         item.setIcon(android.R.drawable.ic_menu_preferences);
 
-        if(!(this instanceof DraggableTaskListFragment)) {
-            item = menu.add(Menu.NONE, MENU_SORT_ID, Menu.NONE,
-                    R.string.TLA_menu_sort);
-            item.setIcon(android.R.drawable.ic_menu_sort_by_size);
-        }
-
         item = menu.add(Menu.NONE, MENU_SYNC_ID, Menu.NONE,
                 R.string.TLA_menu_sync);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item.setIcon(R.drawable.ic_menu_refresh);
 
         item = menu.add(Menu.NONE, MENU_HELP_ID, Menu.NONE,
@@ -307,17 +302,35 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         }
     }
 
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem item;
+
+        if(!(this instanceof DraggableTaskListFragment)) {
+            // remove it if its there, because we cant get a menuitem by id, doh
+            menu.removeItem(MENU_SORT_ID);
+
+            item = menu.add(Menu.NONE, MENU_SORT_ID, Menu.NONE,
+                    R.string.TLA_menu_sort);
+            item.setIcon(android.R.drawable.ic_menu_sort_by_size);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
+    }
+
     private void setUpUiComponents() {
-        ((ImageView)getActivity().findViewById(R.id.back)).setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(),
-                        FilterListActivity.class);
-                startActivity(intent);
-                AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
-                        new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                        R.anim.slide_right_in, R.anim.slide_right_out);
-            }
-        });
+        ImageView backButton = (ImageView)getView().findViewById(R.id.back);
+        if (backButton != null) {
+            backButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(),
+                            FilterListActivity.class);
+                    startActivity(intent);
+                    AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
+                            new Class<?>[] { Integer.TYPE, Integer.TYPE },
+                            R.anim.slide_right_in, R.anim.slide_right_out);
+                }
+            });
+        }
 
         // set listener for quick-changing task priority
         getListView().setOnKeyListener(new OnKeyListener() {
@@ -352,7 +365,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         });
 
         // set listener for pressing enter in quick-add box
-        quickAddBox = (EditText) getActivity().findViewById(R.id.quickAddText);
+        quickAddBox = (EditText) getView().findViewById(R.id.quickAddText);
         quickAddBox.setOnEditorActionListener(new OnEditorActionListener() {
             /**
              * When user presses enter, quick-add the task
@@ -369,7 +382,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
 
         // set listener for showing quick add button if text not empty
-        quickAddButton = ((ImageButton)getActivity().findViewById(R.id.quickAddButton));
+        quickAddButton = ((ImageButton)getView().findViewById(R.id.quickAddButton));
         quickAddBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
@@ -397,7 +410,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         });
 
         // prepare and set listener for voice add button
-        voiceAddButton = (ImageButton) getActivity().findViewById(R.id.voiceAddButton);
+        voiceAddButton = (ImageButton) getView().findViewById(R.id.voiceAddButton);
         int prompt = R.string.voice_edit_title_prompt;
         if (Preferences.getBoolean(R.string.p_voiceInputCreatesTask, false))
             prompt = R.string.voice_create_prompt;
@@ -405,7 +418,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         voiceInputAssistant.configureMicrophoneButton(prompt);
 
         // set listener for extended add button
-        ((ImageButton)getActivity().findViewById(R.id.extendedAddButton)).setOnClickListener(new OnClickListener() {
+        ((ImageButton)getView().findViewById(R.id.extendedAddButton)).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Task task = quickAddTask(quickAddBox.getText().toString(), false);
                 Intent intent = new Intent(getActivity(), TaskEditActivity.class);
@@ -666,7 +679,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
-        ((TextView)getActivity().findViewById(R.id.listLabel)).setText(filter.title);
+        ((TextView)getView().findViewById(R.id.listLabel)).setText(filter.title);
 
         // perform query
         TodorooCursor<Task> currentCursor = taskService.fetchFiltered(
@@ -715,7 +728,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
         // update title
         filter.title = getString(R.string.TLA_custom);
-        ((TextView)getActivity().findViewById(R.id.listLabel)).setText(filter.title);
+        ((TextView)getView().findViewById(R.id.listLabel)).setText(filter.title);
 
         // try selecting again
         for(int i = 0; i < currentCursor.getCount(); i++) {
@@ -744,7 +757,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
             Task task = createWithValues(filter.valuesForNewTasks,
                     title, taskService, metadataService);
 
-            TextView quickAdd = (TextView)getActivity().findViewById(R.id.quickAddText);
+            TextView quickAdd = (TextView)getView().findViewById(R.id.quickAddText);
             quickAdd.setText(""); //$NON-NLS-1$
 
             if(selectNewTask) {
