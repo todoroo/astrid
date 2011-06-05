@@ -6,6 +6,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -46,7 +47,8 @@ public class VoiceInputAssistant {
      * If you only use one microphone-button on an activity, you can leave it to its default, VOICE_RECOGNITION_REQUEST_CODE.
      */
     private int requestCode = VOICE_RECOGNITION_REQUEST_CODE;
-    private final Activity activity;
+    private Activity activity;
+    private Fragment fragment;
     private final ImageButton voiceButton;
     private final EditText textField;
     private boolean append = false;
@@ -78,7 +80,6 @@ public class VoiceInputAssistant {
      * a microphone-button themselves.
      */
     public VoiceInputAssistant(Activity activity) {
-        Assert.assertNotNull("Each VoiceInputAssistant must be bound to an activity!", activity);
         this.activity = activity;
         this.voiceButton = null;
         this.textField = null;
@@ -93,7 +94,6 @@ public class VoiceInputAssistant {
      * @param textField the textfield that should get the resulttext
      */
     public VoiceInputAssistant(Activity activity, ImageButton voiceButton, EditText textField) {
-        Assert.assertNotNull("Each VoiceInputAssistant must be bound to an activity!", activity);
         Assert.assertNotNull("A VoiceInputAssistant without a voiceButton makes no sense!", voiceButton);
         Assert.assertNotNull("You have to specify a textfield that is bound to this VoiceInputAssistant!!", textField);
         this.activity = activity;
@@ -124,6 +124,55 @@ public class VoiceInputAssistant {
     }
 
     /**
+     * Creates a new VoiceInputAssistant-instance simply for checking the availability of the
+     * RecognizerService. This is used for Preferences-Screens that dont want to provide
+     * a microphone-button themselves.
+     */
+    public VoiceInputAssistant(Fragment fragment) {
+        this.fragment = fragment;
+        this.voiceButton = null;
+        this.textField = null;
+    }
+
+    /**
+     * Creates a new VoiceInputAssistance-instance for use with a specified button and textfield.
+     * If you need more than one microphone-button on a given Activity, use the other constructor.
+     *
+     * @param fragment the Fragment which holds the microphone-button and the textField to insert recognized test
+     * @param voiceButton the microphone-Button
+     * @param textField the textfield that should get the resulttext
+     */
+    public VoiceInputAssistant(Fragment fragment, ImageButton voiceButton, EditText textField) {
+        Assert.assertNotNull("A VoiceInputAssistant without a voiceButton makes no sense!", voiceButton);
+        Assert.assertNotNull("You have to specify a textfield that is bound to this VoiceInputAssistant!!", textField);
+        this.fragment = fragment;
+        this.voiceButton = voiceButton;
+        this.textField = textField;
+    }
+
+    /**
+     * The param requestCode is used to differentiate between multiple
+     * microphone-buttons on a single activity.
+     * Use the this constructor to specify your own requestCode in
+     * this case for every additional use on an activity.
+     * If you only use one microphone-button on an activity,
+     * you can leave it to its default, VOICE_RECOGNITION_REQUEST_CODE.
+     *
+     *
+     * @param fragment
+     * @param voiceButton
+     * @param textField
+     * @param requestCode has to be unique in a single Activity-context,
+     *   dont use VOICE_RECOGNITION_REQUEST_CODE, this is reserved for the other constructor
+     */
+    public VoiceInputAssistant(Fragment fragment, ImageButton voiceButton, EditText textField, int requestCode) {
+        this(fragment, voiceButton, textField);
+        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE)
+            throw new InvalidParameterException("You have to specify a unique requestCode for this VoiceInputAssistant!");
+        this.requestCode = requestCode;
+    }
+
+    /**
      * Fire an intent to start the speech recognition activity.
      * This is fired by the listener on the microphone-button.
      *
@@ -134,11 +183,14 @@ public class VoiceInputAssistant {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, languageModel);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, activity.getString(prompt));
-        activity.startActivityForResult(intent, requestCode);
+        if (activity != null)
+            activity.startActivityForResult(intent, requestCode);
+        else if (fragment != null)
+            fragment.startActivityForResult(intent, requestCode);
     }
 
     /**
-     * This callback-method has to be called from Activity.onActivityResult within your activity
+     * This callback-method has to be called from Activity.onActivityResult within your activity/fragment
      * with parameters directly on passthru.<br>
      * You can check in your activity if it was really a RecognizerIntent that was handled here,
      * if so, this method returns true. In this case, you should call super.onActivityResult in your
@@ -191,7 +243,7 @@ public class VoiceInputAssistant {
      */
     public boolean isVoiceInputAvailable() {
         // Check to see if a recognition activity is present
-        PackageManager pm = activity.getPackageManager();
+        PackageManager pm = (activity != null ? activity.getPackageManager() : fragment.getActivity().getPackageManager());
         List<ResolveInfo> activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
         return (activities.size() != 0);
@@ -221,7 +273,10 @@ public class VoiceInputAssistant {
         Intent marketIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("market://search?q=pname:" + packageName)); //$NON-NLS-1$
         try {
-            activity.startActivity(marketIntent);
+            if (activity != null)
+                activity.startActivity(marketIntent);
+            else if (fragment != null)
+                fragment.startActivity(marketIntent);
         } catch (ActivityNotFoundException ane) {
             DialogUtilities.okDialog(activity,
                     activity.getString(R.string.EPr_marketUnavailable_dlg),

@@ -421,9 +421,16 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         ((ImageButton)getView().findViewById(R.id.extendedAddButton)).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Task task = quickAddTask(quickAddBox.getText().toString(), false);
+                TaskEditFragment taskEditFragment = (TaskEditFragment) getFragmentManager()
+                .findFragmentById(R.id.taskedit_fragment);
+
                 Intent intent = new Intent(getActivity(), TaskEditActivity.class);
-                intent.putExtra(TaskEditActivity.TOKEN_ID, task.getId());
-                startActivityForResult(intent, ACTIVITY_EDIT_TASK);
+                intent.putExtra(TaskEditFragment.TOKEN_ID, task.getId());
+                if (taskEditFragment == null || !taskEditFragment.isInLayout()) {
+                    startActivityForResult(intent, ACTIVITY_EDIT_TASK);
+                } else {
+                    taskEditFragment.populateFields(intent, true);
+                }
             }
         });
 
@@ -1028,7 +1035,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         case CONTEXT_MENU_EDIT_TASK_ID: {
             itemId = item.getGroupId();
             intent = new Intent(getActivity(), TaskEditActivity.class);
-            intent.putExtra(TaskEditActivity.TOKEN_ID, itemId);
+            intent.putExtra(TaskEditFragment.TOKEN_ID, itemId);
             startActivityForResult(intent, ACTIVITY_EDIT_TASK);
             return true;
         }
@@ -1045,7 +1052,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
             taskService.save(clone);
 
             intent = new Intent(getActivity(), TaskEditActivity.class);
-            intent.putExtra(TaskEditActivity.TOKEN_ID, clone.getId());
+            intent.putExtra(TaskEditFragment.TOKEN_ID, clone.getId());
             startActivityForResult(intent, ACTIVITY_EDIT_TASK);
 
             return true;

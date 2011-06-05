@@ -58,6 +58,7 @@ import com.todoroo.astrid.api.TaskAction;
 import com.todoroo.astrid.api.TaskDecoration;
 import com.todoroo.astrid.api.TaskDecorationExposer;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskEditFragment;
 import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.helper.TaskAdapterAddOnManager;
 import com.todoroo.astrid.notes.NoteViewingActivity;
@@ -773,9 +774,16 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             mBar = null;
 
             if(position == 0) {
+                TaskEditFragment taskEditFragment = (TaskEditFragment) listFragment.getFragmentManager()
+                .findFragmentById(R.id.taskedit_fragment);
+
                 Intent intent = new Intent(listFragment.getActivity(), TaskEditActivity.class);
-                intent.putExtra(TaskEditActivity.TOKEN_ID, taskId);
-                listFragment.startActivityForResult(intent, TaskListFragment.ACTIVITY_EDIT_TASK);
+                intent.putExtra(TaskEditFragment.TOKEN_ID, taskId);
+                if (taskEditFragment == null || !taskEditFragment.isInLayout()) {
+                    listFragment.startActivityForResult(intent, TaskListFragment.ACTIVITY_EDIT_TASK);
+                } else {
+                    taskEditFragment.populateFields(intent, true);
+                }
             } else {
                 flushSpecific(taskId);
                 try {

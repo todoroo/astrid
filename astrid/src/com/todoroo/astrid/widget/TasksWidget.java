@@ -32,6 +32,7 @@ import com.todoroo.astrid.core.CoreFilterExposer;
 import com.todoroo.astrid.core.SortHelper;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.fragment.TaskEditFragment;
 import com.todoroo.astrid.fragment.TaskListFragment;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.TaskService;
@@ -217,7 +218,7 @@ public class TasksWidget extends AppWidgetProvider {
             editIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             if(filter != null && filter.valuesForNewTasks != null) {
                 String values = AndroidUtilities.contentValuesToSerializedString(filter.valuesForNewTasks);
-                editIntent.putExtra(TaskEditActivity.TOKEN_VALUES, values);
+                editIntent.putExtra(TaskEditFragment.TOKEN_VALUES, values);
                 editIntent.setType(values);
             }
             pendingIntent = PendingIntent.getActivity(context, 0,
