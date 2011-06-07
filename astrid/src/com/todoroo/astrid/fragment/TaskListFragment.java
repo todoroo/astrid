@@ -1002,6 +1002,12 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
     }
 
     @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        // called when context menu appears
+        return onOptionsItemSelected(item);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         Intent intent;
         long itemId;

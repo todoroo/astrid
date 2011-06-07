@@ -46,7 +46,7 @@ public class ReminderDebugContextActions {
 
         public Object getLabel(Task task) {
             if (Constants.DEBUG)
-                return "when alarm?"; //$NON-NLS-1$
+                return "make notification"; //$NON-NLS-1$
             return null;
         }
 
