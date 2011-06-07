@@ -80,6 +80,13 @@ public class NotificationActivity extends TaskListActivity implements OnTimeSetL
         displayNotificationPopup();
     }
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//
+//        displayNotificationPopup();
+//    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         populateFilter(intent);
@@ -107,33 +114,33 @@ public class NotificationActivity extends TaskListActivity implements OnTimeSetL
 
         // instantiate reminder window
         ViewGroup parent = (ViewGroup) findViewById(R.id.taskListParent);
-        getLayoutInflater().inflate(R.layout.notification_control, parent, true);
+        View notif_parent = getLayoutInflater().inflate(R.layout.notification_control, parent, true);
 
         String reminder = Notifications.getRandomReminder(getResources().getStringArray(R.array.reminder_responses));
 
         if(Preferences.getBoolean(R.string.p_rmd_nagging, true))
-            ((TextView)findViewById(R.id.reminderLabel)).setText(reminder);
+            ((TextView)notif_parent.findViewById(R.id.reminderLabel)).setText(reminder);
         else {
-            findViewById(R.id.reminderLabel).setVisibility(View.GONE);
-            findViewById(R.id.astridIcon).setVisibility(View.GONE);
+            notif_parent.findViewById(R.id.reminderLabel).setVisibility(View.GONE);
+            notif_parent.findViewById(R.id.astridIcon).setVisibility(View.GONE);
         }
 
         // set up listeners
-        ((Button)findViewById(R.id.goAway)).setOnClickListener(new OnClickListener() {
+        ((Button)notif_parent.findViewById(R.id.goAway)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 finish();
             }
         });
 
-        ((Button)findViewById(R.id.snooze)).setOnClickListener(new OnClickListener() {
+        ((Button)notif_parent.findViewById(R.id.snooze)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 snooze();
             }
         });
 
-        ((Button)findViewById(R.id.done)).setOnClickListener(new OnClickListener() {
+        ((Button)notif_parent.findViewById(R.id.done)).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 Task task = new Task();
