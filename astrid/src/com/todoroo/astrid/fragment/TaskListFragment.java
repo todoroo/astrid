@@ -13,6 +13,7 @@ import org.weloveastrid.rmilk.MilkUtilities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.ListFragment;
 import android.app.PendingIntent.CanceledException;
 import android.content.BroadcastReceiver;
@@ -176,6 +177,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
     private final TaskListContextMenuExtensionLoader contextMenuExtensionLoader = new TaskListContextMenuExtensionLoader();
     private VoiceInputAssistant voiceInputAssistant;
+    private boolean mDualPane;
 
     /* ======================================================================
      * ======================================================= initialization
@@ -243,6 +245,14 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
         setUpUiComponents();
         onNewIntent(getActivity().getIntent());
+
+        Fragment filterFrame = getFragmentManager().findFragmentById(R.id.filterlist_fragment);
+        mDualPane = (filterFrame != null) && filterFrame.isInLayout();
+
+        if (mDualPane) {
+            // In dual-pane mode, the list view highlights the selected item.
+            getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
     }
 
     public void onNewIntent(Intent intent) {
@@ -686,7 +696,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
-        ((TextView)getView().findViewById(R.id.listLabel)).setText(filter.title);
+        getActivity().getActionBar().setTitle(filter.title);
 
         // perform query
         TodorooCursor<Task> currentCursor = taskService.fetchFiltered(

@@ -13,6 +13,7 @@
         android:layout_height="42dip"
         android:layout_weight="1"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:background="@drawable/edit_header">
     
         <!-- List Label -->

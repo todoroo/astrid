@@ -46,6 +46,8 @@ public final class TaskEditActivity extends Activity {
 
         setContentView(R.layout.task_edit_fragment);
         taskEditFragment = (TaskEditFragment)getFragmentManager().findFragmentById(R.id.taskedit_fragment);
+
+        getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_background));
     }
 
     @Override
