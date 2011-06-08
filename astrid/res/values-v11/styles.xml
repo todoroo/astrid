@@ -14,6 +14,7 @@
     
     <style name="Theme" parent="@style/Theme.GreenDroid">
         <item name="android:windowBackground">@null</item>
+        <item name="android:actionBarStyle">@style/customActionBarStyle</item>
     </style>
     
     <style name="White" parent="android:Theme.Holo.Light">
@@ -114,5 +115,11 @@
         <item name="android:textSize">14sp</item>                                                                                                                                                                    
         <item name="android:textColor">@android:color/black</item>                                                                                                                                                   
     </style> 
-    
+
+    <!-- ====================================================== Actionbar == -->
+
+    <style name="customActionBarStyle"  parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@drawable/actionbar_background</item>
+    </style>
+        
 </resources>

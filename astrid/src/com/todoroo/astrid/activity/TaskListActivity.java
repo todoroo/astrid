@@ -27,8 +27,6 @@ public class TaskListActivity extends Activity {
 
         setContentView(R.layout.task_list_fragment);
         tasklistFragment = (TaskListFragment)getFragmentManager().findFragmentById(R.id.tasklist_fragment);
-
-        getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_background));
     }
 
     @Override

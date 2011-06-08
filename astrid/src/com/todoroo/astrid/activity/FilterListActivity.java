@@ -30,8 +30,6 @@ public class FilterListActivity extends Activity {
         setContentView(R.layout.filter_list_fragment);
         if (filterlistFragment == null)
             filterlistFragment = (FilterListFragment)getFragmentManager().findFragmentById(R.id.filterlist_fragment);
-
-        getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_background));
     }
 
     @Override

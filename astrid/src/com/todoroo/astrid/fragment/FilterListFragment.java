@@ -2,6 +2,7 @@ package com.todoroo.astrid.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.PendingIntent.CanceledException;
 import android.app.SearchManager;
 import android.content.DialogInterface;
@@ -29,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -72,6 +74,7 @@ public class FilterListFragment extends ExpandableListFragment {
     protected ExceptionService exceptionService;
 
     FilterAdapter adapter = null;
+    private boolean mDualPane;
 
     /* ======================================================================
      * ======================================================= initialization
@@ -114,6 +117,14 @@ public class FilterListFragment extends ExpandableListFragment {
         onContentChanged();
 
         onNewIntent(getActivity().getIntent());
+
+        Fragment tasklistFrame = getFragmentManager().findFragmentById(R.id.tasklist_fragment);
+        mDualPane = (tasklistFrame != null) && tasklistFrame.isInLayout();
+
+        if (mDualPane) {
+            // In dual-pane mode, the list view highlights the selected item.
+            getExpandableListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
 
         // dithering
         getActivity().getWindow().setFormat(PixelFormat.RGBA_8888);
