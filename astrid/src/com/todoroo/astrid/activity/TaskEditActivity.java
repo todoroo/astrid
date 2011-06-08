@@ -36,10 +36,8 @@ import com.todoroo.astrid.fragment.TaskEditFragment;
  *
  */
 public final class TaskEditActivity extends Activity {
-    protected TaskEditFragment taskEditFragment = null;
-
     public TaskEditFragment getTaskEditFragment() {
-        return taskEditFragment;
+        return (TaskEditFragment)getFragmentManager().findFragmentById(R.id.taskedit_fragment);
     }
 
     @Override
@@ -47,7 +45,6 @@ public final class TaskEditActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.task_edit_fragment);
-        taskEditFragment = (TaskEditFragment)getFragmentManager().findFragmentById(R.id.taskedit_fragment);
     }
 
     @Override
@@ -69,6 +66,7 @@ public final class TaskEditActivity extends Activity {
     @Override
     public void finish() {
         super.finish();
-        taskEditFragment.finish();
+        if (getTaskEditFragment() != null)
+            getTaskEditFragment().finish();
     }
 }

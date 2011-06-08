@@ -16,10 +16,8 @@ import com.todoroo.astrid.fragment.TaskListFragment;
  *
  */
 public class TaskListActivity extends Activity {
-    protected TaskListFragment tasklistFragment = null;
-
     public TaskListFragment getTasklistFragment() {
-        return tasklistFragment;
+        return (TaskListFragment)getFragmentManager().findFragmentById(R.id.tasklist_fragment);
     }
 
     @Override
@@ -27,7 +25,6 @@ public class TaskListActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.task_list_fragment);
-        tasklistFragment = (TaskListFragment)getFragmentManager().findFragmentById(R.id.tasklist_fragment);
     }
 
     @Override
@@ -38,12 +35,8 @@ public class TaskListActivity extends Activity {
             if (flFragment != null && flFragment.isInLayout())
                 flFragment.onNewIntent(intent);
         } else {
-            if (tasklistFragment == null)
-                tasklistFragment = (TaskListFragment)getFragmentManager().findFragmentById(R.id.tasklist_fragment);
-
-            if (tasklistFragment != null) {
-                tasklistFragment.onNewIntent(intent);
-            }
+            if (getTasklistFragment() != null)
+                getTasklistFragment().onNewIntent(intent);
         }
     }
 
