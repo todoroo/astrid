@@ -4,6 +4,7 @@
 package com.todoroo.astrid.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.timsu.astrid.R;
@@ -17,10 +18,8 @@ import com.todoroo.astrid.fragment.FilterListFragment;
  *
  */
 public class FilterListActivity extends Activity {
-    protected FilterListFragment filterlistFragment = null;
-
     public FilterListFragment getFilterlistFragment() {
-        return filterlistFragment;
+        return (FilterListFragment)getFragmentManager().findFragmentById(R.id.filterlist_fragment);
     }
 
     @Override
@@ -28,15 +27,20 @@ public class FilterListActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.filter_list_fragment);
-        if (filterlistFragment == null)
-            filterlistFragment = (FilterListFragment)getFragmentManager().findFragmentById(R.id.filterlist_fragment);
     }
 
     @Override
     public void onContentChanged() {
         super.onContentChanged();
-        if (filterlistFragment == null)
-            filterlistFragment = (FilterListFragment)getFragmentManager().findFragmentById(R.id.filterlist_fragment);
-        filterlistFragment.onContentChanged();
+        if (getFilterlistFragment() != null)
+            getFilterlistFragment().onContentChanged();
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (getFilterlistFragment() != null)
+            getFilterlistFragment().onNewIntent(intent);
+    }
+
 }

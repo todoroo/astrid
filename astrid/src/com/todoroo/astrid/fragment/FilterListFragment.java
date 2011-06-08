@@ -139,7 +139,7 @@ public class FilterListFragment extends ExpandableListFragment {
      * <li>ACTION_ADD_LIST - adds new lists to the merge adapter
      * </ul>
      */
-    protected void onNewIntent(Intent intent) {
+    public void onNewIntent(Intent intent) {
         final String intentAction = intent.getAction();
         if (Intent.ACTION_SEARCH.equals(intentAction)) {
             String query = intent.getStringExtra(SearchManager.QUERY).trim();

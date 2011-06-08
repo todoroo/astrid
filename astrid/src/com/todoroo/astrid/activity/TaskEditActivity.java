@@ -20,9 +20,11 @@
 package com.todoroo.astrid.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.timsu.astrid.R;
+import com.todoroo.astrid.fragment.FilterListFragment;
 import com.todoroo.astrid.fragment.TaskEditFragment;
 
 /**
@@ -51,6 +53,17 @@ public final class TaskEditActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle inState) {
         super.onRestoreInstanceState(inState);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
+            // forward the searchrequest to the filterfragment
+            FilterListFragment flFragment = (FilterListFragment)getFragmentManager().findFragmentById(R.id.filterlist_fragment);
+            if (flFragment != null && flFragment.isInLayout())
+                flFragment.onNewIntent(intent);
+        }
     }
 
     @Override
