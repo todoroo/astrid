@@ -75,6 +75,7 @@ import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.activity.AddOnActivity;
+import com.todoroo.astrid.activity.FilterListActivity;
 import com.todoroo.astrid.alarms.AlarmControlSet;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.dao.Database;
@@ -246,6 +247,7 @@ public final class TaskEditFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // We have a menu item to show in action bar.
         setHasOptionsMenu(true);
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
 
         setUpUIComponents();
     }
@@ -613,6 +615,12 @@ public final class TaskEditFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case android.R.id.home:
+                // app icon in Action Bar clicked; go home
+                Intent intent = new Intent(this.getActivity(), FilterListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
             case MENU_SAVE_ID:
                 saveButtonClick();
                 return true;

@@ -57,7 +57,7 @@
   <supports-screens />
   
   <application android:icon="@drawable/icon" android:label="@string/app_name"
-               android:theme="@style/Theme">
+               android:theme="@style/Theme" android:hardwareAccelerated="true" android:logo="@drawable/icon_48">
                
     <!-- ====================================================== Activities = -->
         
