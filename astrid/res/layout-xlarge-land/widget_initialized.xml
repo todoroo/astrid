@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     android:background="@drawable/widget_frame">
 
@@ -11,13 +11,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:paddingTop="2dp"
         android:paddingLeft="40dp">
         
         <TextView
-        	android:id="@+id/widget_title"
-        	android:layout_width="82dp" 
-        	android:layout_height="50dp"
-        	android:layout_gravity="left" 
+            android:id="@+id/widget_title"
+            android:layout_gravity="left" 
+            android:layout_width="128dp" 
+            android:layout_height="47dp"
             android:textColor="#ffffff"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -26,15 +27,15 @@
             android:ellipsize="start" />
     
         <ImageButton
-        	android:id="@+id/widget_button"
-        	android:src="@drawable/button_plus" 
-        	android:layout_gravity="right" 
-        	android:layout_width="35dp" 
-        	android:layout_height="50dp"
+            android:id="@+id/widget_button"
+            android:src="@drawable/button_plus" 
+            android:layout_gravity="right" 
+            android:layout_width="35dp" 
+            android:layout_height="47dp"
             android:background="#00000000" />
       
     </LinearLayout>
-    	
+
     <LinearLayout android:id="@+id/taskbody"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent"
@@ -46,10 +47,10 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:singleLine="true"
-	        android:maxWidth="115dip"
+	        android:maxWidth="170dip"
             android:text="@string/TWi_loading"
 	        style="@style/TextAppearance.Widget" 
-	        android:layout_marginLeft="23dp"/>
+	        android:layout_marginLeft="23dip"/>
 
 	    <ImageView
 	        android:id="@+id/separator_1"
@@ -58,8 +59,7 @@
 	        android:src="@drawable/separator"
 	    	android:layout_gravity="center_horizontal" 
 	    	android:layout_height="wrap_content" 
-	    	android:layout_marginTop="4dp"/>
-
+	    	android:layout_marginTop="4dip"/>
 
     	<TextView
 	        android:id="@+id/task_2"
@@ -67,10 +67,10 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:singleLine="true"
-	        android:maxWidth="115dip"
+	        android:maxWidth="170dip"
 	        style="@style/TextAppearance.Widget" 
-	        android:layout_marginLeft="23dp"
-	        android:layout_marginTop="4dp"/>
+	        android:layout_marginLeft="23dip"
+	        android:layout_marginTop="4dip"/>
 
 	    <ImageView
 	        android:id="@+id/separator_2"
@@ -79,7 +79,7 @@
 	        android:src="@drawable/separator"
 	    	android:layout_gravity="center_horizontal" 
 	    	android:layout_height="wrap_content" 
-	    	android:layout_marginTop="4dp"/>
+	    	android:layout_marginTop="4dip"/>
 
 
     	<TextView
@@ -88,11 +88,11 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:singleLine="true"
-	        android:maxWidth="115dip"
+	        android:maxWidth="170dip"
 	        style="@style/TextAppearance.Widget" 
-	        android:layout_marginLeft="23dp"
-	        android:layout_marginTop="4dp"/>
-
+	        android:layout_marginLeft="23dip"
+	        android:layout_marginTop="4dip"/>
+	        
 	    <ImageView
 	        android:id="@+id/separator_3"
 	        android:layout_width="wrap_content" 
@@ -100,8 +100,7 @@
 	        android:src="@drawable/separator"
 	    	android:layout_gravity="center_horizontal" 
 	    	android:layout_height="wrap_content" 
-	    	android:layout_marginTop="4dp"/>
-
+	    	android:layout_marginTop="4dip"/>
 
     	<TextView
 	        android:id="@+id/task_4"
@@ -109,10 +108,10 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:singleLine="true"
-	        android:maxWidth="115dip"
+	        android:maxWidth="170dip"
 	        style="@style/TextAppearance.Widget" 
-	        android:layout_marginLeft="23dp"
-	        android:layout_marginTop="4dp"/>
+	        android:layout_marginLeft="23dip"
+	        android:layout_marginTop="4dip"/>
 
 	    <ImageView
 	        android:id="@+id/separator_4"
@@ -121,7 +120,7 @@
 	        android:src="@drawable/separator"
 	    	android:layout_gravity="center_horizontal" 
 	    	android:layout_height="wrap_content" 
-	    	android:layout_marginTop="4dp"/>
+	    	android:layout_marginTop="4dip"/>
 
 
     	<TextView
@@ -130,10 +129,9 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:singleLine="true"
-	        android:maxWidth="115dip"
+	        android:maxWidth="170dip"
 	        style="@style/TextAppearance.Widget" 
-	        android:layout_marginLeft="23dp"
-	        android:layout_marginTop="4dp"/>
-	        
+	        android:layout_marginLeft="23dip"
+	        android:layout_marginTop="4dip"/>
     </LinearLayout>
 </LinearLayout>
