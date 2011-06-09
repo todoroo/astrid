@@ -7,6 +7,7 @@ import android.app.PendingIntent.CanceledException;
 import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -240,11 +241,16 @@ public class FilterListFragment extends ExpandableListFragment {
             // or just update the tasklist-fragment (usually in landscape)
             TaskListFragment tasklist = (TaskListFragment) getFragmentManager()
             .findFragmentById(R.id.tasklist_fragment);
-            if (tasklist == null || !tasklist.isInLayout()) {
+            if (tasklist == null || !tasklist.isInLayout() || (intent.getComponent() != null)) {
                 startActivity(intent);
-                AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
-                        new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                        R.anim.slide_left_in, R.anim.slide_left_out);
+                if (getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_LANDSCAPE)
+                    AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
+                            new Class<?>[] { Integer.TYPE, Integer.TYPE }, 0, 0);
+                else
+                    AndroidUtilities.callApiMethod(5, getActivity(), "overridePendingTransition", //$NON-NLS-1$
+                            new Class<?>[] { Integer.TYPE, Integer.TYPE },
+                            R.anim.slide_left_in, R.anim.slide_left_out);
             } else {
                 tasklist.onNewIntent(intent);
             }

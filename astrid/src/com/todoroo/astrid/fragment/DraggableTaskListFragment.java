@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import android.app.ListFragment;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -46,12 +45,6 @@ public class DraggableTaskListFragment extends TaskListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        return getListBody(container);
-    }
-
-    @Override
     protected View getListBody(ViewGroup root) {
         return getActivity().getLayoutInflater().inflate(R.layout.task_list_body_draggable, root, false);
     }
@@ -66,6 +59,8 @@ public class DraggableTaskListFragment extends TaskListFragment {
     protected void setUpTaskList() {
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
+
+        getActivity().getActionBar().setTitle(filter.title);
 
         ((TextView)getView().findViewById(R.id.listLabel)).setText(filter.title);
 

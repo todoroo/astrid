@@ -24,7 +24,11 @@ public class GtasksListFragment extends DraggableTaskListFragment {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+    }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         getTouchListView().setDropListener(dropListener);
         getTouchListView().setSwipeListener(swipeListener);
 

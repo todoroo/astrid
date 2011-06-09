@@ -42,8 +42,10 @@ public class TouchListView extends ListView {
 	private WindowManager.LayoutParams mWindowParams;
 	private int mDragPos;      // which item is being dragged
 	private int mFirstDragPos; // where was the dragged item originally
-	private int mDragPoint;    // at what offset inside the item did the user grab it
-	private int mCoordOffset;  // the difference between screen coordinates and coordinates in this view
+    private int mDragPointX;     // at what offset inside the item did the user grab it
+	private int mDragPointY;     // at what offset inside the item did the user grab it
+    private int mCoordOffsetX;  // the difference between screen coordinates and coordinates in this view
+	private int mCoordOffsetY;  // the difference between screen coordinates and coordinates in this view
 	private int mDragStartX;
 	private DragListener mDragListener;
 	private DropListener mDropListener;
@@ -101,8 +103,10 @@ public class TouchListView extends ListView {
 											break;
 									}
 									ViewGroup item = (ViewGroup) getChildAt(itemnum - getFirstVisiblePosition());
-									mDragPoint = y - item.getTop();
-									mCoordOffset = ((int)ev.getRawY()) - y;
+                                    mDragPointX = x - item.getLeft();
+									mDragPointY = y - item.getTop();
+                                    mCoordOffsetX = ((int)ev.getRawX()) - x;
+									mCoordOffsetY = ((int)ev.getRawY()) - y;
 									View dragger = item.findViewById(grabberId);
 									Rect r = mTempRect;
 //									dragger.getDrawingRect(r);
@@ -117,7 +121,7 @@ public class TouchListView extends ListView {
 											// Create a copy of the drawing cache so that it does not get recycled
 											// by the framework when the list tries to clean up memory
 											Bitmap bitmap = Bitmap.createBitmap(item.getDrawingCache());
-											startDragging(bitmap, y);
+											startDragging(bitmap, (int) ev.getRawX(), y);
 											mDragPos = itemnum;
 											mFirstDragPos = mDragPos;
 											mHeight = getHeight();
@@ -152,7 +156,7 @@ public class TouchListView extends ListView {
 	}
 
 	private int getItemForPosition(int y) {
-			int adjustedy = y - mDragPoint - 32;
+			int adjustedy = y - mDragPointY - 32;
 			int pos = myPointToPosition(0, adjustedy);
 			if (pos >= 0) {
 					if (pos <= mFirstDragPos) {
@@ -323,13 +327,14 @@ public class TouchListView extends ListView {
 			return super.onTouchEvent(ev);
 	}
 
-	private void startDragging(Bitmap bm, int y) {
+	private void startDragging(Bitmap bm, int x, int y) {
 			stopDragging();
 
 			mWindowParams = new WindowManager.LayoutParams();
 			mWindowParams.gravity = Gravity.TOP;
-			mWindowParams.x = 0;
-			mWindowParams.y = y - mDragPoint + mCoordOffset;
+//			mWindowParams.x = x - mDragPointX + mCoordOffsetY;
+            mWindowParams.x = x;
+			mWindowParams.y = y - mDragPointY + mCoordOffsetY;
 
 			mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 			mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -367,7 +372,7 @@ public class TouchListView extends ListView {
 					}
 					mWindowParams.alpha = alpha;
 			}
-			mWindowParams.y = y - mDragPoint + mCoordOffset;
+			mWindowParams.y = y - mDragPointY + mCoordOffsetY;
 			mWindowManager.updateViewLayout(mDragView, mWindowParams);
 	}
 

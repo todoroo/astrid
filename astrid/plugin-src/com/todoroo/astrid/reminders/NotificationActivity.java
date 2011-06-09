@@ -114,7 +114,7 @@ public class NotificationActivity extends TaskListActivity implements OnTimeSetL
         findViewById(R.id.taskListFooter).setVisibility(View.GONE);
 
         // instantiate reminder window
-        ViewGroup parent = (ViewGroup) tasklistFragment.getView();
+        ViewGroup parent = (ViewGroup) getTasklistFragment().getView();
         View notif_parent = getLayoutInflater().inflate(R.layout.notification_control, parent, true);
 
         String reminder = Notifications.getRandomReminder(getResources().getStringArray(R.array.reminder_responses));
