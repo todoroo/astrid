@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See the file "LICENSE" for the full license governing this code. -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+  <string name="TLA_menu_help">Hilfe zur Taskliste</string>
+  
+  <string name="FLA_menu_help">Hilfe zur Filterliste</string>
+  
+  <string name="TEA_menu_help">Hilfe zu Hinzufügen/Bearbeiten</string>
+</resources>

@@ -290,7 +290,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item.setIcon(R.drawable.ic_menu_refresh);
 
-        item = menu.add(Menu.NONE, MENU_HELP_ID, Menu.NONE,
+        item = menu.add(Menu.NONE, MENU_HELP_ID, 2,
                 R.string.TLA_menu_help);
         item.setIcon(android.R.drawable.ic_menu_help);
 

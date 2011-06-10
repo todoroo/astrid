@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.format.DateUtils;
@@ -136,6 +137,7 @@ public final class TaskEditFragment extends Fragment {
     private static final int MENU_SAVE_ID = R.string.TEA_menu_save;
     private static final int MENU_DISCARD_ID = R.string.TEA_menu_discard;
     private static final int MENU_DELETE_ID = R.string.TEA_menu_delete;
+    private static final int MENU_HELP_ID = R.string.TEA_menu_help;
 
     // --- services
 
@@ -630,6 +632,11 @@ public final class TaskEditFragment extends Fragment {
             case MENU_DELETE_ID:
                 deleteButtonClick();
                 return true;
+            case MENU_HELP_ID:
+                intent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://weloveastrid.com/help-user-guide-astrid-v3/addedit-tasks/")); //$NON-NLS-1$
+                startActivity(intent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -650,6 +657,10 @@ public final class TaskEditFragment extends Fragment {
 
         item = menu.add(Menu.NONE, MENU_DELETE_ID, 0, R.string.TEA_menu_delete);
         item.setIcon(android.R.drawable.ic_menu_delete);
+
+        item = menu.add(Menu.NONE, MENU_HELP_ID, 0,
+                R.string.TEA_menu_help);
+        item.setIcon(android.R.drawable.ic_menu_help);
     }
 
     @Override

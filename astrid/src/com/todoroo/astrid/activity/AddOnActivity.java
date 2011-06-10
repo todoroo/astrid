@@ -11,6 +11,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -62,6 +63,7 @@ public class AddOnActivity extends TabActivity {
         setTitle(R.string.AOA_title);
 
         populate();
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void populate() {
@@ -90,6 +92,18 @@ public class AddOnActivity extends TabActivity {
         availableList.setAdapter(new AddOnAdapter(this, false, available));
         if(available.size() > 0)
             findViewById(R.id.empty_available).setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId()==android.R.id.home) {
+            // app icon in Action Bar clicked; go home
+            Intent intent = new Intent(this, FilterListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -38,6 +38,7 @@ import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Field;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.sql.UnaryCriterion;
+import com.todoroo.astrid.activity.FilterListActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.api.CustomFilterCriterion;
@@ -154,6 +155,7 @@ public class CustomFilterActivity extends ListActivity {
         updateList();
 
         setUpListeners();
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     /**
@@ -474,6 +476,13 @@ public class CustomFilterActivity extends ListActivity {
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (item.getItemId()==android.R.id.home) {
+            // app icon in Action Bar clicked; go home
+            Intent intent = new Intent(this, FilterListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
+        }
         // group filter option
         if(item.getGroupId() == MENU_GROUP_FILTER) {
             // give an initial value for the row before adding it

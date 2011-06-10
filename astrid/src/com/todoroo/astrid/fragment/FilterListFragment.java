@@ -170,7 +170,7 @@ public class FilterListFragment extends ExpandableListFragment {
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         item.setIcon(android.R.drawable.ic_menu_search);
 
-        item = menu.add(Menu.NONE, MENU_HELP_ID, Menu.NONE,
+        item = menu.add(Menu.NONE, MENU_HELP_ID, 1,
                 R.string.FLA_menu_help);
         item.setIcon(android.R.drawable.ic_menu_help);
     }
@@ -241,7 +241,8 @@ public class FilterListFragment extends ExpandableListFragment {
             // or just update the tasklist-fragment (usually in landscape)
             TaskListFragment tasklist = (TaskListFragment) getFragmentManager()
             .findFragmentById(R.id.tasklist_fragment);
-            if (tasklist == null || !tasklist.isInLayout() || (intent.getComponent() != null)) {
+            if (tasklist == null || !tasklist.isInLayout() ||
+                    (intent.getComponent() != null && !("com.todoroo.astrid.activity.TaskListActivity".equals(intent.getComponent().getClassName())))) {
                 startActivity(intent);
                 if (getResources().getConfiguration().orientation
                         == Configuration.ORIENTATION_LANDSCAPE)
