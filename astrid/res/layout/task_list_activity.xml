@@ -69,7 +69,7 @@
             android:layout_weight="1"
             android:visibility="gone"
             android:background="@drawable/footer_button"
-            android:src="@drawable/tango_microphone"
+            android:src="@drawable/ic_footer_mic"
             android:scaleType="center"/> 
     
         <!-- Quick Add Button -->
@@ -81,7 +81,7 @@
             android:layout_weight="1"
             android:visibility="gone"
             android:background="@drawable/footer_button"
-            android:src="@drawable/tango_add"
+            android:src="@drawable/ic_footer_add"
             android:scaleType="center"/> 
     
         <!-- Quick Add Task -->
@@ -104,7 +104,7 @@
             android:layout_marginRight="3dip"
             android:layout_weight="1"
             android:background="@drawable/footer_button"
-            android:src="@android:drawable/ic_menu_edit"
+            android:src="@drawable/ic_footer_edit"
             android:scaleType="center"/> 
 
     </LinearLayout>

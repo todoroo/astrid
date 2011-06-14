@@ -43,11 +43,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.timsu.astrid.R;
@@ -275,7 +278,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
      */
     public static class ViewHolder {
         public Task task;
-        public View view;
+        public ViewGroup view;
         public TextView nameView;
         public CheckBox completeBox;
         public AsyncImageView picture;
@@ -398,8 +401,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         details = details.trim().replace("\n", "<br>");
         String[] splitDetails = details.split("\\|");
         viewHolder.completeBox.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        float left = viewHolder.completeBox.getMeasuredWidth() + 5;
-        int availableWidth = (int) (dm.widthPixels - left - rightWidth);
+        float left = viewHolder.completeBox.getMeasuredWidth() +
+            ((MarginLayoutParams)viewHolder.completeBox.getLayoutParams()).leftMargin;
+        int availableWidth = (int) (dm.widthPixels - left - rightWidth * dm.density) - 15;
 
         int i = 0;
         for(; i < splitDetails.length; i++) {
@@ -417,10 +421,13 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         actual.clear();
 
         if(i >= splitDetails.length) {
+            viewHolder.details1.setPadding(0, 0, 0, (int)(4 * dm.density));
             viewHolder.details2.setVisibility(View.GONE);
             return;
-        } else
+        } else {
+            viewHolder.details1.setPadding(0, 0, 0, 0);
             viewHolder.details2.setVisibility(View.VISIBLE);
+        }
 
         for(; i < splitDetails.length; i++)
             actual.insert(actual.length(), convertToHtml(splitDetails[i] + "  ", detailImageGetter, null));
@@ -713,9 +720,14 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                     View view = decoration.decoration.apply(activity, viewHolder.taskRow);
                     viewHolder.decorations[i] = view;
                     switch(decoration.position) {
-                    case TaskDecoration.POSITION_LEFT:
-                        viewHolder.taskRow.addView(view, 2);
+                    case TaskDecoration.POSITION_LEFT: {
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                        params.addRule(RelativeLayout.BELOW, R.id.completeBox);
+                        view.setLayoutParams(params);
+                        viewHolder.view.addView(view);
                         break;
+                    }
                     case TaskDecoration.POSITION_RIGHT:
                         viewHolder.taskRow.addView(view, viewHolder.taskRow.getChildCount());
                     }
@@ -728,7 +740,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         protected void reset(ViewHolder viewHolder, long taskId) {
             if(viewHolder.decorations != null) {
                 for(View view : viewHolder.decorations)
-                    viewHolder.taskRow.removeView(view);
+                    ((ViewGroup)view.getParent()).removeView(view);
             }
             if(taskId == expanded)
                 viewHolder.view.setBackgroundResource(R.drawable.list_selector_highlighted);

@@ -9,7 +9,7 @@
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="4dip"
+        android:paddingTop="8dip"
         android:paddingLeft="8dip"
         android:paddingRight="8dip"
         android:scaleType="center"
