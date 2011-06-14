@@ -33,6 +33,17 @@
             android:paddingRight="50dip"
             android:ellipsize="start"
             style="@style/TextAppearance.TLA_Header"/>
+        
+        <!-- Header Logo -->
+        <ImageView android:id="@+id/headerLogo"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="100"
+            android:gravity="center"
+            android:paddingRight="50dip"
+            android:src="@drawable/header_logo"
+            android:scaleType="center"
+            android:visibility="gone"/>
 
     </LinearLayout>
     
@@ -93,7 +104,7 @@
             android:layout_marginRight="3dip"
             android:layout_weight="1"
             android:background="@drawable/footer_button"
-            android:src="@drawable/tango_edit"
+            android:src="@android:drawable/ic_menu_edit"
             android:scaleType="center"/> 
 
     </LinearLayout>

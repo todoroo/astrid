@@ -30,9 +30,11 @@ import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.text.Html.TagHandler;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -135,6 +137,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     private QuickActionWidget mBar;
     private final QuickActionListener mBarListener = new QuickActionListener();
 
+    // measure utilities
+    private final Paint paint;
+    private final DisplayMetrics dm;
+
     // --- task detail and decoration soft caches
 
     public final DecorationManager decorationManager;
@@ -168,6 +174,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         this.onCompletedTaskListener = onCompletedTaskListener;
 
         fontSize = Preferences.getIntegerFromString(R.string.p_fontSize, 20);
+        paint = new Paint();
+        dm = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
 
         synchronized(TaskAdapter.class) {
             if(IMPORTANCE_COLORS == null)
@@ -295,6 +304,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         }
 
         // due date / completion date
+        float dueDateTextWidth = 0;
         final TextView dueDateView = viewHolder.dueDate; {
             if(!task.isCompleted() && task.hasDueDate()) {
                 long dueDate = task.getValue(Task.DUE_DATE);
@@ -307,11 +317,13 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
                 String dateValue = formatDate(dueDate);
                 dueDateView.setText(dateValue);
+                dueDateTextWidth = paint.measureText(dateValue);
                 setVisibility(dueDateView);
             } else if(task.isCompleted()) {
                 String dateValue = DateUtilities.getDateStringWithTime(activity, new Date(task.getValue(Task.COMPLETION_DATE)));
                 dueDateView.setText(r.getString(R.string.TAd_completed, dateValue));
                 dueDateView.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemDueDate_Completed);
+                dueDateTextWidth = paint.measureText(dateValue);
                 setVisibility(dueDateView);
             } else {
                 dueDateView.setVisibility(View.GONE);
@@ -363,17 +375,55 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 details = task.getValue(Task.DETAILS);
             if(TextUtils.isEmpty(details) || DETAIL_SEPARATOR.equals(details) || task.isCompleted()) {
                 viewHolder.details1.setVisibility(View.GONE);
+                viewHolder.details2.setVisibility(View.GONE);
             } else {
                 viewHolder.details1.setVisibility(View.VISIBLE);
                 while(details.startsWith(DETAIL_SEPARATOR))
                     details = details.substring(DETAIL_SEPARATOR.length());
-                viewHolder.details1.setText(convertToHtml(details.trim().replace("\n", //$NON-NLS-1$
-                        "<br>"), detailImageGetter, null)); //$NON-NLS-1$
+
+                addDetails(viewHolder, details, dueDateTextWidth);
             }
         }
 
         // details and decorations, expanded
         decorationManager.request(viewHolder);
+    }
+
+    @SuppressWarnings("nls")
+    private void addDetails(ViewHolder viewHolder, String details, float rightWidth) {
+        SpannableStringBuilder prospective = new SpannableStringBuilder();
+        SpannableStringBuilder actual = new SpannableStringBuilder();
+
+        details = details.trim().replace("\n", "<br>");
+        String[] splitDetails = details.split("\\|");
+        viewHolder.completeBox.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        float left = viewHolder.completeBox.getMeasuredWidth() + 5;
+        int availableWidth = (int) (dm.widthPixels - left - rightWidth);
+
+        int i = 0;
+        for(; i < splitDetails.length; i++) {
+            Spanned spanned = convertToHtml(splitDetails[i] + "  ", detailImageGetter, null);
+            prospective.insert(prospective.length(), spanned);
+            viewHolder.details1.setText(prospective);
+            viewHolder.details1.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+            if(rightWidth > 0 && viewHolder.details1.getMeasuredWidth() > availableWidth)
+                break;
+
+            actual.insert(actual.length(), spanned);
+        }
+        viewHolder.details1.setText(actual);
+        actual.clear();
+
+        if(i >= splitDetails.length) {
+            viewHolder.details2.setVisibility(View.GONE);
+            return;
+        } else
+            viewHolder.details2.setVisibility(View.VISIBLE);
+
+        for(; i < splitDetails.length; i++)
+            actual.insert(actual.length(), convertToHtml(splitDetails[i] + "  ", detailImageGetter, null));
+        viewHolder.details2.setText(actual);
     }
 
     protected TaskRowListener listener = new TaskRowListener();
@@ -918,11 +968,14 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             name.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemTitle);
         }
         name.setTextSize(fontSize);
-        float detailTextSize = Math.max(10, fontSize * 13 / 20);
+        float detailTextSize = Math.max(10, fontSize * 12 / 20);
         if(viewHolder.details1 != null)
             viewHolder.details1.setTextSize(detailTextSize);
+        if(viewHolder.details2 != null)
+            viewHolder.details2.setTextSize(detailTextSize);
         if(viewHolder.dueDate != null)
             viewHolder.dueDate.setTextSize(detailTextSize);
+        paint.setTextSize(detailTextSize);
     }
 
     /**
