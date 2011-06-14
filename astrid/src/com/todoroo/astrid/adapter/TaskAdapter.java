@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -846,19 +845,20 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             new HashMap<Integer, TaskAction>(2);
         private long taskId;
         private int itemCount = 0;
-        private int iconWidth;
 
         public void initialize(long newTaskId) {
             this.taskId = newTaskId;
             itemCount = 0;
             positionActionMap.clear();
             mBar.setOnQuickActionClickListener(this);
-            iconWidth = activity.getResources().getDrawable(R.drawable.ic_qbar_edit).getIntrinsicHeight();
         }
 
         public void addWithAction(TaskAction item) {
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(item.icon, iconWidth, iconWidth, true);
-            Drawable drawable = new BitmapDrawable(activity.getResources(), scaledBitmap);
+            Drawable drawable;
+            if(item.drawable > 0)
+                drawable = activity.getResources().getDrawable(item.drawable);
+            else
+                drawable = new BitmapDrawable(activity.getResources(), item.icon);
             addWithAction(new QuickAction(drawable, item.text), item);
         }
 
