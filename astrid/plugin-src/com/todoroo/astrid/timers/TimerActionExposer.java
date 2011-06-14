@@ -47,10 +47,10 @@ public class TimerActionExposer extends BroadcastReceiver {
             final Drawable drawable;
             if(task.getValue(Task.TIMER_START) == 0) {
                 label = context.getString(R.string.TAE_startTimer);
-                drawable = context.getResources().getDrawable(R.drawable.tango_clock_start);
+                drawable = context.getResources().getDrawable(R.drawable.ic_qbar_timer_start);
             } else {
                 label = context.getString(R.string.TAE_stopTimer);
-                drawable = context.getResources().getDrawable(R.drawable.tango_clock_stop);
+                drawable = context.getResources().getDrawable(R.drawable.ic_qbar_timer_stop);
             }
             Bitmap icon = ((BitmapDrawable)drawable).getBitmap();
             Intent newIntent = new Intent(TIMER_ACTION);

@@ -37,7 +37,7 @@ public class EditPeopleExposer extends BroadcastReceiver {
 
         if(AstridApiConstants.BROADCAST_REQUEST_ACTIONS.equals(intent.getAction())) {
             final String label = context.getString(R.string.EPE_action);
-            final Drawable drawable = context.getResources().getDrawable(R.drawable.tango_users);
+            final Drawable drawable = context.getResources().getDrawable(R.drawable.ic_qbar_share);
             Intent newIntent = new Intent(ACTION);
             newIntent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, taskId);
             Bitmap icon = ((BitmapDrawable)drawable).getBitmap();

@@ -52,10 +52,10 @@ public class EditNoteExposer extends BroadcastReceiver {
                 if(task == null || TextUtils.isEmpty(task.getValue(Task.NOTES)))
                     return;
                 label = context.getString(R.string.ENE_label);
-                drawable = context.getResources().getDrawable(R.drawable.tango_notes);
+                drawable = context.getResources().getDrawable(R.drawable.ic_qbar_comments);
             } else {
                 label = context.getString(R.string.ENE_label_comments);
-                drawable = context.getResources().getDrawable(R.drawable.tango_chat);
+                drawable = context.getResources().getDrawable(R.drawable.ic_qbar_comments);
             }
             Intent newIntent = new Intent(ACTION);
             newIntent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, taskId);
