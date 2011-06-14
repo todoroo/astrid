@@ -69,6 +69,7 @@ import com.todoroo.astrid.api.TaskDecorationExposer;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.TaskAdapterAddOnManager;
 import com.todoroo.astrid.notes.EditNoteActivity;
+import com.todoroo.astrid.notes.NotesDecorationExposer;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.timers.TimerDecorationExposer;
 import com.todoroo.astrid.utility.Constants;
@@ -477,16 +478,11 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 string = DateUtils.getRelativeTimeSpanString(activity, date, true).toString();
             else
                 string = DateUtilities.getRelativeDay(activity, date).toLowerCase();
-        } else if(Math.abs(date - DateUtilities.now()) < DateUtilities.ONE_WEEK) {
+        } else {
             string = DateUtils.getRelativeDateTimeString(activity, date,
                     DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
             if(!Task.hasDueTime(date))
                 string = string.substring(0, string.lastIndexOf(','));
-        } else {
-            if(Task.hasDueTime(date))
-                string = DateUtilities.getDateStringWithTimeAndWeekday(activity, new Date(date));
-            else
-                string = DateUtilities.getDateStringWithWeekday(activity, new Date(date));
         }
 
         dateCache.put(date, string);
@@ -597,9 +593,20 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     private final ImageGetter detailImageGetter = new ImageGetter() {
         private final HashMap<Integer, Drawable> cache =
             new HashMap<Integer, Drawable>(3);
+        @SuppressWarnings("nls")
         public Drawable getDrawable(String source) {
             Resources r = activity.getResources();
-            int drawable = r.getIdentifier("drawable/" + source, null, Constants.PACKAGE); //$NON-NLS-1$
+
+            if(source.equals("silk_clock"))
+                source = "details_alarm";
+            else if(source.equals("silk_tag_pink"))
+                source = "details_tag";
+            else if(source.equals("silk_date"))
+                source = "details_repeat";
+            else if(source.equals("silk_note"))
+                source = "details_note";
+
+            int drawable = r.getIdentifier("drawable/" + source, null, Constants.PACKAGE);
             if(drawable == 0)
                 return null;
             Drawable d;
@@ -653,6 +660,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
         private final TaskDecorationExposer[] exposers = new TaskDecorationExposer[] {
                 new TimerDecorationExposer(),
+                new NotesDecorationExposer()
         };
 
         /**

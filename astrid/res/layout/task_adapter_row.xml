@@ -9,7 +9,7 @@
     android:paddingRight="4dip"
     android:orientation="vertical">
             
-    <LinearLayout android:id="@+id/task_row"
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="100"
@@ -38,19 +38,27 @@
             android:paddingBottom="4dip"
             android:layout_weight="100">
               
-            <!-- task name -->
-            <TextView android:id="@+id/title"
+            <LinearLayout android:id="@+id/task_row"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                style="@style/TextAppearance.TAd_ItemTitle"/>
+                android:orientation="horizontal">
+        
+                <!-- task name -->
+                <TextView android:id="@+id/title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="100"
+                    style="@style/TextAppearance.TAd_ItemTitle"/>
+        
+            </LinearLayout>
         
             <!-- due date -->
             <TextView android:id="@+id/dueDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/title"
+                android:layout_below="@id/task_row"
                 android:layout_alignParentRight="true"
                 android:singleLine="true"/>
               
@@ -58,7 +66,8 @@
             <TextView android:id="@+id/details1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/title"
+                android:layout_marginTop="-2dip"
+                android:layout_below="@id/task_row"
                 android:layout_alignParentLeft="true"
                 style="@style/TextAppearance.TAd_ItemDetails"
                 android:visibility="gone" />

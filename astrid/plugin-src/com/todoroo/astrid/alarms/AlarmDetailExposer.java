@@ -67,7 +67,7 @@ public class AlarmDetailExposer extends BroadcastReceiver {
                 flags |= DateUtils.FORMAT_SHOW_DATE;
             CharSequence durationString = DateUtils.formatDateTime(context, nextTime,
                      flags);
-            return "<img src='silk_clock'/> " + durationString; //$NON-NLS-1$
+            return "<img src='silk_alarm'/> " + durationString; //$NON-NLS-1$
         } finally {
             cursor.close();
         }
