@@ -32,6 +32,7 @@ import android.text.Html.TagHandler;
 import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -214,17 +215,16 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         viewHolder.picture = (AsyncImageView)view.findViewById(R.id.picture);
         viewHolder.completeBox = (CheckBox)view.findViewById(R.id.completeBox);
         viewHolder.dueDate = (TextView)view.findViewById(R.id.dueDate);
-        viewHolder.details = (TextView)view.findViewById(R.id.details);
-        viewHolder.extendedDetails = (TextView)view.findViewById(R.id.extendedDetails);
-        viewHolder.actions = (LinearLayout)view.findViewById(R.id.actions);
+        viewHolder.details1 = (TextView)view.findViewById(R.id.details1);
+        viewHolder.details2 = (TextView)view.findViewById(R.id.details2);
         viewHolder.taskRow = (LinearLayout)view.findViewById(R.id.task_row);
         viewHolder.importance = (View)view.findViewById(R.id.importance);
 
         view.setTag(viewHolder);
         for(int i = 0; i < view.getChildCount(); i++)
             view.getChildAt(i).setTag(viewHolder);
-        if(viewHolder.details != null)
-            viewHolder.details.setTag(viewHolder);
+        if(viewHolder.details1 != null)
+            viewHolder.details1.setTag(viewHolder);
 
         // add UI component listeners
         addListeners(view);
@@ -270,10 +270,8 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         public CheckBox completeBox;
         public AsyncImageView picture;
         public TextView dueDate;
-        public TextView details;
-        public TextView extendedDetails;
+        public TextView details1, details2;
         public View importance;
-        public LinearLayout actions;
         public LinearLayout taskRow;
 
         public View[] decorations;
@@ -358,18 +356,18 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         }
 
         String details;
-        if(viewHolder.details != null) {
+        if(viewHolder.details1 != null) {
             if(taskDetailLoader.containsKey(task.getId()))
                 details = taskDetailLoader.get(task.getId()).toString();
             else
                 details = task.getValue(Task.DETAILS);
             if(TextUtils.isEmpty(details) || DETAIL_SEPARATOR.equals(details) || task.isCompleted()) {
-                viewHolder.details.setVisibility(View.GONE);
+                viewHolder.details1.setVisibility(View.GONE);
             } else {
-                viewHolder.details.setVisibility(View.VISIBLE);
+                viewHolder.details1.setVisibility(View.VISIBLE);
                 while(details.startsWith(DETAIL_SEPARATOR))
                     details = details.substring(DETAIL_SEPARATOR.length());
-                viewHolder.details.setText(convertToHtml(details.trim().replace("\n", //$NON-NLS-1$
+                viewHolder.details1.setText(convertToHtml(details.trim().replace("\n", //$NON-NLS-1$
                         "<br>"), detailImageGetter, null)); //$NON-NLS-1$
             }
         }
@@ -423,10 +421,24 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             return dateCache.get(date);
 
         String string;
-        if(Task.hasDueTime(date))
-            string = DateUtilities.getDateStringWithTimeAndWeekday(activity, new Date(date));
-        else
-            string = DateUtilities.getDateStringWithWeekday(activity, new Date(date));
+
+        if(Math.abs(date - DateUtilities.now()) < DateUtilities.ONE_DAY) {
+            if(Task.hasDueTime(date))
+                string = DateUtils.getRelativeTimeSpanString(activity, date, true).toString();
+            else
+                string = DateUtilities.getRelativeDay(activity, date).toLowerCase();
+        } else if(Math.abs(date - DateUtilities.now()) < DateUtilities.ONE_WEEK) {
+            string = DateUtils.getRelativeDateTimeString(activity, date,
+                    DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
+            if(!Task.hasDueTime(date))
+                string = string.substring(0, string.lastIndexOf(','));
+        } else {
+            if(Task.hasDueTime(date))
+                string = DateUtilities.getDateStringWithTimeAndWeekday(activity, new Date(date));
+            else
+                string = DateUtilities.getDateStringWithWeekday(activity, new Date(date));
+        }
+
         dateCache.put(date, string);
         return string;
     }
@@ -906,9 +918,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             name.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemTitle);
         }
         name.setTextSize(fontSize);
-        float detailTextSize = Math.max(12, fontSize * 14 / 20);
-        if(viewHolder.details != null)
-            viewHolder.details.setTextSize(detailTextSize);
+        float detailTextSize = Math.max(10, fontSize * 13 / 20);
+        if(viewHolder.details1 != null)
+            viewHolder.details1.setTextSize(detailTextSize);
         if(viewHolder.dueDate != null)
             viewHolder.dueDate.setTextSize(detailTextSize);
     }
