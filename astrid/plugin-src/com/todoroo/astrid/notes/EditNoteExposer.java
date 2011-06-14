@@ -65,7 +65,7 @@ public class EditNoteExposer extends BroadcastReceiver {
 
             // transmit
             Intent broadcastIntent = new Intent(AstridApiConstants.BROADCAST_SEND_ACTIONS);
-            broadcastIntent.putExtra(AstridApiConstants.EXTRAS_ADDON, ActFmPreferenceService.IDENTIFIER);
+            broadcastIntent.putExtra(AstridApiConstants.EXTRAS_ADDON, NotesPlugin.IDENTIFIER);
             broadcastIntent.putExtra(AstridApiConstants.EXTRAS_RESPONSE, action);
             broadcastIntent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, taskId);
             context.sendBroadcast(broadcastIntent, AstridApiConstants.PERMISSION_READ);

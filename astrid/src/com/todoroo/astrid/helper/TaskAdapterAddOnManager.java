@@ -6,6 +6,7 @@ package com.todoroo.astrid.helper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.app.ListActivity;
@@ -27,8 +28,8 @@ abstract public class TaskAdapterAddOnManager<TYPE> {
         this.activity = activity;
     }
 
-    private final Map<Long, HashMap<String, TYPE>> cache =
-        Collections.synchronizedMap(new HashMap<Long, HashMap<String, TYPE>>(0));
+    private final Map<Long, LinkedHashMap<String, TYPE>> cache =
+        Collections.synchronizedMap(new HashMap<Long, LinkedHashMap<String, TYPE>>(0));
 
     // --- interface
 
@@ -111,7 +112,7 @@ abstract public class TaskAdapterAddOnManager<TYPE> {
     protected synchronized Collection<TYPE> initialize(long taskId) {
         if(cache.containsKey(taskId) && cache.get(taskId) != null)
             return get(taskId);
-        cache.put(taskId, new HashMap<String, TYPE>(0));
+        cache.put(taskId, new LinkedHashMap<String, TYPE>(0));
         return null;
     }
 
@@ -123,7 +124,7 @@ abstract public class TaskAdapterAddOnManager<TYPE> {
      */
     protected synchronized Collection<TYPE> addIfNotExists(long taskId, String addOn,
             TYPE item) {
-        HashMap<String, TYPE> list = cache.get(taskId);
+        LinkedHashMap<String, TYPE> list = cache.get(taskId);
         if(list == null)
             return null;
         if(list.containsValue(item))
