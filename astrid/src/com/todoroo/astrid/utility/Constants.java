@@ -21,6 +21,11 @@ public final class Constants {
     public static final boolean OEM = false;
 
     /**
+     * Whether this is an Android Market-disabled build
+     */
+    public static final boolean MARKET_DISABLED = false;
+
+    /**
      * Interval to update the widget (in order to detect hidden tasks
      * becoming visible)
      */
@@ -49,6 +54,9 @@ public final class Constants {
 
     /** Notification Manager id for producteev notifications*/
     public static final int NOTIFICATION_PRODUCTEEV_NOTIFICATIONS = -4;
+
+    /** Notification Manager id for astrid.com */
+    public static final int NOTIFICATION_ACTFM = -5;
 
 
 }

@@ -10,9 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
-import android.text.format.DateUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property;
@@ -49,7 +47,8 @@ public final class ReminderService  {
         Task.REMINDER_FLAGS,
         Task.REMINDER_PERIOD,
         Task.REMINDER_LAST,
-        Task.REMINDER_SNOOZE
+        Task.REMINDER_SNOOZE,
+        Task.FLAGS,
     };
 
     /** flag for due date reminder */
@@ -142,6 +141,17 @@ public final class ReminderService  {
         scheduleAlarm(task, true);
     }
 
+    public void clearAllAlarms(Task task) {
+        scheduler.createAlarm(task, NO_ALARM, TYPE_SNOOZE);
+        scheduler.createAlarm(task, NO_ALARM, TYPE_RANDOM);
+        scheduler.createAlarm(task, NO_ALARM, TYPE_DUE);
+        scheduler.createAlarm(task, NO_ALARM, TYPE_OVERDUE);
+    }
+
+    public void clearAlarm(Task task, int type) {
+        scheduler.createAlarm(task, NO_ALARM, type);
+    }
+
     /**
      * Schedules alarms for a single task
      *
@@ -164,8 +174,10 @@ public final class ReminderService  {
             }
         }
 
-        if(task.isCompleted() || task.isDeleted())
+        if(task.isCompleted() || task.isDeleted() || task.getValue(Task.USER_ID) != 0) {
+            clearAllAlarms(task);
             return;
+        }
 
         // snooze reminder
         long whenSnooze = calculateNextSnoozeReminder(task);
@@ -178,18 +190,6 @@ public final class ReminderService  {
 
         // notifications after due date
         long whenOverdue = calculateNextOverdueReminder(task);
-
-        /*if(Constants.DEBUG) {
-            System.err.println("TASK: " + task.getValue(Task.TITLE));
-            System.err.println("LAST REMINDER: " + new Date(task.getValue(Task.REMINDER_LAST)));
-            if(task.hasDueDate())
-                System.err.println("DUEDATE: " + new Date(task.getValue(Task.DUE_DATE)));
-            System.err.println("WHEN OVERDUE: " + (whenOverdue));
-            System.err.println("WHEN DUED: " + (whenDueDate));
-            System.err.println("WHEN SNOOZ: " + (whenSnooze));
-            System.err.println("WHEN RANDO: " + (whenRandom));
-        }*/
-
 
         // if random reminders are too close to due date, favor due date
         if(whenRandom != NO_ALARM && whenDueDate - whenRandom < DateUtilities.ONE_DAY)
@@ -347,17 +347,6 @@ public final class ReminderService  {
 
                     if(dueDate > DateUtilities.now() && dueDateAlarm < DateUtilities.now())
                         dueDateAlarm = dueDate;
-
-                    String toastMessage;
-                    Context context = ContextManager.getContext();
-                    CharSequence formattedDate =
-                        DateUtils.getRelativeTimeSpanString(dueDateAlarm);
-                    toastMessage = context.getString(R.string.rmd_time_toast, formattedDate);
-
-                    if (dueDateAlarm != NO_ALARM)
-                        Toast.makeText(context, toastMessage, 5).show();
-                    else
-                        Toast.makeText(context, context.getString(R.string.rmd_time_toast_quiet), 5).show();
                 }
             }
 
@@ -434,11 +423,14 @@ public final class ReminderService  {
             intent.putExtra(Notifications.ID_KEY, task.getId());
             intent.putExtra(Notifications.TYPE_KEY, type);
 
+            // calculate the unique requestCode as a combination of the task-id and alarm-type:
+            // concatenate id+type to keep the combo unique
+            String rc = ""+task.getId()+type;
             AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, Integer.parseInt(rc),
                     intent, 0);
 
-            if(time == 0 || time == NO_ALARM)
+            if (time == 0 || time == NO_ALARM)
                 am.cancel(pendingIntent);
             else {
                 if(time < DateUtilities.now())
@@ -461,7 +453,7 @@ public final class ReminderService  {
     private TodorooCursor<Task> getTasksWithReminders(Property<?>... properties) {
         return taskDao.query(Query.select(properties).where(Criterion.and(
                 TaskCriteria.isActive(),
-                Criterion.not(TaskCriteria.isReadOnly()),
+                TaskCriteria.ownedByMe(),
                 Criterion.or(Task.REMINDER_FLAGS.gt(0), Task.REMINDER_PERIOD.gt(0)))));
     }
 

@@ -82,7 +82,6 @@ public class DraggableTaskListFragment extends TaskListFragment {
         getTouchListView().setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                taskAdapter.clearSelection();
                 return false;
             }
         });

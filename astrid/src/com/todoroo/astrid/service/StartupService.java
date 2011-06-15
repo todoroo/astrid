@@ -30,17 +30,20 @@ import com.todoroo.andlib.service.ExceptionService.TodorooUncaughtExceptionHandl
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
+import com.todoroo.astrid.actfm.sync.ActFmSyncService;
 import com.todoroo.astrid.backup.BackupConstants;
 import com.todoroo.astrid.backup.BackupService;
 import com.todoroo.astrid.backup.TasksXmlImporter;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
+import com.todoroo.astrid.gtasks.GtasksPreferenceService;
 import com.todoroo.astrid.producteev.ProducteevUtilities;
 import com.todoroo.astrid.reminders.ReminderStartupReceiver;
 import com.todoroo.astrid.utility.AstridPreferences;
 import com.todoroo.astrid.utility.Constants;
-import com.todoroo.astrid.widget.TasksWidget.UpdateService;
+import com.todoroo.astrid.widget.TasksWidget.WidgetUpdateService;
 
 /**
  * Service which handles jobs that need to be run when Astrid starts up.
@@ -60,20 +63,21 @@ public class StartupService {
 
     // --- application startup
 
-    @Autowired
-    ExceptionService exceptionService;
+    @Autowired ExceptionService exceptionService;
 
-    @Autowired
-    UpgradeService upgradeService;
+    @Autowired UpgradeService upgradeService;
 
-    @Autowired
-    TaskService taskService;
+    @Autowired TaskService taskService;
 
-    @Autowired
-    MetadataService metadataService;
+    @Autowired MetadataService metadataService;
 
-    @Autowired
-    Database database;
+    @Autowired Database database;
+
+    @Autowired ActFmSyncService actFmSyncService;
+
+    @Autowired GtasksPreferenceService gtasksPreferenceService;
+
+    @Autowired ActFmPreferenceService actFmPreferenceService;
 
     /**
      * bit to prevent multiple initializations
@@ -146,7 +150,7 @@ public class StartupService {
             public void run() {
                 // start widget updating alarm
                 AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-                Intent intent = new Intent(context, UpdateService.class);
+                Intent intent = new Intent(context, WidgetUpdateService.class);
                 PendingIntent pendingIntent = PendingIntent.getService(context,
                         0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
                 am.setInexactRepeating(AlarmManager.RTC, 0,
@@ -155,15 +159,17 @@ public class StartupService {
                 database.openForWriting();
                 taskService.cleanup();
 
-                // schedule alarms
-                ReminderStartupReceiver.startReminderSchedulingService(context);
-
                 // if sync ongoing flag was set, clear it
                 ProducteevUtilities.INSTANCE.stopOngoing();
                 MilkUtilities.INSTANCE.stopOngoing();
+                gtasksPreferenceService.stopOngoing();
+                actFmPreferenceService.stopOngoing();
                 OpencrxCoreUtils.INSTANCE.stopOngoing();
 
+                // perform initialization
+                ReminderStartupReceiver.startReminderSchedulingService(context);
                 BackupService.scheduleService(context);
+                actFmSyncService.initialize();
 
                 // get and display update messages
                 new UpdateMessageService().processUpdates(context);
