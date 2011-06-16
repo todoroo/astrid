@@ -106,7 +106,7 @@ import com.todoroo.astrid.utility.AstridPreferences;
 import com.todoroo.astrid.utility.Constants;
 import com.todoroo.astrid.utility.Flags;
 import com.todoroo.astrid.voice.VoiceInputAssistant;
-import com.todoroo.astrid.widget.TasksWidget;
+import com.todoroo.astrid.widget.TasksWidget.WidgetUpdateService;
 
 public class TaskListFragment extends ListFragment implements OnScrollListener,
         GestureInterface, OnSortSelectedListener {
@@ -122,11 +122,11 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
     // --- menu codes
 
-    private static final int MENU_ADDONS_ID = R.string.TLA_menu_addons;
-    private static final int MENU_SETTINGS_ID = R.string.TLA_menu_settings;
-    private static final int MENU_SORT_ID = R.string.TLA_menu_sort;
-    private static final int MENU_SYNC_ID = R.string.TLA_menu_sync;
-    private static final int MENU_HELP_ID = R.string.TLA_menu_help;
+    protected static final int MENU_ADDONS_ID = R.string.TLA_menu_addons;
+    protected static final int MENU_SETTINGS_ID = R.string.TLA_menu_settings;
+    protected static final int MENU_SORT_ID = R.string.TLA_menu_sort;
+    public static final int MENU_SYNC_ID = R.string.TLA_menu_sync;
+    protected static final int MENU_HELP_ID = R.string.TLA_menu_help;
     private static final int MENU_ADDON_INTENT_ID = Menu.FIRST + 199;
 
     private static final int CONTEXT_MENU_EDIT_TASK_ID = R.string.TAd_contextEditTask;
@@ -582,13 +582,13 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
 
                 if(AstridApiConstants.BROADCAST_SEND_DECORATIONS.equals(intent.getAction())) {
                     TaskDecoration deco = extras.getParcelable(AstridApiConstants.EXTRAS_RESPONSE);
-                    taskAdapter.decorationManager.addNew(taskId, addOn, deco);
+                    taskAdapter.decorationManager.addNew(taskId, addOn, deco, null);
                 } else if(AstridApiConstants.BROADCAST_SEND_DETAILS.equals(intent.getAction())) {
                     String detail = extras.getString(AstridApiConstants.EXTRAS_RESPONSE);
                     taskAdapter.addDetails(taskId, detail);
                 } else if(AstridApiConstants.BROADCAST_SEND_ACTIONS.equals(intent.getAction())) {
                     TaskAction action = extras.getParcelable(AstridApiConstants.EXTRAS_RESPONSE);
-                    taskAdapter.taskActionManager.addNew(taskId, addOn, action);
+                    taskAdapter.taskActionManager.addNew(taskId, addOn, action, null);
                 }
             } catch (Exception e) {
                 exceptionService.reportError("receive-detail-" + //$NON-NLS-1$
@@ -696,7 +696,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
-        getActivity().getActionBar().setTitle(filter.title);
+            getActivity().getActionBar().setTitle(filter.title);
 
         // perform query
         TodorooCursor<Task> currentCursor = taskService.fetchFiltered(
@@ -1140,7 +1140,7 @@ public class TaskListFragment extends ListFragment implements OnScrollListener,
             editor.putInt(SortHelper.PREF_SORT_SORT, sort);
             editor.commit();
             ContextManager.getContext().startService(new Intent(ContextManager.getContext(),
-                    TasksWidget.UpdateService.class));
+                    WidgetUpdateService.class));
         }
 
         setUpTaskList();

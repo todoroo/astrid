@@ -39,5 +39,4 @@ public class TaskListActivity extends Activity {
                 getTasklistFragment().onNewIntent(intent);
         }
     }
-
 }

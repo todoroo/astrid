@@ -70,7 +70,7 @@ public class TasksWidget extends AppWidgetProvider {
      */
     public static void updateWidgets(Context context) {
         context.startService(new Intent(context,
-                TasksWidget.UpdateService.class));
+                TasksWidget.WidgetUpdateService.class));
     }
 
     /**
@@ -79,8 +79,8 @@ public class TasksWidget extends AppWidgetProvider {
      */
     public static void updateWidget(Context context, int id) {
         Intent intent = new Intent(ContextManager.getContext(),
-                TasksWidget.UpdateService.class);
-        intent.putExtra(UpdateService.EXTRA_WIDGET_ID, id);
+                TasksWidget.WidgetUpdateService.class);
+        intent.putExtra(WidgetUpdateService.EXTRA_WIDGET_ID, id);
         context.startService(intent);
     }
 
@@ -91,7 +91,7 @@ public class TasksWidget extends AppWidgetProvider {
         }
     }
 
-    public static class UpdateService extends Service {
+    public static class WidgetUpdateService extends Service {
 
         public static String EXTRA_WIDGET_ID = "widget_id"; //$NON-NLS-1$
 
@@ -165,7 +165,7 @@ public class TasksWidget extends AppWidgetProvider {
                 int flags = publicPrefs.getInt(SortHelper.PREF_SORT_FLAGS, 0);
                 int sort = publicPrefs.getInt(SortHelper.PREF_SORT_SORT, 0);
                 String query = SortHelper.adjustQueryForFlagsAndSort(
-                        filter.sqlQuery, flags, sort) + " LIMIT " + numberOfTasks;
+                        filter.sqlQuery, flags, sort).replaceAll("LIMIT \\d+", "") + " LIMIT " + numberOfTasks;
 
                 database.openForReading();
                 cursor = taskService.fetchFiltered(query, null, Task.ID, Task.TITLE, Task.DUE_DATE, Task.COMPLETION_DATE);

@@ -14,6 +14,8 @@ import android.content.Context;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 
+import com.todoroo.astrid.api.R;
+
 
 public class DateUtilities {
 
@@ -62,15 +64,10 @@ public class DateUtilities {
 
     static Boolean is24HourOverride = null;
 
-    @SuppressWarnings("nls")
     public static boolean is24HourFormat(Context context) {
         if(is24HourOverride != null)
             return is24HourOverride;
 
-//        String value = android.provider.Settings.System.getString(context.getContentResolver(),
-//                android.provider.Settings.System.TIME_12_24);
-//        boolean b24 =  !(value == null || value.equals("12"));
-//        return b24;
         return DateFormat.is24HourFormat(context);
     }
 
@@ -133,6 +130,24 @@ public class DateUtilities {
     @SuppressWarnings("nls")
     public static String getDateStringWithTime(Context context, Date date) {
         return getDateString(context, date) + " " + getTimeString(context, date);
+    }
+
+    /**
+     * @return yesterday, today, tomorrow, or null
+     */
+    public static String getRelativeDay(Context context, long date) {
+        Date today = new Date();
+        if(Math.abs(today.getTime() - date) > DateUtilities.ONE_DAY)
+            return null;
+        int todayDate = today.getDate();
+        int otherDate = unixtimeToDate(date).getDate();
+
+        if(todayDate == otherDate)
+            return context.getString(R.string.today);
+        if(today.getTime() > date)
+            return context.getString(R.string.yesterday);
+        return context.getString(R.string.tomorrow);
+
     }
 
 }

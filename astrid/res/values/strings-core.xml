@@ -49,6 +49,9 @@
 
   <!-- EULA title -->
   <string name="DLG_eula_title">Astrid Terms Of Use</string>
+
+  <!-- Progress Dialog generic text -->
+  <string name="DLG_please_wait">Please Wait</string>
   
   <!-- =============================================================== UI == -->
   
@@ -60,6 +63,23 @@
   
   <!-- String formatter for Disable button -->
   <string name="WID_disableButton">Disable</string>
+  
+  <!--  ============================================================= notes -->
+  
+  <!-- Note Exposer -->    
+  <string name="ENE_label">Notes</string>
+  
+  <!-- Note Exposer / Comments -->    
+  <string name="ENE_label_comments">Comments</string>
+  
+  <!-- EditNoteActivity - no comments -->
+  <string name="ENA_no_comments">Nothing To Show</string>
+  
+  <!-- EditNoteActivity - loading -->
+  <string name="ENA_loading">Loading...</string>
+  
+  <!-- EditNoteActivity - refresh comments -->
+  <string name="ENA_refresh_comments">Refresh Comments</string>
   
   <!-- ================================================= TaskListActivity == -->
   
