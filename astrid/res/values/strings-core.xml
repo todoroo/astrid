@@ -299,6 +299,8 @@
       <item>Tomorrow</item>
       <item>(day after)</item>
       <item>Next Week</item>
+      <item>In Two Weeks</item>
+      <item>Next Month</item>
       <item>No Deadline</item>
   </string-array>
   

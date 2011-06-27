@@ -326,6 +326,7 @@ public final class Task extends RemoteModel {
     public static final int URGENCY_NEXT_MONTH = 5;
     public static final int URGENCY_SPECIFIC_DAY = 6;
     public static final int URGENCY_SPECIFIC_DAY_TIME = 7;
+    public static final int URGENCY_IN_TWO_WEEKS = 8;
 
     /** hide until array index -> significance */
     public static final int HIDE_UNTIL_NONE = 0;
@@ -362,6 +363,9 @@ public final class Task extends RemoteModel {
             break;
         case URGENCY_NEXT_WEEK:
             date = DateUtilities.now() + DateUtilities.ONE_WEEK;
+            break;
+        case URGENCY_IN_TWO_WEEKS:
+            date = DateUtilities.now() + DateUtilities.ONE_WEEK + DateUtilities.ONE_WEEK;
             break;
         case URGENCY_NEXT_MONTH:
             date = DateUtilities.oneMonthFromNow();
