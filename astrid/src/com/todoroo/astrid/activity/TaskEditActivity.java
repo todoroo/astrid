@@ -888,6 +888,10 @@ public final class TaskEditActivity extends TabActivity {
             urgencyValues[4] = new UrgencyValue(labels[4],
                     Task.URGENCY_NEXT_WEEK);
             urgencyValues[5] = new UrgencyValue(labels[5],
+                    Task.URGENCY_IN_TWO_WEEKS);
+            urgencyValues[6] = new UrgencyValue(labels[6],
+                    Task.URGENCY_NEXT_MONTH);
+            urgencyValues[7] = new UrgencyValue(labels[7],
                     Task.URGENCY_NONE);
 
             // search for setting
