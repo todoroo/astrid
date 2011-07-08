@@ -70,6 +70,7 @@ public class RepeatTaskCompleteListener extends BroadcastReceiver {
             clone.setValue(Task.TIMER_START, 0L);
             clone.setValue(Task.ELAPSED_SECONDS, 0);
             clone.setValue(Task.REMINDER_SNOOZE, 0L);
+            clone.setValue(Task.DETAILS_DATE, 0L);
             PluginServices.getTaskService().save(clone);
 
             // clear recurrence from completed task so it can be re-completed
@@ -101,7 +102,8 @@ public class RepeatTaskCompleteListener extends BroadcastReceiver {
                         repeatFromDate.getMonth() + 1, repeatFromDate.getDate(),
                         repeatFromDate.getHours(), repeatFromDate.getMinutes(), repeatFromDate.getSeconds());
             } else {
-                repeatFrom = today;
+                repeatFrom = new DateValueImpl(repeatFromDate.getYear() + 1900,
+                        repeatFromDate.getMonth() + 1, repeatFromDate.getDate());
             }
         } else if (task.hasDueDate() && repeatAfterCompletion) {
             if(task.hasDueTime()) {
@@ -135,7 +137,8 @@ public class RepeatTaskCompleteListener extends BroadcastReceiver {
             RecurrenceIterator iterator = RecurrenceIteratorFactory.createRecurrenceIterator(rrule,
                     repeatFrom, TimeZone.getDefault());
             DateValue nextDate = repeatFrom;
-            if(repeatFrom.compareTo(today) < 0)
+
+            if (repeatAfterCompletion && repeatFrom.compareTo(today) < 0)
                 iterator.advanceTo(today);
 
             for(int i = 0; i < 10; i++) { // ten tries then we give up
@@ -146,37 +149,49 @@ public class RepeatTaskCompleteListener extends BroadcastReceiver {
                 if(nextDate.compareTo(repeatFrom) == 0)
                     continue;
 
-                if(nextDate instanceof DateTimeValueImpl) {
-                    DateTimeValueImpl newDateTime = (DateTimeValueImpl)nextDate;
-                    Date date = new Date(Date.UTC(newDateTime.year() - 1900, newDateTime.month() - 1,
-                            newDateTime.day(), newDateTime.hour(),
-                            newDateTime.minute(), newDateTime.second()));
-                    // time may be inaccurate due to DST, force time to be same
-                    date.setHours(repeatFromDate.getHours());
-                    date.setMinutes(repeatFromDate.getMinutes());
-                    newDueDate = task.createDueDate(Task.URGENCY_SPECIFIC_DAY_TIME,
-                            date.getTime());
-                } else {
-                    newDueDate = task.createDueDate(Task.URGENCY_SPECIFIC_DAY,
-                            new Date(nextDate.year() - 1900, nextDate.month() - 1,
-                                    nextDate.day()).getTime());
-                }
+                newDueDate = convertDateTimeValueToLong(repeatFromDate,
+                        nextDate, task);
 
-                // detect if we finished
-                if(newDueDate > DateUtilities.now()) {
-                    // if byDay is set and interval > 1, we need to run again
-                    if(rrule.getByDay().size() > 0 && rrule.getInterval() > 0) {
-                        if(newDueDate - repeatFromDate.getTime() > DateUtilities.ONE_WEEK)
-                            break;
-                    } else if(newDueDate > repeatFromDate.getTime())
+                if(repeatAfterCompletion) {
+                    // detect if we finished
+                    if (newDueDate > DateUtilities.now() && newDueDate > repeatFromDate.getTime()) {
                         break;
+                    }
+                } else {
+                    if (newDueDate > repeatFromDate.getTime()) {
+                        break;
+                    }
                 }
             }
         }
 
-        if(newDueDate == -1)
-            return -1;
+        return newDueDate;
+    }
 
+    /**
+     * @param repeatFromDate
+     * @param nextDate
+     * @param task
+     * @return
+     */
+    private static long convertDateTimeValueToLong(Date repeatFromDate,
+            DateValue nextDate, Task task) {
+        long newDueDate;
+        if(nextDate instanceof DateTimeValueImpl) {
+            DateTimeValueImpl newDateTime = (DateTimeValueImpl)nextDate;
+            Date date = new Date(Date.UTC(newDateTime.year() - 1900, newDateTime.month() - 1,
+                    newDateTime.day(), newDateTime.hour(),
+                    newDateTime.minute(), newDateTime.second()));
+            // time may be inaccurate due to DST, force time to be same
+            date.setHours(repeatFromDate.getHours());
+            date.setMinutes(repeatFromDate.getMinutes());
+            newDueDate = task.createDueDate(Task.URGENCY_SPECIFIC_DAY_TIME,
+                    date.getTime());
+        } else {
+            newDueDate = task.createDueDate(Task.URGENCY_SPECIFIC_DAY,
+                    new Date(nextDate.year() - 1900, nextDate.month() - 1,
+                            nextDate.day()).getTime());
+        }
         return newDueDate;
     }
 

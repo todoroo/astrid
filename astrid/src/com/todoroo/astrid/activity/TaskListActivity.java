@@ -440,13 +440,14 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
             @Override
             public void run() {
                 // refresh if conditions match
-                Flags.checkAndClear(Flags.REFRESH);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loadTaskListContent(true);
-                    }
-                });
+                if (Flags.checkAndClear(Flags.REFRESH)) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadTaskListContent(true);
+                        }
+                    });
+                }
             }
         }, BACKGROUND_REFRESH_INTERVAL, BACKGROUND_REFRESH_INTERVAL);
     }
@@ -609,6 +610,8 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
             taskAdapter.flushCaches();
             loadTaskListContent(true);
             taskService.cleanup();
+        } else {
+            loadTaskListContent(false);
         }
     }
 
