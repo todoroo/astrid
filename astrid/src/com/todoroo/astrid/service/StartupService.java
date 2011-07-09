@@ -38,6 +38,7 @@ import com.todoroo.astrid.backup.TasksXmlImporter;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.gtasks.GtasksPreferenceService;
+import com.todoroo.astrid.gtasks.sync.GtasksSyncOnSaveService;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
 import com.todoroo.astrid.producteev.ProducteevUtilities;
 import com.todoroo.astrid.reminders.ReminderStartupReceiver;
@@ -78,6 +79,8 @@ public class StartupService {
     @Autowired GtasksPreferenceService gtasksPreferenceService;
 
     @Autowired ActFmPreferenceService actFmPreferenceService;
+
+    @Autowired GtasksSyncOnSaveService gtasksSyncOnSaveService;
 
     /**
      * bit to prevent multiple initializations
@@ -135,8 +138,12 @@ public class StartupService {
         // invoke upgrade service
         boolean justUpgraded = latestSetVersion != version;
         if(justUpgraded && version > 0) {
-            if(latestSetVersion > 0)
+            if(latestSetVersion > 0) {
                 upgradeService.performUpgrade(context, latestSetVersion);
+                if (!gtasksPreferenceService.migrationHasOccurred()) {
+                    gtasksPreferenceService.setToken(null);
+                }
+            }
             AstridPreferences.setCurrentVersion(version);
         }
         if(latestSetVersion == 0) {
@@ -170,6 +177,8 @@ public class StartupService {
                 ReminderStartupReceiver.startReminderSchedulingService(context);
                 BackupService.scheduleService(context);
                 actFmSyncService.initialize();
+
+                gtasksSyncOnSaveService.initialize();
 
                 // get and display update messages
                 new UpdateMessageService().processUpdates(context);
