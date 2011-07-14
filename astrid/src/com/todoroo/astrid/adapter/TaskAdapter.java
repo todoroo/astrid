@@ -489,19 +489,25 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
         String string;
 
+        int flagsWithTime = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH;
+        int flagsWithoutTime = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH;
         if(Math.abs(date - DateUtilities.now()) < DateUtilities.ONE_DAY) {
-            if(Task.hasDueTime(date))
-                string = DateUtils.getRelativeTimeSpanString(activity, date, true).toString();
+            if(Task.hasDueTime(date)) {
+                string = DateUtils.formatDateRange(activity, date, date, flagsWithTime);
+            }
             else
                 string = DateUtilities.getRelativeDay(activity, date).toLowerCase();
         } else {
-            if(Task.hasDueTime(date))
-                string = DateUtils.getRelativeDateTimeString(activity, date,
-                        DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0).toString();
+            if(Task.hasDueTime(date)) {
+// buggy: http://code.google.com/p/android/issues/detail?id=8477
+//                string = DateUtils.getRelativeDateTimeString(activity, date,
+//                        DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, flags).toString();
+                string = DateUtils.formatDateRange(activity, date, date, flagsWithTime);
+            }
             else if(Math.abs(date - DateUtilities.now()) < DateUtilities.ONE_WEEK)
                 string = DateUtilities.getWeekday(new Date(date));
             else
-                string = DateUtilities.getDateString(activity, new Date(date));
+                string = DateUtils.formatDateRange(activity, date, date, flagsWithoutTime);
 
         }
 
