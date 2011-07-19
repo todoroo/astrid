@@ -142,33 +142,54 @@ public class TagFilterExposer extends BroadcastReceiver {
         HashSet<String> tagNames = new HashSet<String>();
 
         // active tags
-        Tag[] myTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE,
-                Criterion.and(TaskCriteria.ownedByMe(), TaskCriteria.activeAndVisible()));
-        for(Tag tag : myTags)
+        long twoWeeksAgo = DateUtilities.now() - (DateUtilities.ONE_WEEK * 2);
+
+        //Get all active tags, ignoring completed/deleted status
+        Tag[] activeTags = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE,
+                Criterion.and(TaskCriteria.ownedByMe(), TagData.LAST_ACTIVITY_DATE.gt(twoWeeksAgo)));
+        //Get all active tags, filtering out those with no active tasks
+        Tag[] tagsWithTasks = tagService.getGroupedTags(TagService.GROUPED_TAGS_BY_SIZE,
+                Criterion.and(TaskCriteria.ownedByMe(), TaskCriteria.activeAndVisible(), TagData.LAST_ACTIVITY_DATE.gt(twoWeeksAgo)));
+
+        ArrayList<Tag> sharedTags = new ArrayList<Tag>();
+        ArrayList<Tag> notListed = new ArrayList<Tag>();
+
+        for (Tag tag : tagsWithTasks) {
             tagNames.add(tag.tag);
-        if(myTags.length > 0)
-            list.add(filterFromTags(myTags, R.string.tag_FEx_category_mine));
+        }
+
+        //For all active tags that don't have active tasks, set their count to 0
+        for (Tag tag : activeTags) {
+            if (tagNames.contains(tag.tag))
+                continue;
+            tag.count = 0;
+            tagNames.add(tag.tag);
+        }
+
+        if(activeTags.length > 0)
+            list.add(filterFromTags(activeTags, R.string.tag_FEx_category_mine));
 
         // find all tag data not in active tag list
         TodorooCursor<TagData> cursor = tagDataService.query(Query.select(
-                TagData.NAME, TagData.TASK_COUNT, TagData.REMOTE_ID).where(TagData.DELETION_DATE.eq(0)));
-        ArrayList<Tag> notListed = new ArrayList<Tag>();
+                TagData.NAME, TagData.TASK_COUNT, TagData.REMOTE_ID, TagData.LAST_ACTIVITY_DATE).where(TagData.DELETION_DATE.eq(0)));
+
         try {
-            ArrayList<Tag> sharedTags = new ArrayList<Tag>();
             for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 String tagName = cursor.get(TagData.NAME);
                 if(tagNames.contains(tagName))
                     continue;
                 Tag tag = new Tag(tagName, cursor.get(TagData.TASK_COUNT),
-                        cursor.get(TagData.REMOTE_ID));
-                if(tag.count > 0)
+                        cursor.get(TagData.REMOTE_ID), cursor.get(TagData.LAST_ACTIVITY_DATE));
+
+                if(tag.lastActivity >= DateUtilities.now() - (DateUtilities.ONE_WEEK * 2))
                     sharedTags.add(tag);
                 else
                     notListed.add(tag);
                 tagNames.add(tagName);
+
+                if(sharedTags.size() > 0)
+                    list.add(filterFromTags(sharedTags.toArray(new Tag[sharedTags.size()]), R.string.tag_FEx_category_shared));
             }
-            if(sharedTags.size() > 0)
-                list.add(filterFromTags(sharedTags.toArray(new Tag[sharedTags.size()]), R.string.tag_FEx_category_shared));
         } finally {
             cursor.close();
         }

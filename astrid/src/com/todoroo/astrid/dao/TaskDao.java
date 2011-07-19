@@ -65,7 +65,7 @@ public class TaskDao extends DatabaseDao<Task> {
 
     	/** Check if a given task belongs to someone else & is read-only */
         public static Criterion ownedByMe() {
-             return Criterion.and(Field.field(Task.FLAGS.name+ " & " + //$NON-NLS-1$
+             return Criterion.and(Field.field(Task.FLAGS.toString() + " & " + //$NON-NLS-1$
                      Task.FLAG_IS_READONLY).eq(0),
                      Task.USER_ID.eq(0));
     	}
@@ -87,7 +87,7 @@ public class TaskDao extends DatabaseDao<Task> {
             return Criterion.and(Task.COMPLETION_DATE.eq(0),
                     Task.DELETION_DATE.eq(0),
                     Task.HIDE_UNTIL.lt(Functions.now()),
-                    Field.field(Task.FLAGS.name + " & " + //$NON-NLS-1$
+                    Field.field(Task.FLAGS.toString() + " & " + //$NON-NLS-1$
                             Task.FLAG_IS_READONLY).eq(0),
                     Task.USER_ID.eq(0));
     	}

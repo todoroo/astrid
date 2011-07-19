@@ -3,6 +3,9 @@ package com.todoroo.astrid.tags;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import android.text.TextUtils;
+
+import com.todoroo.andlib.data.DatabaseDao.ModelUpdateListener;
 import com.todoroo.andlib.data.Property.CountProperty;
 import com.todoroo.andlib.data.Property.LongProperty;
 import com.todoroo.andlib.data.Property.StringProperty;
@@ -15,9 +18,11 @@ import com.todoroo.andlib.sql.Join;
 import com.todoroo.andlib.sql.Order;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.sql.QueryTemplate;
+import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.core.PluginServices;
 import com.todoroo.astrid.dao.MetadataDao;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
+import com.todoroo.astrid.dao.TaskDao;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.TagData;
@@ -63,10 +68,29 @@ public final class TagService {
 
     @Autowired TaskService taskService;
 
+    @Autowired TaskDao taskDao;
+
     @Autowired TagDataService tagDataService;
 
     public TagService() {
         DependencyInjectionService.getInstance().inject(this);
+        //Every time a task is modified, count it as activity on all lists it belongs to
+        taskDao.addListener(new ModelUpdateListener<Task>() {
+            @Override
+            public void onModelUpdated(Task model) {
+                TodorooCursor<Metadata> tags = getTags(model.getId());
+                for (tags.moveToFirst(); !tags.isAfterLast(); tags.moveToNext()) {
+                    String tagName = tags.get(TAG);
+                    if (tagName != null) {
+                        TagData tagData = tagDataService.getTag(tagName, TagData.PROPERTIES);
+                        if (!TextUtils.isEmpty(tagData.getValue(TagData.NAME))) {
+                            tagData.setValue(TagData.LAST_ACTIVITY_DATE, DateUtilities.now());
+                            tagDataService.save(tagData);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -86,11 +110,17 @@ public final class TagService {
         public String tag;
         int count;
         long remoteId;
+        long lastActivity;
 
         public Tag(String tag, int count, long remoteId) {
             this.tag = tag;
             this.count = count;
             this.remoteId = remoteId;
+        }
+
+        public Tag(String tag, int count, long remoteId, long lastActivity) {
+            this(tag, count, remoteId);
+            this.lastActivity = lastActivity;
         }
 
         @Override
@@ -132,8 +162,9 @@ public final class TagService {
      * @return empty array if no tags, otherwise array
      */
     public Tag[] getGroupedTags(Order order, Criterion activeStatus) {
-        Query query = Query.select(TAG, REMOTE_ID, COUNT).
+        Query query = Query.select(TAG, REMOTE_ID, COUNT, TagData.LAST_ACTIVITY_DATE).
             join(Join.inner(Task.TABLE, Metadata.TASK.eq(Task.ID))).
+            join(Join.left(TagData.TABLE, TAG.eq(TagData.NAME))).
             where(Criterion.and(activeStatus, MetadataCriteria.withKey(KEY))).
             orderBy(order).groupBy(TAG);
         TodorooCursor<Metadata> cursor = metadataDao.query(query);
@@ -141,7 +172,7 @@ public final class TagService {
             Tag[] array = new Tag[cursor.getCount()];
             for (int i = 0; i < array.length; i++) {
                 cursor.moveToNext();
-                array[i] = new Tag(cursor.get(TAG), cursor.get(COUNT), cursor.get(REMOTE_ID));
+                array[i] = new Tag(cursor.get(TAG), cursor.get(COUNT), cursor.get(REMOTE_ID), cursor.get(TagData.LAST_ACTIVITY_DATE));
             }
             return array;
         } finally {
