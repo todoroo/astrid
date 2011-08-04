@@ -4,4 +4,17 @@
     <attr name="allowMultiple" format="boolean"/>
     <attr name="completeTags" format="boolean"/>
   </declare-styleable>
+  
+  <declare-styleable name="com.deezapps.widget.HorizontalPager">
+      <attr name="pageWidth" format="dimension" />
+  </declare-styleable>
+
+  <declare-styleable name="com.deezapps.widget.PagerControl">
+      <attr name="barColor"        format="color" />
+      <attr name="highlightColor"  format="color" />
+      <attr name="fadeDelay"       format="integer" />
+      <attr name="fadeDuration"    format="integer" />
+      <attr name="roundRectRadius" format="dimension" />
+  </declare-styleable>
+  
 </resources>

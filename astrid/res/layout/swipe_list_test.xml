@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See the file "LICENSE" for the full license governing this code. -->
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/flipper"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+  
+  <!-- page one -->
+  <FrameLayout
+    android:background="@drawable/background_gradient"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <TextView
+      android:id="@+id/text1"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:padding="10dip"
+      android:background="#33ffffff"
+      android:textSize="24dip"
+      android:text="Today" />
+  </FrameLayout>
+    
+  <LinearLayout 
+      android:id="@+id/taskListParent"
+      android:layout_width="fill_parent" 
+      android:layout_height="fill_parent"
+      android:background="@drawable/background_gradient"
+      android:orientation="vertical">    
+      <!-- Header -->
+      <LinearLayout
+          android:layout_width="fill_parent" 
+          android:layout_height="43dip"
+          android:layout_weight="1"
+          android:orientation="horizontal"
+          android:background="@drawable/header_background">
+          <!-- Filters Button -->
+          <ImageView android:id="@+id/back"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:layout_weight="1"
+              android:src="@drawable/header_tags"
+              android:scaleType="center" />           
+          <!-- List Label -->
+          <TextView android:id="@+id/listLabel"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:layout_weight="100"
+              android:gravity="center"
+              android:singleLine="true"
+              android:paddingRight="50dip"
+              android:ellipsize="start"
+              style="@style/TextAppearance.TLA_Header"/>          
+          <!-- Header Logo -->
+          <ImageView android:id="@+id/headerLogo"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:layout_weight="100"
+              android:gravity="center"
+              android:paddingRight="50dip"
+              android:src="@drawable/header_logo"
+              android:scaleType="center"
+              android:visibility="gone"/>
+      </LinearLayout>
+      
+      <!-- Body goes here -->
+          
+      <!-- Footer -->
+      <LinearLayout
+          android:id="@+id/taskListFooter"
+          android:layout_width="fill_parent" 
+          android:layout_height="wrap_content"
+          android:minHeight="47dip"
+          android:layout_weight="1"
+          android:background="@drawable/footer_background"
+          android:padding="3dip"
+          android:orientation="horizontal">
+          
+          <!-- Voice Add Button -->
+          <ImageButton android:id="@+id/voiceAddButton"
+              android:layout_width="wrap_content"
+              android:layout_height="39dip"
+              android:layout_gravity="top"
+              android:layout_marginRight="3dip"
+              android:layout_weight="1"
+              android:visibility="gone"
+              android:background="@drawable/footer_button"
+              android:src="@drawable/ic_footer_mic"
+              android:scaleType="center"/> 
+      
+          <!-- Quick Add Task -->
+          <EditText android:id="@+id/quickAddText"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="3dip"
+              android:layout_weight="100"
+              android:background="@drawable/footer_edittext"
+              android:hint="@string/TLA_quick_add_hint"
+              android:textSize="16sp"
+              android:autoText="true"
+              android:capitalize="sentences"/>
+          
+          <!-- Extended Add Button -->
+          <ImageButton android:id="@+id/quickAddButton"
+              android:layout_width="wrap_content"
+              android:layout_height="39dip"
+              android:layout_gravity="top"
+              android:layout_marginRight="3dip"
+              android:layout_weight="1"
+              android:background="@drawable/footer_button"
+              android:src="@drawable/ic_footer_add"
+              android:scaleType="center"/> 
+      </LinearLayout>
+  </LinearLayout>
+
+  
+  <!-- page three -->
+  <FrameLayout
+    android:background="@drawable/background_gradient"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <TextView
+      android:id="@+id/text3"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:padding="10dip"
+      android:background="#33ffffff"
+      android:textSize="24dip"
+      android:text="Household" />
+  </FrameLayout>
+  
+</ViewFlipper>
+

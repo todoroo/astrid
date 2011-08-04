@@ -73,7 +73,7 @@
     <!-- ====================================================== Activities = -->
         
     <!-- Activity that displays task list -->
-    <activity android:name="com.todoroo.astrid.activity.TaskListActivity"
+    <activity android:name="com.todoroo.astrid.activity.SwipeListTest"
               android:windowSoftInputMode="stateHidden"
               android:theme="@style/Theme">
       <intent-filter>
@@ -85,6 +85,7 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
+    <activity android:name="com.todoroo.astrid.activity.TaskListActivity" />
     <!-- Activity launched from shortcut -->
     <activity android:name="com.todoroo.astrid.activity.ShortcutActivity"
               android:clearTaskOnLaunch="true">
