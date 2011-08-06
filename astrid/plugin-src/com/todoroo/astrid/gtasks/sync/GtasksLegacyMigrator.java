@@ -86,6 +86,12 @@ public class GtasksLegacyMigrator {
                         }
                     }
 
+                    if (defaultListId == null) {
+                        com.google.api.services.tasks.v1.model.TaskList defaultList = gtasksService.getGtaskList("@default"); //$NON-NLS-1$
+                        defaultListId = defaultList.id;
+                    }
+                    Preferences.setString(GtasksPreferenceService.PREF_DEFAULT_LIST, defaultListId);
+
                     //For each local task, check to see if its title paired with any list title has a match in the map
                     for (allTasksWithGtaskData.moveToFirst(); !allTasksWithGtaskData.isAfterLast(); allTasksWithGtaskData.moveToNext()) {
                         GtasksTaskContainer container = gtasksMetadataService.readTaskAndMetadata(allTasksWithGtaskData);
@@ -93,6 +99,7 @@ public class GtasksLegacyMigrator {
                                 ", remote id: " + container.gtaskMetadata.getValue(GtasksMetadata.ID));
                         //Search through lists to see if one of them has match
                         String taskTitle = container.task.getValue(Task.TITLE);
+                        boolean foundMatch = false;
                         for (com.google.api.services.tasks.v1.model.TaskList list : allLists.items) {
                             String expectedKey = constructKeyFromTitles(taskTitle, list.title);
 
@@ -104,22 +111,17 @@ public class GtasksLegacyMigrator {
                                 container.gtaskMetadata.setValue(GtasksMetadata.ID, newRemoteTaskId);
                                 container.gtaskMetadata.setValue(GtasksMetadata.LIST_ID, newRemoteListId);
                                 gtasksMetadataService.saveTaskAndMetadata(container);
-                                break;
-                            } else {
-                                System.err.println("Resetting metadata");
-                                //For non-matches, make the task look newly created
-                                container.gtaskMetadata.setValue(GtasksMetadata.ID, ""); //$NON-NLS-1$
-                                container.gtaskMetadata.setValue(GtasksMetadata.LIST_ID, list.id);
-                                gtasksMetadataService.saveTaskAndMetadata(container);
+                                foundMatch = true;
                                 break;
                             }
                         }
+                        if (!foundMatch) {
+                            System.err.println("Resetting metadata");
+                            //For non-matches, make the task look newly created
+                            container.gtaskMetadata = GtasksMetadata.createEmptyMetadata(container.task.getId());
+                            gtasksMetadataService.saveTaskAndMetadata(container);
+                        }
                     }
-                    if (defaultListId == null) {
-                        com.google.api.services.tasks.v1.model.TaskList defaultList = gtasksService.getGtaskList("@default"); //$NON-NLS-1$
-                        defaultListId = defaultList.id;
-                    }
-                    Preferences.setString(GtasksPreferenceService.PREF_DEFAULT_LIST, defaultListId);
                 }
             } finally {
                 allTasksWithGtaskData.close();
