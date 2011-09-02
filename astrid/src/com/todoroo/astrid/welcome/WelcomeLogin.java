@@ -15,18 +15,16 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.facebook.android.AuthListener;
-import com.timsu.astrid.C2DMReceiver;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.ActFmLoginActivity;
-import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
-import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
 import com.todoroo.astrid.activity.Eula;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.utility.AstridPreferences;
 
 public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
 
@@ -52,16 +50,18 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        int latestSetVersion = AstridPreferences.getCurrentVersion();
         new StartupService().onStartupApplication(this);
         ContextManager.setContext(this);
 
-        if (Preferences.getBoolean(KEY_SHOWED_WELCOME_LOGIN, false)) {
+        if (latestSetVersion > 0 || Preferences.getBoolean(KEY_SHOWED_WELCOME_LOGIN, false)) {
             finishAndShowNext();
         }
         initializeUI();
     }
 
-    private void finishAndShowNext() {
+    @Override
+    protected void finishAndShowNext() {
         Intent welcomeScreen = new Intent(this, WelcomeScreen.class);
         startActivity(welcomeScreen);
         finish();
@@ -76,7 +76,8 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
         setupLoginLater();
     }
 
-    private SpannableString getLinkString(String base, String linkComponent, final OnClickListener listener) {
+    private SpannableString getLinkStringWithCustomInterval(String base, String linkComponent,
+                                                            int start, int endOffset, final OnClickListener listener) {
         SpannableString link = new SpannableString (String.format("%s %s", //$NON-NLS-1$
                 base, linkComponent));
         ClickableSpan linkSpan = new ClickableSpan() {
@@ -87,11 +88,15 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
             @Override
             public void updateDrawState(TextPaint ds) {
                 ds.setUnderlineText(true);
-                ds.setColor(Color.rgb(255, 96, 0));
+                ds.setColor(Color.rgb(255, 255, 255));
             }
         };
-        link.setSpan(linkSpan, base.length() + 1, link.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        link.setSpan(linkSpan, start, link.length() + endOffset, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return link;
+    }
+
+    private SpannableString getLinkString(String base, String linkComponent, final OnClickListener listener) {
+        return getLinkStringWithCustomInterval(base, linkComponent, base.length() + 1, 0, listener);
     }
 
     private void setupTermsOfService() {
@@ -100,7 +105,7 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
 
         String tosBase = getString(R.string.welcome_login_tos_base);
         String tosLink = getString(R.string.welcome_login_tos_link);
-        SpannableString link = getLinkString(tosBase, tosLink, showTosListener);
+        SpannableString link = getLinkStringWithCustomInterval(tosBase, tosLink, tosBase.length() + 2, -1, showTosListener);
         tos.setText(link);
     }
 
@@ -128,7 +133,7 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
             @Override
             public void updateDrawState(TextPaint ds) {
                 ds.setUnderlineText(true);
-                ds.setColor(Color.rgb(255, 96, 0));
+                ds.setColor(Color.rgb(255, 255, 255));
             }
         };
         loginLaterLink.setSpan(laterSpan, 0, loginLaterBase.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -149,7 +154,10 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
         public void onClick(View arg0) {
             String title = getString(R.string.welcome_login_confirm_later_title);
             String confirmLater = getString(R.string.welcome_login_confirm_later_dialog);
-            DialogUtilities.okCancelDialog(WelcomeLogin.this, title, confirmLater, confirmLaterListener, null);
+            DialogUtilities.okCancelCustomDialog(WelcomeLogin.this, title, confirmLater,
+                    R.string.welcome_login_confirm_later_ok,
+                    R.string.welcome_login_confirm_later_cancel,
+                    null, confirmLaterListener);
         }
 
         private final DialogInterface.OnClickListener confirmLaterListener = new DialogInterface.OnClickListener() {
@@ -161,31 +169,9 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
     };
 
     @Override
-    @SuppressWarnings("nls")
     protected void postAuthenticate(JSONObject result, String token) {
-        actFmPreferenceService.setToken(token);
-
-        Preferences.setLong(ActFmPreferenceService.PREF_USER_ID,
-                result.optLong("id"));
-        Preferences.setString(ActFmPreferenceService.PREF_NAME, result.optString("name"));
-        Preferences.setString(ActFmPreferenceService.PREF_EMAIL, result.optString("email"));
-        Preferences.setString(ActFmPreferenceService.PREF_PICTURE, result.optString("picture"));
-
-        setResult(RESULT_OK);
-
         // Delete the "Setup sync" task on successful login
         taskService.deleteWhere(Task.TITLE.eq(getString(R.string.intro_task_3_summary)));
-        finishAndShowNext();
-
-        if(!noSync) {
-            new ActFmSyncProvider().synchronize(this);
-        }
-
-        try {
-            C2DMReceiver.register();
-        } catch (Exception e) {
-            // phone may not support c2dm
-            exceptionService.reportError("error-c2dm-register", e);
-        }
+        super.postAuthenticate(result, token);
     }
 }

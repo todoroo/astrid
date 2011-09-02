@@ -19,7 +19,7 @@
         android:layout_below="@id/gdi_header"
         android:gravity="center"
         android:textColor="@android:color/black"
-        android:background="#ff999999"
+        android:background="#ffeeeeee"
         android:fadingEdgeLength="0dp"/>
 
     <FrameLayout
