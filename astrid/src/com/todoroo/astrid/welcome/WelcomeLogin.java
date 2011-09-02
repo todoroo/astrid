@@ -421,7 +421,7 @@ public class WelcomeLogin extends Activity implements AuthListener {
         setResult(RESULT_OK);
 
         // Delete the "Setup sync" task on successful login
-        taskService.delete(taskService.fetchById(StartupService.INTRO_TASK_SIZE - 1, Task.ID));
+        taskService.deleteWhere(Task.TITLE.eq(getString(R.string.intro_task_3_summary)));
         finishAndShowNext();
 
         if(!noSync) {
