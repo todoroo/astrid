@@ -51,11 +51,11 @@
     4) Log In &amp; Synchronize!\n
     \n
   </string>
- 
-  <!-- NEW USER EXPERIENCE -->
-  
+
   <!-- Task 1 due date setting. Corresponds to Task.URGENCY_NONE -->
   <string name="intro_task_3_due_setting">0</string>
+ 
+  <!-- NEW USER EXPERIENCE -->
   
   <!-- help bubbles -->
 
