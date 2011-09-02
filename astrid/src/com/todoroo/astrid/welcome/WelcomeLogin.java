@@ -1,23 +1,4 @@
-/*
- * ASTRID: Android's Simple Task Recording Dashboard
- *
- * Copyright (c) 2009 Tim Su
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- * for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-package com.todoroo.astrid.actfm;
+package com.todoroo.astrid.welcome;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -69,23 +50,19 @@ import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.actfm.OAuthLoginActivity;
 import com.todoroo.astrid.actfm.sync.ActFmInvoker;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
-import com.todoroo.astrid.activity.TaskListActivity;
+import com.todoroo.astrid.activity.Eula;
+import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.gtasks.auth.ModernAuthManager;
 import com.todoroo.astrid.service.AstridDependencyInjector;
+import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
 
-/**
- * This activity allows users to sign in or log in to Producteev
- *
- * @author arne.jans
- *
- */
-public class ActFmLoginActivity extends Activity implements AuthListener {
-
+public class WelcomeLogin extends Activity implements AuthListener {
     public static final String APP_ID = "183862944961271"; //$NON-NLS-1$
 
     @Autowired ExceptionService exceptionService;
@@ -103,13 +80,15 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     private static final int REQUEST_CODE_GOOGLE_ACCOUNTS = 1;
     private static final int REQUEST_CODE_OAUTH = 2;
 
+    public static final String KEY_SHOWED_WELCOME_LOGIN = "key_showed_welcome_login"; //$NON-NLS-1$
+
     static {
         AstridDependencyInjector.initialize();
     }
 
     public static final String EXTRA_DO_NOT_SYNC = "nosync"; //$NON-NLS-1$
 
-    public ActFmLoginActivity() {
+    public WelcomeLogin() {
         super();
         DependencyInjectionService.getInstance().inject(this);
     }
@@ -118,10 +97,15 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new StartupService().onStartupApplication(this);
         ContextManager.setContext(this);
 
-        setContentView(R.layout.actfm_login_activity);
-        setTitle(R.string.actfm_ALA_title);
+        if (Preferences.getBoolean(KEY_SHOWED_WELCOME_LOGIN, false)) {
+            finishAndShowNext();
+        }
+
+        setContentView(R.layout.welcome_login_activity);
+        setTitle(R.string.welcome_login_title);
 
         noSync = getIntent().getBooleanExtra(EXTRA_DO_NOT_SYNC, false);
 
@@ -146,18 +130,27 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         setResult(RESULT_CANCELED);
     }
 
+    private void finishAndShowNext() {
+        Intent welcomeScreen = new Intent(this, WelcomeScreen.class);
+        startActivity(welcomeScreen);
+        finish();
+        Preferences.setBoolean(KEY_SHOWED_WELCOME_LOGIN, true);
+    }
+
     private void initializeUI() {
         findViewById(R.id.gg_login).setOnClickListener(googleListener);
-        TextView pwLogin = (TextView) findViewById(R.id.pw_login);
-        pwLogin.setOnClickListener(signUpListener);
+        setupTermsOfService();
+        setupPWLogin();
+        setupLoginLater();
+    }
 
-        String pwLoginBase = getString(R.string.actfm_ALA_pw_login);
-        SpannableString link = new SpannableString(String.format("%s %s", //$NON-NLS-1$
-                pwLoginBase, getString(R.string.actfm_ALA_pw_link)));
+    private SpannableString getLinkString(String base, String linkComponent, final OnClickListener listener) {
+        SpannableString link = new SpannableString (String.format("%s %s", //$NON-NLS-1$
+                base, linkComponent));
         ClickableSpan linkSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                signUpListener.onClick(widget);
+                listener.onClick(widget);
             }
             @Override
             public void updateDrawState(TextPaint ds) {
@@ -165,25 +158,71 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
                 ds.setColor(Color.rgb(255, 96, 0));
             }
         };
-        link.setSpan(linkSpan, pwLoginBase.length() + 1, link.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        link.setSpan(linkSpan, base.length() + 1, link.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return link;
+    }
+
+    private void setupTermsOfService() {
+        TextView tos = (TextView)findViewById(R.id.intro);
+        tos.setOnClickListener(showTosListener);
+
+        String tosBase = getString(R.string.welcome_login_intro);
+        String tosLink = getString(R.string.welcome_login_tos_link);
+        SpannableString link = getLinkString(tosBase, tosLink, showTosListener);
+        tos.setText(link);
+    }
+
+    private void setupPWLogin() {
+        TextView pwLogin = (TextView) findViewById(R.id.pw_login);
+        pwLogin.setOnClickListener(signUpListener);
+
+        String pwLoginBase = getString(R.string.actfm_ALA_pw_login);
+        String pwLoginLink = getString(R.string.actfm_ALA_pw_link);
+
+        SpannableString link = getLinkString(pwLoginBase, pwLoginLink, signUpListener);
         pwLogin.setText(link);
+    }
+
+    private void setupLoginLater() {
+        TextView loginLater = (TextView)findViewById(R.id.login_later);
+        loginLater.setOnClickListener(loginLaterListener);
+        String loginLaterBase = getString(R.string.welcome_login_later);
+        SpannableString loginLaterLink = new SpannableString(String.format("%s", loginLaterBase)); //$NON-NLS-1$
+        ClickableSpan laterSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                loginLaterListener.onClick(widget);
+            }
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                ds.setUnderlineText(true);
+                ds.setColor(Color.rgb(255, 96, 0));
+            }
+        };
+        loginLaterLink.setSpan(laterSpan, 0, loginLaterBase.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        loginLater.setText(loginLaterLink);
     }
 
     // --- event handler
 
+    private final OnClickListener showTosListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Eula.showEulaBasic(WelcomeLogin.this);
+        }
+    };
+
     private final OnClickListener loginLaterListener = new OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            String confirmLater = ActFmLoginActivity.this.getString(R.string.actfm_ALA_confirm_later_dialog);
-            DialogUtilities.okCancelDialog(ActFmLoginActivity.this, confirmLater, confirmLaterListener, null);
+            String confirmLater = WelcomeLogin.this.getString(R.string.actfm_ALA_confirm_later_dialog);
+            DialogUtilities.okCancelDialog(WelcomeLogin.this, confirmLater, confirmLaterListener, null);
         }
 
         private final DialogInterface.OnClickListener confirmLaterListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent taskListStartup = new Intent(ActFmLoginActivity.this, TaskListActivity.class);
-                ActFmLoginActivity.this.startActivity(taskListStartup);
-                ActFmLoginActivity.this.finish();
+                finishAndShowNext();
             }
         };
     };
@@ -192,7 +231,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         @Override
         @SuppressWarnings("nls")
         public void onClick(View arg0) {
-            Intent intent = new Intent(ActFmLoginActivity.this, OAuthLoginActivity.class);
+            Intent intent = new Intent(WelcomeLogin.this, OAuthLoginActivity.class);
             try {
                 String url = actFmInvoker.createFetchUrl("user_oauth", "provider", "google");
                 intent.putExtra(OAuthLoginActivity.URL_TOKEN, url);
@@ -208,7 +247,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     private final OnClickListener signUpListener = new OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            final LinearLayout body = new LinearLayout(ActFmLoginActivity.this);
+            final LinearLayout body = new LinearLayout(WelcomeLogin.this);
             body.setOrientation(LinearLayout.VERTICAL);
             body.setPadding(10, 0, 10, 0);
 
@@ -216,7 +255,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
             final AtomicReference<AlertDialog> dialog = new AtomicReference<AlertDialog>();
             final AtomicBoolean isNew = new AtomicBoolean(true);
-            final Button toggleNew = new Button(ActFmLoginActivity.this);
+            final Button toggleNew = new Button(WelcomeLogin.this);
             toggleNew.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -247,7 +286,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
             password.setTransformationMethod(new PasswordTransformationMethod());
 
 
-            dialog.set(new AlertDialog.Builder(ActFmLoginActivity.this)
+            dialog.set(new AlertDialog.Builder(WelcomeLogin.this)
             .setView(body)
             .setIcon(R.drawable.icon_32)
             .setTitle(R.string.actfm_ALA_signup_title)
@@ -267,15 +306,15 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
             .setNegativeButton(android.R.string.cancel, null)
             .show());
 
-            dialog.get().setOwnerActivity(ActFmLoginActivity.this);
+            dialog.get().setOwnerActivity(WelcomeLogin.this);
         }
     };
 
     private EditText addEditField(LinearLayout body, int hint) {
-        TextView label = new TextView(ActFmLoginActivity.this);
+        TextView label = new TextView(WelcomeLogin.this);
         label.setText(hint);
         body.addView(label);
-        EditText field = new EditText(ActFmLoginActivity.this);
+        EditText field = new EditText(WelcomeLogin.this);
         field.setHint(hint);
         body.addView(field);
         return field;
@@ -380,7 +419,10 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         Preferences.setString(ActFmPreferenceService.PREF_PICTURE, result.optString("picture"));
 
         setResult(RESULT_OK);
-        finish();
+
+        // Delete the "Setup sync" task on successful login
+        taskService.delete(taskService.fetchById(StartupService.INTRO_TASK_SIZE - 1, Task.ID));
+        finishAndShowNext();
 
         if(!noSync) {
             new ActFmSyncProvider().synchronize(this);
@@ -461,5 +503,4 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         else
             GoogleLoginServiceHelper.getAccount(this, REQUEST_CODE_GOOGLE_ACCOUNTS, false);
     }
-
 }

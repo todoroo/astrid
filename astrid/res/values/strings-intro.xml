@@ -46,7 +46,9 @@
     \n
   </string>
   
-  <!-- NEW USER EXPERIENCE, help bubbles -->
+  <!-- NEW USER EXPERIENCE -->
+  
+  <!-- Help bubbles -->
   <!-- Shown the first time a user sees the task list activity -->
   <string name="help_popover_add_task">Add a task here</string>
 
@@ -59,5 +61,13 @@
   <!-- Shown the first time a user sees the list settings tab -->
   <string name="help_popover_collaborators">Collaborators can help you build your list or finish tasks</string>
   
+  <!-- Login activity -->
+  <string name="welcome_login_title">Welcome to Astrid!</string>
+  
+  <string name="welcome_login_intro">Sign-in for free online sync, backup and to share lists and tasks with others. By using Astrid you agree to</string>
+  
+  <string name="welcome_login_tos_link">\"Terms of Service\"</string>
+  
+  <string name="welcome_login_later">Try Astrid without signing in</string>
   
 </resources>
