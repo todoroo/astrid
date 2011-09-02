@@ -1,39 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <RelativeLayout
+  <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:paddingLeft="4px"
     android:paddingRight="4px"
-    android:background="@drawable/astrid_com_gradient">
+    android:background="@drawable/astrid_com_gradient"
+    android:orientation="vertical">
 
-    <TextView
-      android:id="@+id/intro"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:gravity="center"
-      android:layout_alignParentTop="true"
-      android:layout_alignParentLeft="true"
-      android:textSize="16sp"
-      android:paddingTop="20dip"
-      android:textColor="#ffffff"
-      android:text="@string/welcome_login_intro" />
-      
-    <TextView
-      android:id="@+id/error"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@id/intro"
-      android:layout_alignParentLeft="true"
-      android:gravity="center"
-      android:paddingTop="5dip"
-      android:textColor="#ff0000"
-      android:textSize="16sp"
-      android:textStyle="bold" />
-      
     <ImageView
+      android:id="@+id/logo"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
+      android:layout_weight="1"
       android:layout_alignParentTop="true"
       android:layout_alignParentLeft="true"
       android:scaleType="fitCenter"
@@ -41,14 +20,44 @@
       android:paddingRight="20dip"
       android:layout_marginBottom="95dip"
       android:src="@drawable/astrid_com_logo" />
+      
+	<RelativeLayout
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1">
+    
+    <TextView
+      android:id="@+id/error"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/logo"
+      android:layout_alignParentLeft="true"
+      android:gravity="center"
+      android:paddingTop="5dip"
+      android:textColor="#ff0000"
+      android:textSize="16sp"
+      android:textStyle="bold" />
+      
+
+    <TextView
+      android:id="@+id/tos"
+      android:layout_weight="1"
+      android:layout_width="fill_parent"
+      android:layout_height="45dip"
+      android:gravity="center"
+      android:layout_alignParentBottom="true"
+      android:paddingLeft="20dip"
+      android:paddingRight="20dip"
+      android:textSize="16sp"
+      android:textColor="#cccccc" />
 
     <TextView
       android:id="@+id/login_later"
       android:layout_weight="1"
       android:layout_width="fill_parent"
       android:layout_height="45dip"
+      android:layout_above="@id/tos"
       android:gravity="center"
-      android:layout_alignParentBottom="true"
       android:paddingLeft="20dip"
       android:paddingRight="20dip"
       android:textSize="16sp"
@@ -88,6 +97,6 @@
       android:paddingRight="20dip"
       android:textSize="16sp"
       android:drawableLeft="@drawable/google"
-      android:text="@string/actfm_ALA_gg_login" />
-      
-</RelativeLayout>
+      android:text="@string/actfm_ALA_gg_login" />   
+  </RelativeLayout>
+</LinearLayout>

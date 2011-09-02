@@ -218,9 +218,6 @@ public class StartupService {
     }
 
     private static final int[] INTRO_TASKS = new int[] {
-        R.string.intro_task_1_summary,
-        R.string.intro_task_1_note,
-        R.string.intro_task_1_due_setting,
         R.string.intro_task_2_summary,
         R.string.intro_task_2_note,
         R.string.intro_task_2_due_setting,

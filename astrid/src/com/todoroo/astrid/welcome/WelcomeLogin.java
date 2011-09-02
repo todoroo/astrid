@@ -163,10 +163,10 @@ public class WelcomeLogin extends Activity implements AuthListener {
     }
 
     private void setupTermsOfService() {
-        TextView tos = (TextView)findViewById(R.id.intro);
+        TextView tos = (TextView)findViewById(R.id.tos);
         tos.setOnClickListener(showTosListener);
 
-        String tosBase = getString(R.string.welcome_login_intro);
+        String tosBase = getString(R.string.welcome_login_tos_base);
         String tosLink = getString(R.string.welcome_login_tos_link);
         SpannableString link = getLinkString(tosBase, tosLink, showTosListener);
         tos.setText(link);
@@ -215,8 +215,9 @@ public class WelcomeLogin extends Activity implements AuthListener {
     private final OnClickListener loginLaterListener = new OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            String confirmLater = WelcomeLogin.this.getString(R.string.actfm_ALA_confirm_later_dialog);
-            DialogUtilities.okCancelDialog(WelcomeLogin.this, confirmLater, confirmLaterListener, null);
+            String title = getString(R.string.welcome_login_confirm_later_title);
+            String confirmLater = getString(R.string.welcome_login_confirm_later_dialog);
+            DialogUtilities.okCancelDialog(WelcomeLogin.this, title, confirmLater, confirmLaterListener, null);
         }
 
         private final DialogInterface.OnClickListener confirmLaterListener = new DialogInterface.OnClickListener() {

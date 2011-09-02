@@ -72,7 +72,6 @@ import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.sync.ActFmInvoker;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
-import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.gtasks.auth.ModernAuthManager;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StatisticsService;
@@ -170,23 +169,6 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     }
 
     // --- event handler
-
-    private final OnClickListener loginLaterListener = new OnClickListener() {
-        @Override
-        public void onClick(View arg0) {
-            String confirmLater = ActFmLoginActivity.this.getString(R.string.actfm_ALA_confirm_later_dialog);
-            DialogUtilities.okCancelDialog(ActFmLoginActivity.this, confirmLater, confirmLaterListener, null);
-        }
-
-        private final DialogInterface.OnClickListener confirmLaterListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent taskListStartup = new Intent(ActFmLoginActivity.this, TaskListActivity.class);
-                ActFmLoginActivity.this.startActivity(taskListStartup);
-                ActFmLoginActivity.this.finish();
-            }
-        };
-    };
 
     private final OnClickListener googleListener = new OnClickListener() {
         @Override
