@@ -80,7 +80,9 @@
   
   <string name="welcome_login_tos_link">\"Terms of Service\"</string>
   
-  <string name="welcome_login_later">Try Astrid without signing in</string>
+  <string name="welcome_login_pw">Login with Username/Password</string>
+  
+  <string name="welcome_login_later">Login Later</string>
   
   <string name="welcome_login_confirm_later_title">Why not sign in?</string>
   

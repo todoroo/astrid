@@ -12,6 +12,8 @@ import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.facebook.android.AuthListener;
@@ -46,15 +48,15 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
         return R.string.welcome_login_title;
     }
 
-    @SuppressWarnings("nls")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         int latestSetVersion = AstridPreferences.getCurrentVersion();
         new StartupService().onStartupApplication(this);
         ContextManager.setContext(this);
 
-        if (latestSetVersion > 0 || Preferences.getBoolean(KEY_SHOWED_WELCOME_LOGIN, false)) {
+        if (latestSetVersion != 0 || Preferences.getBoolean(KEY_SHOWED_WELCOME_LOGIN, false)) {
             finishAndShowNext();
         }
         initializeUI();
@@ -95,10 +97,6 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
         return link;
     }
 
-    private SpannableString getLinkString(String base, String linkComponent, final OnClickListener listener) {
-        return getLinkStringWithCustomInterval(base, linkComponent, base.length() + 1, 0, listener);
-    }
-
     private void setupTermsOfService() {
         TextView tos = (TextView)findViewById(R.id.tos);
         tos.setOnClickListener(showTosListener);
@@ -110,14 +108,8 @@ public class WelcomeLogin extends ActFmLoginActivity implements AuthListener {
     }
 
     private void setupPWLogin() {
-        TextView pwLogin = (TextView) findViewById(R.id.pw_login);
+        Button pwLogin = (Button) findViewById(R.id.pw_login);
         pwLogin.setOnClickListener(signUpListener);
-
-        String pwLoginBase = getString(R.string.actfm_ALA_pw_login);
-        String pwLoginLink = getString(R.string.actfm_ALA_pw_link);
-
-        SpannableString link = getLinkString(pwLoginBase, pwLoginLink, signUpListener);
-        pwLogin.setText(link);
     }
 
     private void setupLoginLater() {
