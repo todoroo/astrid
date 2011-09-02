@@ -19,6 +19,9 @@
   \n
   </string>
   
+  <!-- Task 1 due date setting. Corresponds to Task.URGENCY_TOMORROW -->
+  <string name="intro_task_1_due_setting">2</string>
+  
   <!-- Task 2 Summary  -->
   <string name="intro_task_2_summary">Add a widget to your desktop</string>
 
@@ -33,6 +36,9 @@
   \n
   </string>
   
+  <!-- Task 2 due date setting. Corresponds to Task.URGENCY_DAY_AFTER -->
+  <string name="intro_task_2_due_setting">3</string>
+  
     <!-- Task 3 Summary  -->
   <string name="intro_task_3_summary">Setup sync with Astrid.com</string>
 
@@ -45,10 +51,14 @@
     4) Log In &amp; Synchronize!\n
     \n
   </string>
-  
+ 
   <!-- NEW USER EXPERIENCE -->
   
-  <!-- Help bubbles -->
+  <!-- Task 1 due date setting. Corresponds to Task.URGENCY_NONE -->
+  <string name="intro_task_3_due_setting">0</string>
+  
+  <!-- help bubbles -->
+
   <!-- Shown the first time a user sees the task list activity -->
   <string name="help_popover_add_task">Add a task here</string>
 
