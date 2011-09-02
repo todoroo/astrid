@@ -16,6 +16,7 @@
       android:paddingLeft="20dip"
       android:paddingRight="20dip"
       android:paddingBottom="10dip"
+      android:layout_marginTop="40dip"
       android:src="@drawable/astrid_com_logo" />
       
     <TextView

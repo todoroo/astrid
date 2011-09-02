@@ -35,15 +35,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextPaint;
 import android.text.method.PasswordTransformationMethod;
-import android.text.style.ClickableSpan;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -159,10 +154,10 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
     protected void initializeUI() {
         findViewById(R.id.gg_login).setOnClickListener(googleListener);
-        TextView pwLogin = (TextView) findViewById(R.id.pw_login);
+        Button pwLogin = (Button) findViewById(R.id.pw_login);
         pwLogin.setOnClickListener(signUpListener);
 
-        String pwLoginBase = getString(R.string.actfm_ALA_pw_login);
+        /*String pwLoginBase = getString(R.string.actfm_ALA_pw_login);
         SpannableString link = new SpannableString(String.format("%s %s", //$NON-NLS-1$
                 pwLoginBase, getString(R.string.actfm_ALA_pw_link)));
         ClickableSpan linkSpan = new ClickableSpan() {
@@ -175,9 +170,10 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
                 ds.setUnderlineText(true);
                 ds.setColor(Color.rgb(255, 96, 0));
             }
+
         };
         link.setSpan(linkSpan, pwLoginBase.length() + 1, link.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        pwLogin.setText(link);
+        pwLogin.setText(link);//*/
     }
 
     // --- event handler
