@@ -87,15 +87,15 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
     public static final String APP_ID = "183862944961271"; //$NON-NLS-1$
 
-    @Autowired ExceptionService exceptionService;
-    @Autowired TaskService taskService;
-    @Autowired ActFmPreferenceService actFmPreferenceService;
+    @Autowired protected ExceptionService exceptionService;
+    @Autowired protected TaskService taskService;
+    @Autowired protected ActFmPreferenceService actFmPreferenceService;
     private final ActFmInvoker actFmInvoker = new ActFmInvoker();
 
     private Facebook facebook;
     private AsyncFacebookRunner facebookRunner;
     private TextView errors;
-    private boolean noSync = false;
+    protected boolean noSync = false;
 
     // --- ui initialization
 
@@ -108,6 +108,14 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
     public static final String EXTRA_DO_NOT_SYNC = "nosync"; //$NON-NLS-1$
 
+    protected int getContentViewResource() {
+        return R.layout.actfm_login_activity;
+    }
+
+    protected int getTitleResource() {
+        return R.string.actfm_ALA_title;
+    }
+
     public ActFmLoginActivity() {
         super();
         DependencyInjectionService.getInstance().inject(this);
@@ -119,8 +127,8 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         super.onCreate(savedInstanceState);
         ContextManager.setContext(this);
 
-        setContentView(R.layout.actfm_login_activity);
-        setTitle(R.string.actfm_ALA_title);
+        setContentView(getContentViewResource());
+        setTitle(getTitleResource());
 
         noSync = getIntent().getBooleanExtra(EXTRA_DO_NOT_SYNC, false);
 
@@ -145,7 +153,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         setResult(RESULT_CANCELED);
     }
 
-    private void initializeUI() {
+    protected void initializeUI() {
         findViewById(R.id.gg_login).setOnClickListener(googleListener);
         TextView pwLogin = (TextView) findViewById(R.id.pw_login);
         pwLogin.setOnClickListener(signUpListener);
@@ -170,7 +178,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
     // --- event handler
 
-    private final OnClickListener googleListener = new OnClickListener() {
+    protected final OnClickListener googleListener = new OnClickListener() {
         @Override
         @SuppressWarnings("nls")
         public void onClick(View arg0) {
@@ -187,7 +195,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         }
     };
 
-    private final OnClickListener signUpListener = new OnClickListener() {
+    protected final OnClickListener signUpListener = new OnClickListener() {
         @Override
         public void onClick(View arg0) {
             final LinearLayout body = new LinearLayout(ActFmLoginActivity.this);
@@ -352,7 +360,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     }
 
     @SuppressWarnings("nls")
-    private void postAuthenticate(JSONObject result, String token) {
+    protected void postAuthenticate(JSONObject result, String token) {
         actFmPreferenceService.setToken(token);
 
         Preferences.setLong(ActFmPreferenceService.PREF_USER_ID,
