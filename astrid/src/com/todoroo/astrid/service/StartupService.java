@@ -29,6 +29,7 @@ import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.service.ExceptionService.TodorooUncaughtExceptionHandler;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.abtesting.FeatureFlipper;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
 import com.todoroo.astrid.backup.BackupConstants;
@@ -179,6 +180,9 @@ public class StartupService {
 
                 // get and display update messages
                 new UpdateMessageService().processUpdates(context);
+
+                // Check for feature flips
+                new FeatureFlipper().updateFeatures();
             }
         }).start();
 

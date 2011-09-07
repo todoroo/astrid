@@ -34,6 +34,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -68,6 +69,9 @@ import com.todoroo.astrid.service.ThemeService;
  *
  */
 public class FilterListActivity extends ExpandableListActivity {
+
+    // -- extra codes
+    public static final String SHOW_BACK_BUTTON = "show_back"; //$NON-NLS-1$
 
     // --- menu codes
 
@@ -106,9 +110,14 @@ public class FilterListActivity extends ExpandableListActivity {
         ThemeService.applyTheme(this);
 
         setContentView(R.layout.filter_list_activity);
+        ImageView backButton = (ImageView) findViewById(R.id.back);
+        if (!getIntent().getBooleanExtra(SHOW_BACK_BUTTON, true)) {
+            backButton.setVisibility(View.GONE);
+            findViewById(R.id.listLabel).setPadding(0, 0, 0, 0);
+        }
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
-        findViewById(R.id.back).setOnClickListener(new OnClickListener() {
+        backButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();

@@ -12,9 +12,13 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.abtesting.ABChooser;
+import com.todoroo.astrid.abtesting.ABOptions;
 import com.todoroo.astrid.activity.Eula;
+import com.todoroo.astrid.activity.FilterListActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsService;
 
 public class WelcomeScreen extends Activity {
 
@@ -56,10 +60,46 @@ public class WelcomeScreen extends Activity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        StatisticsService.sessionPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        StatisticsService.sessionStart(this);
+    }
+
+    @Override
+    protected void onStop() {
+        StatisticsService.sessionStop(this);
+        super.onStop();
+    }
+
     private void finishAndStartNext() {
-        Intent taskListStartup = new Intent(this, TaskListActivity.class);
-        startActivity(taskListStartup);
+        Intent nextActivity = getNextIntent();
+        startActivity(nextActivity);
         finish();
         Preferences.setBoolean(KEY_SHOWED_WELCOME_SCREEN, true);
+    }
+
+    private Intent getNextIntent() {
+        ABChooser chooser = ABChooser.getInstance();
+        Intent intent = new Intent();
+        int choice = chooser.getChoiceForOption(ABOptions.AB_OPTION_FIRST_ACTIVITY);
+        switch (choice) {
+        case 0:
+            intent.setClass(this, TaskListActivity.class);
+            break;
+        case 1:
+            intent.setClass(this, FilterListActivity.class);
+            intent.putExtra(FilterListActivity.SHOW_BACK_BUTTON, false);
+            break;
+        default:
+            intent.setClass(this, TaskListActivity.class);
+        }
+        return intent;
     }
 }
