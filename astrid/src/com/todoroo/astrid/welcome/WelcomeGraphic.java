@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.utility.AndroidUtilities;
-import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.abtesting.ABChooser;
 import com.todoroo.astrid.abtesting.ABOptions;
 import com.todoroo.astrid.activity.Eula;
@@ -20,9 +19,9 @@ import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.StatisticsService;
 
-public class WelcomeScreen extends Activity {
+public class WelcomeGraphic extends Activity {
 
-    public static final String KEY_SHOWED_WELCOME_SCREEN = "key_showed_welcome_screen"; //$NON-NLS-1$
+    public static final String KEY_SHOW_EULA = "show_eula"; //$NON-NLS-1$
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +32,8 @@ public class WelcomeScreen extends Activity {
         new StartupService().onStartupApplication(this);
         setContentView(R.layout.welcome_screen);
 
-        Eula.showEula(this);
+        if (getIntent().getBooleanExtra(KEY_SHOW_EULA, false))
+            Eula.showEula(this);
 
         final ImageView image = (ImageView)findViewById(R.id.welcome_image);
         image.setOnClickListener(new OnClickListener() {
@@ -54,10 +54,6 @@ public class WelcomeScreen extends Activity {
                 }.start();
             }
         });
-
-        if(Preferences.getBoolean(KEY_SHOWED_WELCOME_SCREEN, false)) {
-            finishAndStartNext();
-        }
     }
 
     @Override
@@ -82,7 +78,6 @@ public class WelcomeScreen extends Activity {
         Intent nextActivity = getNextIntent();
         startActivity(nextActivity);
         finish();
-        Preferences.setBoolean(KEY_SHOWED_WELCOME_SCREEN, true);
     }
 
     private Intent getNextIntent() {

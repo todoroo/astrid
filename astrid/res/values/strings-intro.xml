@@ -40,6 +40,8 @@
  
   <!-- NEW USER EXPERIENCE -->
   
+  <string name="splash_screen_loading">Loading...</string>
+  
   <!-- NEW USER EXPERIENCE, help bubbles -->
   <!-- Shown the first time a user sees the task list activity -->
   <string name="help_popover_add_task">Add a task here</string>

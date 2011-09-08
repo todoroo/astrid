@@ -54,7 +54,7 @@ public class ABOptions {
     public synchronized boolean setProbsForKey(String key, int[] newProbs) {
         if (bundles.containsKey(newProbs)) {
             ABOptionBundle bundle = bundles.get(key);
-            if (newProbs.length == bundle.descriptions.length) {
+            if (bundle.descriptions == null || newProbs.length == bundle.descriptions.length) {
                 bundle.weightedProbs = newProbs;
                 return true;
             }
@@ -85,7 +85,7 @@ public class ABOptions {
     public String getDescriptionForOption(String key, int optionIndex) {
         if (bundles.containsKey(key)) {
             ABOptionBundle bundle = bundles.get(key);
-            if (optionIndex < bundle.descriptions.length) {
+            if (bundle.descriptions != null && optionIndex < bundle.descriptions.length) {
                 return bundle.descriptions[optionIndex];
             }
         }
@@ -114,12 +114,18 @@ public class ABOptions {
                 try {
                     String key = (String) field.get(this);
                     Field probsField = abOptions.getDeclaredField(field.getName() + "_PROBS");
-                    Field descriptionsField = abOptions.getDeclaredField(field.getName() + "_DESCRIPTIONS");
-
                     int[] probs = (int[]) probsField.get(this);
-                    String[] descs = (String[]) descriptionsField.get(this);
 
-                    ABOptionBundle newBundle = new ABOptionBundle(probs, descs);
+                    Field descriptionsField;
+                    String[] descriptions;
+                    try {
+                        descriptionsField = abOptions.getDeclaredField(field.getName() + "_DESCRIPTIONS");
+                        descriptions = (String[]) descriptionsField.get(this);
+                    } catch (NoSuchFieldException e) {
+                        descriptions = null;
+                    }
+
+                    ABOptionBundle newBundle = new ABOptionBundle(probs, descriptions);
                     bundles.put(key, newBundle);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -140,5 +146,8 @@ public class ABOptions {
     public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
     private static int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
     private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
+
+    public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
+    private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 }; // Index 0 = show welcome login, index 1 = don't show welcome login
 
 }
