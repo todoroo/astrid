@@ -69,6 +69,7 @@ import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
 import com.todoroo.astrid.gtasks.auth.ModernAuthManager;
 import com.todoroo.astrid.service.AstridDependencyInjector;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
 
@@ -171,7 +172,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     }
 
     protected void recordPageView() {
-        StatisticsService.reportEvent("actfm-login-show"); //$NON-NLS-1$
+        StatisticsService.reportEvent(StatisticsConstants.ACTFM_LOGIN_SHOW);
     }
 
     protected void initializeUI() {
@@ -193,7 +194,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
                         "provider", "google");
                 intent.putExtra(OAuthLoginActivity.URL_TOKEN, url);
                 startActivityForResult(intent, REQUEST_CODE_OAUTH);
-                StatisticsService.reportEvent("actfm-login-gl-start"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.ACTFM_LOGIN_GL_START);
             } catch (UnsupportedEncodingException e) {
                 handleError(e);
             } catch (NoSuchAlgorithmException e) {
@@ -260,9 +261,9 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
                                     password.getText().toString());
 
                             if (isNew.get())
-                                StatisticsService.reportEvent("actfm-login-pw"); //$NON-NLS-1$
+                                StatisticsService.reportEvent(StatisticsConstants.ACTFM_LOGIN_PW);
                             else
-                                StatisticsService.reportEvent("actfm-signup-pw"); //$NON-NLS-1$
+                                StatisticsService.reportEvent(StatisticsConstants.ACTFM_SIGNUP_PW);
                         }
                     }).setNegativeButton(android.R.string.cancel, null).show());
 
@@ -319,7 +320,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
 
                 authenticate(email, name, ActFmInvoker.PROVIDER_FACEBOOK,
                         facebook.getAccessToken());
-                StatisticsService.reportEvent("actfm-login-fb"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.ACTFM_LOGIN_FB);
             } catch (FacebookError e) {
                 handleError(e);
             } catch (JSONException e) {
@@ -366,7 +367,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
             String token = actFmInvoker.getToken();
 
             if (result.optBoolean("new")) { // Report new user statistic
-                StatisticsService.reportEvent("actfm-new-user", "provider", provider);
+                StatisticsService.reportEvent(StatisticsConstants.ACTFM_NEW_USER, "provider", provider);
             }
             postAuthenticate(result, token);
         } catch (IOException e) {
@@ -453,7 +454,7 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
             try {
                 JSONObject json = new JSONObject(result);
                 postAuthenticate(json, json.getString("token"));
-                StatisticsService.reportEvent("actfm-login-gl-success"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.ACTFM_LOGIN_GL_SUCCESS);
             } catch (JSONException e) {
                 handleError(e);
             }

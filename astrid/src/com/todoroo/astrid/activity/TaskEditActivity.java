@@ -72,6 +72,7 @@ import com.todoroo.astrid.repeats.RepeatControlSet;
 import com.todoroo.astrid.service.AddOnService;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.service.ThemeService;
@@ -447,13 +448,13 @@ public final class TaskEditActivity extends TabActivity {
         }
 
         if(model.getValue(Task.TITLE).length() == 0) {
-            StatisticsService.reportEvent("create-task");
+            StatisticsService.reportEvent(StatisticsConstants.CREATE_TASK);
             isNewTask = true;
 
             // set deletion date until task gets a title
             model.setValue(Task.DELETION_DATE, DateUtilities.now());
         } else {
-            StatisticsService.reportEvent("edit-task");
+            StatisticsService.reportEvent(StatisticsConstants.EDIT_TASK);
         }
 
         if(model == null) {

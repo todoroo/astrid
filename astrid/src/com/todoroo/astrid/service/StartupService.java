@@ -256,7 +256,7 @@ public class StartupService {
                 if(children.length > 0) {
                     StatisticsService.sessionStart(context);
                     TasksXmlImporter.importTasks(context, children[0].getAbsolutePath(), null);
-                    StatisticsService.reportEvent("lost-tasks-restored"); //$NON-NLS-1$
+                    StatisticsService.reportEvent(StatisticsConstants.LOST_TASKS_RESTORED);
                 }
             }
         } catch (Exception e) {

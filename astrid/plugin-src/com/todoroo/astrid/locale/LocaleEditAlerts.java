@@ -23,6 +23,7 @@ import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterCategory;
 import com.todoroo.astrid.api.FilterListItem;
 import com.todoroo.astrid.core.PluginServices;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.twofortyfouram.SharedResources;
 
@@ -189,9 +190,9 @@ public final class LocaleEditAlerts extends ExpandableListActivity {
             .setPositiveButton(android.R.string.ok,
                     AddOnActivity.createAddOnClicker(LocaleEditAlerts.this, true))
             .show();
-            StatisticsService.reportEvent("locale-edit-alerts-no-plugin"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.LOCALE_EDIT_ALERTS_NO_PLUGIN);
         } else {
-            StatisticsService.reportEvent("locale-edit-alerts"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.LOCALE_EDIT_ALERTS);
         }
     }
 

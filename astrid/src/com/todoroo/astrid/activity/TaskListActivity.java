@@ -95,6 +95,7 @@ import com.todoroo.astrid.service.AddOnService;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TaskService;
 import com.todoroo.astrid.service.ThemeService;
@@ -241,19 +242,19 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         if(getIntent().hasExtra(TOKEN_SOURCE)) {
             switch(getIntent().getIntExtra(TOKEN_SOURCE, Constants.SOURCE_DEFAULT)) {
             case Constants.SOURCE_NOTIFICATION:
-                StatisticsService.reportEvent("launch-from-notification"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.LAUNCH_FROM_NOTIFICATION);
                 break;
             case Constants.SOURCE_OTHER:
-                StatisticsService.reportEvent("launch-from-other"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.LAUNCH_FROM_OTHER);
                 break;
             case Constants.SOURCE_PPWIDGET:
-                StatisticsService.reportEvent("launch-from-ppw"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.LAUNCH_FROM_PPW);
                 break;
             case Constants.SOURCE_WIDGET:
-                StatisticsService.reportEvent("launch-from-widget"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.LAUNCH_FROM_WIDGET);
                 break;
             case Constants.SOURCE_C2DM:
-                StatisticsService.reportEvent("launch-from-c2dm"); //$NON-NLS-1$
+                StatisticsService.reportEvent(StatisticsConstants.LAUNCH_FROM_C2DM);
                 break;
             }
         }
@@ -819,9 +820,9 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     @SuppressWarnings("nls")
     protected void onTaskCompleted(Task item) {
         if(isInbox)
-            StatisticsService.reportEvent("task-completed-inbox");
+            StatisticsService.reportEvent(StatisticsConstants.TASK_COMPLETED_INBOX);
         else
-            StatisticsService.reportEvent("task-completed-filter");
+            StatisticsService.reportEvent(StatisticsConstants.TASK_COMPLETED_FILTER);
     }
 
     /**
@@ -845,7 +846,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
                 selectCustomId(task.getId());
             }
 
-            StatisticsService.reportEvent("task-created-tasklist");
+            StatisticsService.reportEvent(StatisticsConstants.TASK_CREATED_TASKLIST);
             return task;
         } catch (Exception e) {
             exceptionService.displayAndReportError(this, "quick-add-task", e);
@@ -1073,31 +1074,31 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
         // handle my own menus
         switch (item.getItemId()) {
         case MENU_LISTS_ID:
-            StatisticsService.reportEvent("tla-menu-lists"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_LISTS);
             showFilterListActivity();
             return true;
         case MENU_ADDONS_ID:
-            StatisticsService.reportEvent("tla-menu-addons"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_ADDONS);
             intent = new Intent(this, AddOnActivity.class);
             startActivityForResult(intent, ACTIVITY_ADDONS);
             return true;
         case MENU_SETTINGS_ID:
-            StatisticsService.reportEvent("tla-menu-settings"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_SETTINGS);
             intent = new Intent(this, EditPreferences.class);
             startActivityForResult(intent, ACTIVITY_SETTINGS);
             return true;
         case MENU_SORT_ID:
-            StatisticsService.reportEvent("tla-menu-sort"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_SORT);
             AlertDialog dialog = SortSelectionActivity.createDialog(this,
                     this, sortFlags, sortSort);
             dialog.show();
             return true;
         case MENU_SYNC_ID:
-            StatisticsService.reportEvent("tla-menu-sync"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_SYNC);
             performSyncAction();
             return true;
         case MENU_HELP_ID:
-            StatisticsService.reportEvent("tla-menu-help"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.TLA_MENU_HELP);
             intent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(Constants.HELP_URL));
             startActivity(intent);

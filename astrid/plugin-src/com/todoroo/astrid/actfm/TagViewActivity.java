@@ -71,6 +71,7 @@ import com.todoroo.astrid.dao.UpdateDao;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.tags.TagFilterExposer;
@@ -765,7 +766,7 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
         addCommentField.setText(""); //$NON-NLS-1$
         refreshUpdatesList();
 
-        StatisticsService.reportEvent("actfm-tag-comment"); //$NON-NLS-1$
+        StatisticsService.reportEvent(StatisticsConstants.ACTFM_TAG_COMMENT);
     }
 
     @Override

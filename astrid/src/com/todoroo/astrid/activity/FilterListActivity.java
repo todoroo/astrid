@@ -58,6 +58,7 @@ import com.todoroo.astrid.api.IntentFilter;
 import com.todoroo.astrid.core.SearchFilter;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.StartupService;
+import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.ThemeService;
 
@@ -250,11 +251,11 @@ public class FilterListActivity extends ExpandableListActivity {
             AndroidUtilities.callApiMethod(5, this, "overridePendingTransition", //$NON-NLS-1$
                     new Class<?>[] { Integer.TYPE, Integer.TYPE },
                     R.anim.slide_left_in, R.anim.slide_left_out);
-            StatisticsService.reportEvent("filter-list"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.FILTER_LIST);
             return true;
         } else if(item instanceof SearchFilter) {
             onSearchRequested();
-            StatisticsService.reportEvent("filter-search"); //$NON-NLS-1$
+            StatisticsService.reportEvent(StatisticsConstants.FILTER_SEARCH);
         } else if(item instanceof IntentFilter) {
             try {
                 ((IntentFilter)item).intent.send();
