@@ -817,7 +817,6 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
      * A task was completed from the task adapter
      * @param item task that was completed
      */
-    @SuppressWarnings("nls")
     protected void onTaskCompleted(Task item) {
         if(isInbox)
             StatisticsService.reportEvent(StatisticsConstants.TASK_COMPLETED_INBOX);
