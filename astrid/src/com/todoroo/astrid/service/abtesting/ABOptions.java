@@ -1,4 +1,4 @@
-package com.todoroo.astrid.abtesting;
+package com.todoroo.astrid.service.abtesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -220,9 +220,10 @@ public class ABOptions {
     public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
     private static int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
     private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
-    private static String[] AB_OPTION_FIRST_ACTIVITY_EVENTS = { "create-task", "task-created-tasklist"};
+    private static String[] AB_OPTION_FIRST_ACTIVITY_EVENTS = { "create-task", "task-created-tasklist", "actfm-new-user" };
 
     public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
-    private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 }; // Index 0 = show welcome login, index 1 = don't show welcome login
+    private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 };
     private static String[] AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS = { "ab-welcome-login-show", "ab-welcome-login-skip" };
+    private static String[] AB_OPTION_WELCOME_LOGIN_EVENTS = { "actfm-new-user" };
 }

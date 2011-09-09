@@ -11,7 +11,7 @@ import android.content.Context;
 import com.localytics.android.LocalyticsSession;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.utility.Preferences;
-import com.todoroo.astrid.abtesting.ABOptions;
+import com.todoroo.astrid.service.abtesting.ABOptions;
 import com.todoroo.astrid.utility.Constants;
 
 public class StatisticsService {

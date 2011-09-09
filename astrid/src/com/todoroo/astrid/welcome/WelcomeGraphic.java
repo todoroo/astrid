@@ -11,13 +11,13 @@ import android.widget.ImageView;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.utility.AndroidUtilities;
-import com.todoroo.astrid.abtesting.ABChooser;
-import com.todoroo.astrid.abtesting.ABOptions;
 import com.todoroo.astrid.activity.Eula;
 import com.todoroo.astrid.activity.FilterListActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.StatisticsService;
+import com.todoroo.astrid.service.abtesting.ABChooser;
+import com.todoroo.astrid.service.abtesting.ABOptions;
 
 public class WelcomeGraphic extends Activity {
 

@@ -1,4 +1,4 @@
-package com.todoroo.astrid.abtesting;
+package com.todoroo.astrid.service.abtesting;
 
 import java.io.IOException;
 import java.util.Locale;
