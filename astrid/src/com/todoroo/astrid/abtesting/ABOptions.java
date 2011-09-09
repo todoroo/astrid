@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Helper class to define options with their probabilities and descriptions
@@ -17,6 +18,7 @@ public class ABOptions {
 
     private ABOptions() { // Don't instantiate
         bundles = new HashMap<String, ABOptionBundle>();
+        events = new HashMap<String, List<String>>();
         initialize();
     }
 
@@ -97,6 +99,7 @@ public class ABOptions {
      * Maps keys (i.e. preference key identifiers) to feature weights and descriptions
      */
     private final HashMap<String, ABOptionBundle> bundles;
+    private final HashMap<String, List<String>> events; // maps events to lists of interested keys
 
     private static class ABOptionBundle {
         public int[] weightedProbs;
@@ -126,6 +129,27 @@ public class ABOptions {
                         descriptions = null;
                     }
 
+                    Field relevantEventsField;
+                    String[] relevantEvents = null;
+                    if (descriptions != null) { // Can't tag options with no descriptions, so events are irrelevant
+                        try {
+                            relevantEventsField = abOptions.getDeclaredField(field.getName() + "_EVENTS");
+                            relevantEvents = (String[]) relevantEventsField.get(this);
+                        } catch (NoSuchFieldException e) {
+                            // Do nothing, already null
+                        }
+                    }
+                    if (relevantEvents != null) {
+                        for (String curr : relevantEvents) {
+                            List<String> interestedKeys = events.get(curr);
+                            if (interestedKeys == null) {
+                                interestedKeys = new ArrayList<String>();
+                                events.put(curr, interestedKeys);
+                            }
+                            interestedKeys.add(key);
+                        }
+                    }
+
                     ABOptionBundle newBundle = new ABOptionBundle(probs, descriptions);
                     bundles.put(key, newBundle);
                 } catch (Exception e) {
@@ -144,24 +168,61 @@ public class ABOptions {
         return bundles.containsKey(key);
     }
 
-    public String[] getLocalyticsAttributeArray() {
+    /**
+     * Gets a localytics attribute array for the specified event.
+     * @param event
+     * @return
+     */
+    public String[] getLocalyticsAttributeArrayForEvent(String event) {
         ArrayList<String> attributes = new ArrayList<String>();
-        for (String key : bundles.keySet()) {
-            int choice = ABChooser.getInstance().readChoiceForOption(key);
-            ABOptionBundle bundle = bundles.get(key);
-            if (choice != ABChooser.NO_OPTION && choice < bundle.descriptions.length) {
-                attributes.add(key);
-                attributes.add(bundle.descriptions[choice]);
+        List<String> interestedKeys = events.get(event);
+        if (interestedKeys != null)
+            for (String key : interestedKeys) {
+                // Get choice if exists and add to array
+                if (isValidKey(key)) {
+                    ABOptionBundle bundle = bundles.get(key);
+                    int choice = ABChooser.getInstance().readChoiceForOption(key);
+                    if (choice != ABChooser.NO_OPTION &&
+                            bundle.descriptions != null && choice < bundle.descriptions.length) {
+                        attributes.add(key);
+                        attributes.add(getDescriptionForOption(key, choice));
+                    }
+                }
             }
-        }
         return attributes.toArray(new String[attributes.size()]);
     }
+
+
+    /*
+     * A/B testing options are defined below according to the following spec:
+     *
+     * public static String AB_OPTION_<NAME> = "<key>"
+     * --This key is used to identify the option in the application and in the preferences
+     *
+     * private static int[] AB_OPTION_<NAME>_PROBS = { int, int, ... }
+     * --The different choices in an option correspond to an index in the probability array.
+     * Probabilities are expressed as integers to easily define relative weights. For example,
+     * the array { 1, 2 } would mean option 0 would happen one time for every two occurrences of option 1
+     *
+     * (optional)
+     * private static String[] AB_OPTION_<NAME>_DESCRIPTIONS = { "...", "...", ... }
+     * --A string description of each option. Useful for tagging events. The index of
+     * each description should correspond to the events location in the probability array
+     * (i.e. the arrays should be the same length if this one exists)
+     *
+     * (optional)
+     * private static String[] AB_OPTION_<NAME>_EVENTS = { "...", "...", ... }
+     * --An arbitrary length list of relevant localytics events. When events are
+     * tagged from StatisticsService, they will be appended with attributes
+     * that have that event in this array
+     */
 
     public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
     private static int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
     private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
+    private static String[] AB_OPTION_FIRST_ACTIVITY_EVENTS = { "create-task" };
 
     public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
     private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 }; // Index 0 = show welcome login, index 1 = don't show welcome login
-
+    private static String[] AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS = { "ab-welcome-login-show", "ab-welcome-login-skip" };
 }

@@ -79,9 +79,8 @@ public class ABChooser {
      */
     private int chooseOption(int[] optionProbs) {
         int sum = 0;
-        for (int opt : optionProbs) { // Compute sum
+        for (int opt : optionProbs) // Compute sum
             sum += opt;
-        }
 
         double rand = new Random().nextDouble() * sum; // Get uniformly distributed double between [0, sum)
         sum = 0;
