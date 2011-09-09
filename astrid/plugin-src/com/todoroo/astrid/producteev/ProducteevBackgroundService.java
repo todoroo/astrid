@@ -34,6 +34,7 @@ public class ProducteevBackgroundService extends SyncBackgroundService {
 
     @Override
     public void onDestroy() {
+        StatisticsService.sessionPause();
         StatisticsService.sessionStop(this);
         super.onDestroy();
     }

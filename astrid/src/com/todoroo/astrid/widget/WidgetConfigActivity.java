@@ -121,19 +121,20 @@ abstract public class WidgetConfigActivity extends ExpandableListActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        StatisticsService.sessionStart(this);
         adapter.registerRecevier();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        StatisticsService.sessionPause();
         adapter.unregisterRecevier();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        StatisticsService.sessionStart(this);
     }
 
     @Override

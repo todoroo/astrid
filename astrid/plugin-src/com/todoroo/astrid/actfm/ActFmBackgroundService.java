@@ -43,6 +43,7 @@ public class ActFmBackgroundService extends SyncBackgroundService {
 
     @Override
     public void onDestroy() {
+        StatisticsService.sessionPause();
         StatisticsService.sessionStop(this);
         super.onDestroy();
     }

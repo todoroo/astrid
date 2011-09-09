@@ -192,7 +192,6 @@ public class FilterListActivity extends ExpandableListActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        StatisticsService.sessionStart(this);
     }
 
     @Override
@@ -204,6 +203,7 @@ public class FilterListActivity extends ExpandableListActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        StatisticsService.sessionStart(this);
         if(adapter != null)
             adapter.registerRecevier();
     }

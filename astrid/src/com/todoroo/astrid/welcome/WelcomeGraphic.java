@@ -65,6 +65,11 @@ public class WelcomeGraphic extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         StatisticsService.sessionStart(this);
     }
 

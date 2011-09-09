@@ -680,6 +680,7 @@ public final class TaskEditActivity extends TabActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        StatisticsService.sessionPause();
         unregisterReceiver(controlReceiver);
 
         if(shouldSaveState)
@@ -689,6 +690,7 @@ public final class TaskEditActivity extends TabActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        StatisticsService.sessionStart(this);
         registerReceiver(controlReceiver,
                 new IntentFilter(AstridApiConstants.BROADCAST_SEND_EDIT_CONTROLS));
         populateFields();
@@ -727,7 +729,6 @@ public final class TaskEditActivity extends TabActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        StatisticsService.sessionStart(this);
     }
 
     @Override

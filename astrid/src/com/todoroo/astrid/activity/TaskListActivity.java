@@ -487,7 +487,6 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     @Override
     protected void onStart() {
         super.onStart();
-        StatisticsService.sessionStart(this);
     }
 
     @Override
@@ -499,6 +498,7 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
     @Override
     protected void onResume() {
         super.onResume();
+        StatisticsService.sessionStart(this);
         if (addOnService.hasPowerPack() &&
                 Preferences.getBoolean(R.string.p_voiceInputEnabled, true) &&
                 voiceInputAssistant.isVoiceInputAvailable()) {
@@ -522,8 +522,8 @@ public class TaskListActivity extends ListActivity implements OnScrollListener,
 
     @Override
     protected void onPause() {
-        StatisticsService.sessionPause();
         super.onPause();
+        StatisticsService.sessionPause();
         try {
             unregisterReceiver(detailReceiver);
             unregisterReceiver(refreshReceiver);
