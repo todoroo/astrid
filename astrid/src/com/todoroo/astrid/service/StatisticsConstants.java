@@ -54,7 +54,7 @@ public class StatisticsConstants {
     public static final String PDV_TASK_COMPLETED = "pdv-task-completed";
     public static final String CREATE_CALENDAR_EVENT = "create-calendar-event";
     public static final String REPEAT_TASK_CREATE = "repeat-task-create";
-
+    public static final String ACTFM_LIST_SHARED = "actfm-list-shared";
 
 
 }

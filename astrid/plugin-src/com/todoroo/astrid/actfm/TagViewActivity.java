@@ -657,6 +657,10 @@ public class TagViewActivity extends TaskListActivity implements OnTabChangeList
             return;
         }
 
+        int oldMemberCount = tagData.getValue(TagData.MEMBER_COUNT);
+        if (members.length() > oldMemberCount) {
+            StatisticsService.reportEvent(StatisticsConstants.ACTFM_LIST_SHARED);
+        }
         tagData.setValue(TagData.MEMBERS, members.toString());
         tagData.setValue(TagData.MEMBER_COUNT, members.length());
         tagData.setFlag(TagData.FLAGS, TagData.FLAG_SILENT, isSilent.isChecked());

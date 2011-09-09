@@ -224,6 +224,7 @@ public class ABOptions {
     private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
     private static String[] AB_OPTION_FIRST_ACTIVITY_EVENTS = { StatisticsConstants.CREATE_TASK,
                                                                 StatisticsConstants.TASK_CREATED_TASKLIST,
+                                                                StatisticsConstants.ACTFM_LIST_SHARED,
                                                                 StatisticsConstants.ACTFM_NEW_USER };
 
     public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
