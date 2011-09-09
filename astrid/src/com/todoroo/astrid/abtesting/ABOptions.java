@@ -2,6 +2,7 @@ package com.todoroo.astrid.abtesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -141,6 +142,19 @@ public class ABOptions {
 
     public boolean isValidKey(String key) {
         return bundles.containsKey(key);
+    }
+
+    public String[] getLocalyticsAttributeArray() {
+        ArrayList<String> attributes = new ArrayList<String>();
+        for (String key : bundles.keySet()) {
+            int choice = ABChooser.getInstance().readChoiceForOption(key);
+            ABOptionBundle bundle = bundles.get(key);
+            if (choice != ABChooser.NO_OPTION && choice < bundle.descriptions.length) {
+                attributes.add(key);
+                attributes.add(bundle.descriptions[choice]);
+            }
+        }
+        return attributes.toArray(new String[attributes.size()]);
     }
 
     public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";

@@ -13,6 +13,8 @@ import com.todoroo.astrid.service.StatisticsService;
  */
 public class ABChooser {
 
+    public static final int NO_OPTION = -1;
+
     private static ABChooser instance = null;
     private final ABOptions options;
 
@@ -37,10 +39,10 @@ public class ABChooser {
      * @return
      */
     public int getChoiceForOption(String optionKey) {
-        int pref = Preferences.getInt(optionKey, -1);
-        if (pref > -1) return pref;
+        int pref = readChoiceForOption(optionKey);
+        if (pref > NO_OPTION) return pref;
 
-        int chosen = -1;
+        int chosen = NO_OPTION;
         if (options.isValidKey(optionKey)) {
             int[] optionProbs = options.getProbsForKey(optionKey);
             chosen = chooseOption(optionProbs);
@@ -49,6 +51,15 @@ public class ABChooser {
             StatisticsService.reportEvent(options.getDescriptionForOption(optionKey, chosen)); // Session should be open
         }
         return chosen;
+    }
+
+    /**
+     * Returns the chosen option if set or NO_OPTION if unset
+     * @param optionKey
+     * @return
+     */
+    public int readChoiceForOption(String optionKey) {
+        return Preferences.getInt(optionKey, NO_OPTION);
     }
 
     /**
