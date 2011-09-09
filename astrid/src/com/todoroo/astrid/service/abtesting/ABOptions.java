@@ -113,19 +113,23 @@ public class ABOptions {
         }
     }
 
+    private static final String PROBS_SUFFIX = "_PROBS";
+    private static final String DESCRIPTIONS_SUFFIX = "_DESCRIPTIONS";
+    private static final String EVENTS_SUFFIX = "_RELEVANT_EVENTS";
+
     private void initialize() { // Set up
         Class<?> abOptions = ABOptions.class;
         for(Field field : abOptions.getDeclaredFields()) {
             if (isOptionKeyField(field)) {
                 try {
                     String key = (String) field.get(this);
-                    Field probsField = abOptions.getDeclaredField(field.getName() + "_PROBS");
+                    Field probsField = abOptions.getDeclaredField(field.getName() + PROBS_SUFFIX);
                     int[] probs = (int[]) probsField.get(this);
 
                     Field descriptionsField;
                     String[] descriptions;
                     try {
-                        descriptionsField = abOptions.getDeclaredField(field.getName() + "_DESCRIPTIONS");
+                        descriptionsField = abOptions.getDeclaredField(field.getName() + DESCRIPTIONS_SUFFIX);
                         descriptions = (String[]) descriptionsField.get(this);
                     } catch (NoSuchFieldException e) {
                         descriptions = null;
@@ -135,7 +139,7 @@ public class ABOptions {
                     String[] relevantEvents = null;
                     if (descriptions != null) { // Can't tag options with no descriptions, so events are irrelevant
                         try {
-                            relevantEventsField = abOptions.getDeclaredField(field.getName() + "_EVENTS");
+                            relevantEventsField = abOptions.getDeclaredField(field.getName() + EVENTS_SUFFIX);
                             relevantEvents = (String[]) relevantEventsField.get(this);
                         } catch (NoSuchFieldException e) {
                             // Do nothing, already null
@@ -162,7 +166,7 @@ public class ABOptions {
     }
 
     private boolean isOptionKeyField(Field field) {
-        return !field.getName().endsWith("_PROBS") && !field.getName().endsWith("_DESCRIPTIONS") && !field.getName().endsWith("_EVENTS")
+        return !field.getName().endsWith(PROBS_SUFFIX) && !field.getName().endsWith(DESCRIPTIONS_SUFFIX) && !field.getName().endsWith(EVENTS_SUFFIX)
                 && Modifier.isStatic(field.getModifiers()) && !field.getName().equals("instance");
     }
 
@@ -213,7 +217,7 @@ public class ABOptions {
      * (i.e. the arrays should be the same length if this one exists)
      *
      * (optional)
-     * private static String[] AB_OPTION_<NAME>_EVENTS = { "...", "...", ... }
+     * private static String[] AB_OPTION_<NAME>_RELEVANT_EVENTS = { "...", "...", ... }
      * --An arbitrary length list of relevant localytics events. When events are
      * tagged from StatisticsService, they will be appended with attributes
      * that have that event in this array
@@ -222,7 +226,7 @@ public class ABOptions {
     public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
     private static int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
     private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
-    private static String[] AB_OPTION_FIRST_ACTIVITY_EVENTS = { StatisticsConstants.CREATE_TASK,
+    private static String[] AB_OPTION_FIRST_ACTIVITY_RELEVANT_EVENTS = { StatisticsConstants.CREATE_TASK,
                                                                 StatisticsConstants.TASK_CREATED_TASKLIST,
                                                                 StatisticsConstants.ACTFM_LIST_SHARED,
                                                                 StatisticsConstants.ACTFM_NEW_USER };
@@ -230,5 +234,5 @@ public class ABOptions {
     public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
     private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 };
     private static String[] AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS = { "ab-welcome-login-show", "ab-welcome-login-skip" };
-    private static String[] AB_OPTION_WELCOME_LOGIN_EVENTS = { StatisticsConstants.ACTFM_NEW_USER };
+    private static String[] AB_OPTION_WELCOME_LOGIN_RELEVANT_EVENTS = { StatisticsConstants.ACTFM_NEW_USER };
 }
