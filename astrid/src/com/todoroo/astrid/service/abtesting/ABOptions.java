@@ -202,40 +202,40 @@ public class ABOptions {
     /*
      * A/B testing options are defined below according to the following spec:
      *
-     * public static String AB_OPTION_<NAME> = "<key>"
+     * public static final String AB_OPTION_<NAME> = "<key>"
      * --This key is used to identify the option in the application and in the preferences
      *
-     * private static int[] AB_OPTION_<NAME>_PROBS = { int, int, ... }
+     * private static final int[] AB_OPTION_<NAME>_PROBS = { int, int, ... }
      * --The different choices in an option correspond to an index in the probability array.
      * Probabilities are expressed as integers to easily define relative weights. For example,
      * the array { 1, 2 } would mean option 0 would happen one time for every two occurrences of option 1
      *
      * (optional)
-     * private static String[] AB_OPTION_<NAME>_DESCRIPTIONS = { "...", "...", ... }
+     * private static final String[] AB_OPTION_<NAME>_DESCRIPTIONS = { "...", "...", ... }
      * --A string description of each option. Useful for tagging events. The index of
      * each description should correspond to the events location in the probability array
      * (i.e. the arrays should be the same length if this one exists)
      *
      * (optional)
-     * private static String[] AB_OPTION_<NAME>_RELEVANT_EVENTS = { "...", "...", ... }
+     * private static final String[] AB_OPTION_<NAME>_RELEVANT_EVENTS = { "...", "...", ... }
      * --An arbitrary length list of relevant localytics events. When events are
      * tagged from StatisticsService, they will be appended with attributes
      * that have that event in this array
      */
 
-    public static String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
-    private static int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
-    private static String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
-    private static String[] AB_OPTION_FIRST_ACTIVITY_RELEVANT_EVENTS = { StatisticsConstants.CREATE_TASK,
+    public static final String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
+    private static final int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
+    private static final String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
+    private static final String[] AB_OPTION_FIRST_ACTIVITY_RELEVANT_EVENTS = { StatisticsConstants.CREATE_TASK,
                                                                          StatisticsConstants.TASK_CREATED_TASKLIST,
                                                                          StatisticsConstants.USER_FIRST_TASK,
                                                                          StatisticsConstants.ACTFM_LIST_SHARED,
                                                                          StatisticsConstants.ACTFM_NEW_USER };
 
-    public static String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
-    private static int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 };
-    private static String[] AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS = { "ab-welcome-login-show", "ab-welcome-login-skip" };
-    private static String[] AB_OPTION_WELCOME_LOGIN_RELEVANT_EVENTS = { StatisticsConstants.CREATE_TASK,
+    public static final String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
+    private static final int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 };
+    private static final String[] AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS = { "ab-welcome-login-show", "ab-welcome-login-skip" };
+    private static final String[] AB_OPTION_WELCOME_LOGIN_RELEVANT_EVENTS = { StatisticsConstants.CREATE_TASK,
                                                                         StatisticsConstants.TASK_CREATED_TASKLIST,
                                                                         StatisticsConstants.USER_FIRST_TASK,
                                                                         StatisticsConstants.ACTFM_LIST_SHARED,
