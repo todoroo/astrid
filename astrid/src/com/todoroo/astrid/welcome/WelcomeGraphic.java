@@ -9,7 +9,9 @@ import android.view.Window;
 import android.widget.ImageView;
 
 import com.timsu.astrid.R;
+import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.astrid.activity.Eula;
 import com.todoroo.astrid.activity.FilterListActivity;
@@ -23,10 +25,13 @@ public class WelcomeGraphic extends Activity {
 
     public static final String KEY_SHOW_EULA = "show_eula"; //$NON-NLS-1$
 
+    @Autowired ABChooser abChooser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ContextManager.setContext(this);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        DependencyInjectionService.getInstance().inject(this);
 
         super.onCreate(savedInstanceState);
         new StartupService().onStartupApplication(this);
@@ -86,9 +91,8 @@ public class WelcomeGraphic extends Activity {
     }
 
     private Intent getNextIntent() {
-        ABChooser chooser = ABChooser.getInstance();
         Intent intent = new Intent();
-        int choice = chooser.getChoiceForOption(ABOptions.AB_OPTION_FIRST_ACTIVITY);
+        int choice = abChooser.getChoiceForOption(ABOptions.AB_OPTION_FIRST_ACTIVITY);
         switch (choice) {
         case 0:
             intent.setClass(this, TaskListActivity.class);

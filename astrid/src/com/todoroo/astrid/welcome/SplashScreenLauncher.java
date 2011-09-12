@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.Window;
 
 import com.timsu.astrid.R;
+import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.FilterListActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
@@ -22,6 +24,8 @@ public class SplashScreenLauncher extends Activity {
     private boolean shouldGoThroughWelcome = false;
     private int latestSetVersion = 0;
 
+    @Autowired ABChooser abChooser;
+
     static {
         AstridDependencyInjector.initialize();
     }
@@ -30,6 +34,7 @@ public class SplashScreenLauncher extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
+        DependencyInjectionService.getInstance().inject(this);
         setContentView(R.layout.splash_screen_launcher);
         latestSetVersion = AstridPreferences.getCurrentVersion();
         shouldGoThroughWelcome = ((latestSetVersion == 0) || !Preferences.getBoolean(WelcomeLogin.KEY_SHOWED_WELCOME_LOGIN, false));
@@ -56,10 +61,10 @@ public class SplashScreenLauncher extends Activity {
 
     private void finishAndShowNext() {
         if (shouldGoThroughWelcome) {
-            int welcomeLoginChoice = ABChooser.getInstance().getChoiceForOption(ABOptions.AB_OPTION_WELCOME_LOGIN);
+            int welcomeLoginChoice = abChooser.getChoiceForOption(ABOptions.AB_OPTION_WELCOME_LOGIN);
             welcomeLoginPath(welcomeLoginChoice);
         } else {
-            int tasksOrListsChoice = ABChooser.getInstance().getChoiceForOption(ABOptions.AB_OPTION_FIRST_ACTIVITY);
+            int tasksOrListsChoice = abChooser.getChoiceForOption(ABOptions.AB_OPTION_FIRST_ACTIVITY);
             mainActivityPath(tasksOrListsChoice);
         }
     }

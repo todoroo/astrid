@@ -17,6 +17,7 @@ import com.todoroo.astrid.utility.Constants;
 public class StatisticsService {
 
     private static LocalyticsSession localyticsSession;
+    private static ABOptions abOptions = new ABOptions(); // Not autowired since StatisticsService never instantiated
 
     /**
      * Indicate session started
@@ -82,7 +83,7 @@ public class StatisticsService {
             return;
 
         if(localyticsSession != null) {
-            String[] abAttributes = ABOptions.getInstance().getLocalyticsAttributeArrayForEvent(event);
+            String[] abAttributes = abOptions.getLocalyticsAttributeArrayForEvent(event);
             if(attributes.length > 0 || abAttributes.length > 0) {
                 HashMap<String, String> attrMap = new HashMap<String, String>();
                 for(int i = 1; i < attributes.length; i += 2)

@@ -1,7 +1,5 @@
 package com.todoroo.astrid.service.abtesting;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,25 +11,13 @@ import com.todoroo.astrid.service.StatisticsConstants;
  * @author Sam Bosley <sam@astrid.com>
  *
  */
-@SuppressWarnings({"nls", "unused"})
+@SuppressWarnings("nls")
 public class ABOptions {
 
-    private static ABOptions instance = null;
-
-    private ABOptions() { // Don't instantiate
+    public ABOptions() {
         bundles = new HashMap<String, ABOptionBundle>();
         events = new HashMap<String, List<String>>();
         initialize();
-    }
-
-    /**
-     * Gets the singleton instance of the ABOptions service.
-     * @return
-     */
-    public synchronized static ABOptions getInstance() {
-        if(instance == null)
-            instance = new ABOptions();
-        return instance;
     }
 
     /**
@@ -113,63 +99,6 @@ public class ABOptions {
         }
     }
 
-    private static final String PROBS_SUFFIX = "_PROBS";
-    private static final String DESCRIPTIONS_SUFFIX = "_DESCRIPTIONS";
-    private static final String EVENTS_SUFFIX = "_RELEVANT_EVENTS";
-
-    private void initialize() { // Set up
-        Class<?> abOptions = ABOptions.class;
-        for(Field field : abOptions.getDeclaredFields()) {
-            if (isOptionKeyField(field)) {
-                try {
-                    String key = (String) field.get(this);
-                    Field probsField = abOptions.getDeclaredField(field.getName() + PROBS_SUFFIX);
-                    int[] probs = (int[]) probsField.get(this);
-
-                    Field descriptionsField;
-                    String[] descriptions;
-                    try {
-                        descriptionsField = abOptions.getDeclaredField(field.getName() + DESCRIPTIONS_SUFFIX);
-                        descriptions = (String[]) descriptionsField.get(this);
-                    } catch (NoSuchFieldException e) {
-                        descriptions = null;
-                    }
-
-                    Field relevantEventsField;
-                    String[] relevantEvents = null;
-                    if (descriptions != null) { // Can't tag options with no descriptions, so events are irrelevant
-                        try {
-                            relevantEventsField = abOptions.getDeclaredField(field.getName() + EVENTS_SUFFIX);
-                            relevantEvents = (String[]) relevantEventsField.get(this);
-                        } catch (NoSuchFieldException e) {
-                            // Do nothing, already null
-                        }
-                    }
-                    if (relevantEvents != null) {
-                        for (String curr : relevantEvents) {
-                            List<String> interestedKeys = events.get(curr);
-                            if (interestedKeys == null) {
-                                interestedKeys = new ArrayList<String>();
-                                events.put(curr, interestedKeys);
-                            }
-                            interestedKeys.add(key);
-                        }
-                    }
-
-                    ABOptionBundle newBundle = new ABOptionBundle(probs, descriptions);
-                    bundles.put(key, newBundle);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private boolean isOptionKeyField(Field field) {
-        return !field.getName().endsWith(PROBS_SUFFIX) && !field.getName().endsWith(DESCRIPTIONS_SUFFIX) && !field.getName().endsWith(EVENTS_SUFFIX)
-                && Modifier.isStatic(field.getModifiers()) && !field.getName().equals("instance");
-    }
-
     public boolean isValidKey(String key) {
         return bundles.containsKey(key);
     }
@@ -187,7 +116,7 @@ public class ABOptions {
                 // Get choice if exists and add to array
                 if (isValidKey(key)) {
                     ABOptionBundle bundle = bundles.get(key);
-                    int choice = ABChooser.getInstance().readChoiceForOption(key);
+                    int choice = ABChooser.readChoiceForOption(key);
                     if (choice != ABChooser.NO_OPTION &&
                             bundle.descriptions != null && choice < bundle.descriptions.length) {
                         attributes.add(key);
@@ -223,6 +152,30 @@ public class ABOptions {
      * that have that event in this array
      */
 
+    private void initialize() { // Set up
+        addOption(AB_OPTION_FIRST_ACTIVITY, AB_OPTION_FIRST_ACTIVITY_PROBS,
+                AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS, AB_OPTION_FIRST_ACTIVITY_RELEVANT_EVENTS);
+
+        addOption(AB_OPTION_WELCOME_LOGIN, AB_OPTION_WELCOME_LOGIN_PROBS,
+                AB_OPTION_WELCOME_LOGIN_DESCRIPTIONS, AB_OPTION_WELCOME_LOGIN_RELEVANT_EVENTS);
+    }
+
+    private void addOption(String optionKey, int[] probs, String[] descriptions, String[] relevantEvents) {
+        ABOptionBundle bundle = new ABOptionBundle(probs, descriptions);
+        bundles.put(optionKey, bundle);
+
+        if (relevantEvents != null) {
+            for (String curr : relevantEvents) {
+                List<String> interestedKeys = events.get(curr);
+                if (interestedKeys == null) {
+                    interestedKeys = new ArrayList<String>();
+                    events.put(curr, interestedKeys);
+                }
+                interestedKeys.add(optionKey);
+            }
+        }
+    }
+
     public static final String AB_OPTION_FIRST_ACTIVITY = "ab_first_activity";
     private static final int[] AB_OPTION_FIRST_ACTIVITY_PROBS = { 1, 1 };
     private static final String[] AB_OPTION_FIRST_ACTIVITY_DESCRIPTIONS = { "ab-show-tasks-first", "ab-show-lists-first" };
@@ -230,7 +183,7 @@ public class ABOptions {
                                                                          StatisticsConstants.TASK_CREATED_TASKLIST,
                                                                          StatisticsConstants.USER_FIRST_TASK,
                                                                          StatisticsConstants.ACTFM_LIST_SHARED,
-                                                                         StatisticsConstants.ACTFM_NEW_USER };
+                                                                         StatisticsConstants.ACTFM_NEW_USER };//*/
 
     public static final String AB_OPTION_WELCOME_LOGIN = "ab_welcome_login";
     private static final int[] AB_OPTION_WELCOME_LOGIN_PROBS = { 0, 1 };
@@ -239,5 +192,5 @@ public class ABOptions {
                                                                         StatisticsConstants.TASK_CREATED_TASKLIST,
                                                                         StatisticsConstants.USER_FIRST_TASK,
                                                                         StatisticsConstants.ACTFM_LIST_SHARED,
-                                                                        StatisticsConstants.ACTFM_NEW_USER };
+                                                                        StatisticsConstants.ACTFM_NEW_USER };//*/
 }

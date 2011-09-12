@@ -2,6 +2,8 @@ package com.todoroo.astrid.service.abtesting;
 
 import java.util.Random;
 
+import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.service.StatisticsService;
 
@@ -15,17 +17,14 @@ public class ABChooser {
 
     public static final int NO_OPTION = -1;
 
-    private static ABChooser instance = null;
-    private final ABOptions options;
+    @Autowired
+    private ABOptions abOptions;
 
-    private ABChooser() {
-        options = ABOptions.getInstance();
-    }
+    private final Random random;
 
-    public static synchronized ABChooser getInstance() {
-        if (instance == null)
-            instance = new ABChooser();
-        return instance;
+    public ABChooser() {
+        DependencyInjectionService.getInstance().inject(this);
+        random = new Random();
     }
 
     /**
@@ -43,12 +42,12 @@ public class ABChooser {
         if (pref > NO_OPTION) return pref;
 
         int chosen = NO_OPTION;
-        if (options.isValidKey(optionKey)) {
-            int[] optionProbs = options.getProbsForKey(optionKey);
+        if (abOptions.isValidKey(optionKey)) {
+            int[] optionProbs = abOptions.getProbsForKey(optionKey);
             chosen = chooseOption(optionProbs);
             setChoiceForOption(optionKey, chosen);
 
-            StatisticsService.reportEvent(options.getDescriptionForOption(optionKey, chosen)); // Session should be open
+            StatisticsService.reportEvent(abOptions.getDescriptionForOption(optionKey, chosen)); // Session should be open
         }
         return chosen;
     }
@@ -58,7 +57,7 @@ public class ABChooser {
      * @param optionKey
      * @return
      */
-    public int readChoiceForOption(String optionKey) {
+    public static int readChoiceForOption(String optionKey) {
         return Preferences.getInt(optionKey, NO_OPTION);
     }
 
@@ -69,7 +68,7 @@ public class ABChooser {
      * @param choiceIndex
      */
     public void setChoiceForOption(String optionKey, int choiceIndex) {
-        if (options.isValidKey(optionKey))
+        if (abOptions.isValidKey(optionKey))
             Preferences.setInt(optionKey, choiceIndex);
     }
 
@@ -82,7 +81,7 @@ public class ABChooser {
         for (int opt : optionProbs) // Compute sum
             sum += opt;
 
-        double rand = new Random().nextDouble() * sum; // Get uniformly distributed double between [0, sum)
+        double rand = random.nextDouble() * sum; // Get uniformly distributed double between [0, sum)
         sum = 0;
         for (int i = 0; i < optionProbs.length; i++) {
             sum += optionProbs[i];

@@ -21,5 +21,5 @@
       android:gravity="center"
       android:textColor="#ffffff"
       android:textSize="20dip"
-      android:text="@string/splash_screen_loading" />
+      android:text="@string/DLG_loading" />
 </LinearLayout>
