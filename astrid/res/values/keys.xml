@@ -291,6 +291,8 @@
     
     <string name="gtasks_GPr_sync_on_save_key">gtasks_sync_on_save</string>
     
+    <string name="gtasks_GPr_hide_not_in_list_key">gtasks_show_not_in_list</string>
+    
   <!-- ========================================================== SHARING == -->
   
     <string name="actfm_APr_interval_key">actfm_sync_freq</string>

@@ -36,6 +36,7 @@ import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.sql.QueryTemplate;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.TagViewActivity;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.api.AstridApiConstants;
@@ -50,6 +51,7 @@ import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.gtasks.GtasksPreferenceService;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.tags.TagService.Tag;
@@ -65,6 +67,7 @@ public class TagFilterExposer extends BroadcastReceiver {
     private static final String TAG = "tag"; //$NON-NLS-1$
 
     @Autowired TagDataService tagDataService;
+    @Autowired GtasksPreferenceService gtasksPreferenceService;
 
     private TagService tagService;
 
@@ -188,19 +191,23 @@ public class TagFilterExposer extends BroadcastReceiver {
     }
 
     private FilterCategory filterFromTags(Tag[] tags, int name) {
-        Filter[] filters = new Filter[tags.length + 1];
+        boolean hideUntagged = (gtasksPreferenceService.isLoggedIn() && Preferences.getBoolean(R.string.gtasks_GPr_hide_not_in_list_key, true));
+        int extraFilters = (hideUntagged ? 0 : 1);
+
+        Filter[] filters = new Filter[tags.length + extraFilters];
         Resources r = ContextManager.getContext().getResources();
 
-        Filter untagged = new Filter(r.getString(R.string.tag_FEx_untagged),
-                r.getString(R.string.tag_FEx_untagged),
-                tagService.untaggedTemplate(),
-                null);
-        untagged.listingIcon = ((BitmapDrawable)r.getDrawable(R.drawable.gl_lists)).getBitmap();
-        filters[0] = untagged;
-
+        if (!hideUntagged) {
+            Filter untagged = new Filter(r.getString(R.string.tag_FEx_untagged),
+                    r.getString(R.string.tag_FEx_untagged),
+                    tagService.untaggedTemplate(),
+                    null);
+                untagged.listingIcon = ((BitmapDrawable)r.getDrawable(R.drawable.gl_lists)).getBitmap();
+            filters[0] = untagged;
+        }
         Context context = ContextManager.getContext();
         for(int i = 0; i < tags.length; i++)
-            filters[i + 1] = filterFromTag(context, tags[i], TaskCriteria.activeAndVisible());
+            filters[i + extraFilters] = filterFromTag(context, tags[i], TaskCriteria.activeAndVisible());
         FilterCategoryWithNewButton filter = new FilterCategoryWithNewButton(context.getString(name), filters);
         filter.label = r.getString(R.string.tag_FEx_add_new);
         filter.intent = PendingIntent.getActivity(context, 0,
