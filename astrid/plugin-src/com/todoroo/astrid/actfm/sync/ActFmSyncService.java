@@ -6,8 +6,12 @@ package com.todoroo.astrid.actfm.sync;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -80,13 +84,35 @@ public final class ActFmSyncService {
     @Autowired UpdateDao updateDao;
     @Autowired MetadataDao metadataDao;
 
+    public static final long TIME_BETWEEN_TRIES = 5000 * 60; // 5 minutes between tries for failed pushes
+
+    private static final int PUSH_TYPE_TASK = 0;
+    private static final int PUSH_TYPE_TAG = 1;
+    private static final int PUSH_TYPE_UPDATE = 2;
+
     private String token;
 
     public ActFmSyncService() {
         DependencyInjectionService.getInstance().inject(this);
     }
 
+    class FailedPush {
+        int pushType;
+        long itemId;
+
+        public FailedPush(int pushType, long itemId) {
+            this.pushType = pushType;
+            this.itemId = itemId;
+        }
+    }
+
+    private final List<FailedPush> failedPushes = Collections.synchronizedList(new LinkedList<FailedPush>());
+    Thread pushRetryThread = null;
+    Runnable pushRetryRunnable;
+
     public void initialize() {
+        initializeRetryRunnable();
+
         taskDao.addListener(new ModelUpdateListener<Task>() {
             @Override
             public void onModelUpdated(final Task model) {
@@ -150,6 +176,56 @@ public final class ActFmSyncService {
         });
     }
 
+    private void initializeRetryRunnable() {
+        pushRetryRunnable = new Runnable() {
+            public void run() {
+                while (true) {
+                    AndroidUtilities.sleepDeep(TIME_BETWEEN_TRIES);
+                    if(failedPushes.isEmpty()) {
+                        synchronized(ActFmSyncService.this) {
+                            pushRetryThread = null;
+                            return;
+                        }
+                    }
+                    if(failedPushes.size() > 0) {
+                        Queue<FailedPush> toTry = new LinkedList<FailedPush>(); // Copy into a second queue so we don't end up infinitely retrying in the same loop
+                        while(failedPushes.size() > 0) {
+                            toTry.add(failedPushes.remove(0));
+                        }
+                        while(toTry.size() > 0) {
+                            if (!actFmPreferenceService.isOngoing()) {
+                                FailedPush pushOp = toTry.remove();
+                                switch(pushOp.pushType) {
+                                case PUSH_TYPE_TASK:
+                                    pushTask(pushOp.itemId);
+                                    break;
+                                case PUSH_TYPE_TAG:
+                                    pushTag(pushOp.itemId);
+                                    break;
+                                case PUSH_TYPE_UPDATE:
+                                    pushUpdate(pushOp.itemId);
+                                    break;
+                                }
+                            } else { // If normal sync ongoing/starts, let it deal with remaining sync
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    private void addFailedPush(FailedPush fp) {
+        failedPushes.add(fp);
+        synchronized(this) {
+            if(pushRetryThread == null) {
+                pushRetryThread = new Thread(pushRetryRunnable);
+                pushRetryThread.start();
+            }
+        }
+    }
+
     // --- data push methods
 
     /**
@@ -180,6 +256,8 @@ public final class ActFmSyncService {
             update.setValue(Update.REMOTE_ID, result.optLong("id"));
             updateDao.saveExisting(update);
         } catch (IOException e) {
+            if (!(e instanceof ActFmServiceException))
+                addFailedPush(new FailedPush(PUSH_TYPE_UPDATE, update.getId()));
             handleException("task-save", e);
         }
     }
@@ -283,17 +361,37 @@ public final class ActFmSyncService {
         } catch (JSONException e) {
             handleException("task-save-json", e);
         } catch (IOException e) {
+            if (!(e instanceof ActFmServiceException))
+                addFailedPush(new FailedPush(PUSH_TYPE_TASK, task.getId()));
             handleException("task-save-io", e);
         }
     }
 
     /**
      * Synchronize complete task with server
-     * @param task
+     * @param task id
      */
     public void pushTask(long taskId) {
         Task task = taskService.fetchById(taskId, Task.PROPERTIES);
         pushTaskOnSave(task, task.getMergedValues());
+    }
+
+    /**
+     * Synchronize complete tag with server
+     * @param tagdata id
+     */
+    public void pushTag(long tagId) {
+        TagData tagData = tagDataService.fetchById(tagId, TagData.PROPERTIES);
+        pushTagDataOnSave(tagData, tagData.getMergedValues());
+    }
+
+    /**
+     * Synchronize complete update with server
+     * @param update id
+     */
+    public void pushUpdate(long updateId) {
+        Update update = updateDao.fetch(updateId, Update.PROPERTIES);
+        pushUpdateOnSave(update, update.getMergedValues());
     }
 
     /**
@@ -383,6 +481,7 @@ public final class ActFmSyncService {
                 handleException("refetch-error-tag", e);
             }
         } catch (IOException e) {
+            addFailedPush(new FailedPush(PUSH_TYPE_TAG, tagData.getId()));
             handleException("tag-save", e);
             error = e.getMessage();
         }
