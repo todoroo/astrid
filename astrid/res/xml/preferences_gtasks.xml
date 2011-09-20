@@ -26,6 +26,12 @@
         	android:key="@string/gtasks_GPr_sync_on_save_key"
         	android:title="@string/gtasks_GPr_sync_on_save"
         	android:summary="@string/gtasks_GPr_sync_on_save_summary" />
+        	
+        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+            android:key="@string/gtasks_GPr_hide_not_in_list_key"
+            android:title="@string/gtasks_GPr_hide_not_in_list"
+            android:summary="@string/gtasks_GPr_hide_not_in_list_summary" 
+            android:defaultValue="true" />
             
     </PreferenceCategory>
     

@@ -89,6 +89,10 @@
     
     <string name="gtasks_GPr_sync_on_save_summary">Sync individual tasks as they are saved</string>
     
+    <string name="gtasks_GPr_hide_not_in_list">Hide \"Not in any list\"</string>
+
+    <string name="gtasks_GPr_hide_not_in_list_summary">By default Google Tasks are already in lists. If you\'d like to be able to filter by tasks not in any Astrid list, deselect this option.</string>
+    
     <!-- ================================================ Synchronization == -->    
     
     <!-- title for notification tray when synchronizing -->
