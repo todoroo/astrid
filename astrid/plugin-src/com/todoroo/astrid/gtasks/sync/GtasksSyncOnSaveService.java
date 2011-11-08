@@ -253,7 +253,7 @@ public final class GtasksSyncOnSaveService {
         }
 
         task.setValue(Task.MODIFICATION_DATE, DateUtilities.now());
-        task.setValue(Task.LAST_SYNC, DateUtilities.now());
+        task.setValue(Task.LAST_SYNC_GTASKS, DateUtilities.now() + 1000);
         Flags.set(Flags.GTASKS_SUPPRESS_SYNC);
         taskDao.saveExisting(task);
     }

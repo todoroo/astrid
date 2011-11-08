@@ -160,6 +160,10 @@ public final class Task extends RemoteModel {
     public static final LongProperty LAST_SYNC = new LongProperty(
             TABLE, "lastSync");
 
+    /** Last Sync date with gtasks */
+    public static final LongProperty LAST_SYNC_GTASKS = new LongProperty(
+            TABLE, "lastSyncGtasks");
+
     /** List of all properties for this model */
     public static final Property<?>[] PROPERTIES = generateProperties(Task.class);
 

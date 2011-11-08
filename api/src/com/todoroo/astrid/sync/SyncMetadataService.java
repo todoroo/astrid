@@ -97,11 +97,16 @@ abstract public class SyncMetadataService<TYPE extends SyncContainer> {
         if(lastSyncDate == 0)
             tasks = taskDao.query(Query.select(Task.ID).where(Criterion.none));
         else
-            tasks = taskDao.query(Query.select(Task.ID).where(Criterion.and(
-                    Task.MODIFICATION_DATE.gt(lastSyncDate),
-                    Task.LAST_SYNC.lte(lastSyncDate))).orderBy(Order.asc(Task.ID)));
+            tasks = taskDao.query(Query.select(Task.ID).where(getLocallyUpdatedCriterion(lastSyncDate))
+                                                       .orderBy(Order.asc(Task.ID)));
 
         return joinWithMetadata(tasks, true, properties);
+    }
+
+    protected Criterion getLocallyUpdatedCriterion(long lastSyncDate) {
+        return Criterion.and(
+                Task.MODIFICATION_DATE.gt(lastSyncDate),
+                Task.LAST_SYNC.lte(lastSyncDate));
     }
 
     private TodorooCursor<Task> joinWithMetadata(TodorooCursor<Task> tasks,
