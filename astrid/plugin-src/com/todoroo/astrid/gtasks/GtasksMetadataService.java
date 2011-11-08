@@ -74,6 +74,13 @@ public final class GtasksMetadataService extends SyncMetadataService<GtasksTaskC
         return GtasksMetadata.ID.neq(""); //$NON-NLS-1$
     }
 
+    @Override
+    protected Criterion getLocallyUpdatedCriterion(long lastSyncDate) {
+        return Criterion.and(
+                Task.MODIFICATION_DATE.gt(lastSyncDate),
+                Task.LAST_SYNC_GTASKS.lte(lastSyncDate));
+    }
+
     // --- list iterating helpers
 
 
