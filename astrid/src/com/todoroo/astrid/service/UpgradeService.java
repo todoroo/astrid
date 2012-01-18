@@ -21,6 +21,7 @@ import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
+import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
@@ -40,6 +41,7 @@ import com.todoroo.astrid.utility.AstridPreferences;
 
 public final class UpgradeService {
 
+    public static final int V3_9_2 = 207;
     public static final int V3_9_1_1 = 206;
     public static final int V3_9_1 = 205;
     public static final int V3_9_0_2 = 204;
@@ -169,6 +171,15 @@ public final class UpgradeService {
 
         Preferences.clear(AstridPreferences.P_UPGRADE_FROM);
         StringBuilder changeLog = new StringBuilder();
+
+        if (from < V3_9_2) {
+            newVersionString(changeLog, "3.9.2 (01/13/12)", new String[] {
+                "Made selecting dates and times easier:",
+                "New tutorial walkthrough for new users",
+                "Stomped on a few bugs",
+                "Feedback welcomed!"
+            });
+        }
 
         if (from >= V3_9_1 && from < V3_9_1_1) {
             newVersionString(changeLog, "3.9.1.1 (01/06/12)", new String[] {
@@ -393,7 +404,8 @@ public final class UpgradeService {
             return;
 
         changeLog.append("Have a spectacular day!</body></html>");
-        String changeLogHtml = "<html><body style='color: white'>" + changeLog;
+        String color = (AndroidUtilities.getSdkVersion() >= 14 ? "black" : "white");
+        String changeLogHtml = "<html><body style='color: " + color +"'>" + changeLog;
 
         DialogUtilities.htmlDialog(context, changeLogHtml,
                 R.string.UpS_changelog_title);
