@@ -48,6 +48,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -430,8 +431,7 @@ public final class TaskEditActivity extends Fragment {
             itemOrder = getResources().getStringArray(R.array.TEA_control_sets_prefs);
         String moreSectionTrigger = getString(R.string.TEA_ctrl_more_pref);
         String shareViewDescriptor = getString(R.string.TEA_ctrl_share_pref);
-
-
+        String titleViewDescriptor = getString(R.string.TEA_ctrl_title_pref);
         LinearLayout section = basicControls;
         for (int i = 0; i < itemOrder.length; i++) {
             String item = itemOrder[i];
@@ -439,7 +439,9 @@ public final class TaskEditActivity extends Fragment {
                 section = moreControls;
             } else {
                 TaskEditControlSet curr = controlSetMap.get(item);
-                if (item.equals(shareViewDescriptor))
+                if (item.equals(titleViewDescriptor))
+                    titleControls.addView(curr.getDisplayView());
+                else if (item.equals(shareViewDescriptor))
                     section.addView(peopleControlSet.getSharedWithRow());
                 else if (curr != null) {
                     View control_set = (View) curr.getDisplayView();
