@@ -380,7 +380,7 @@
   <string name="TEA_ctrl_share_pref">TEA_ctrl_share_pref</string>
       
   <string-array name="TEA_control_sets_prefs">
-      <item>@string/TEA_ctrl_title_pref</item>
+      
       <item>@string/TEA_ctrl_who_pref</item>
       <item>@string/TEA_ctrl_when_pref</item>
       <item>@string/TEA_ctrl_more_pref</item>

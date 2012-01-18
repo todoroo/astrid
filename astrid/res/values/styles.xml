@@ -132,7 +132,7 @@
     
     <!-- generic style for labels above edit boxes -->
     <style name="TextAppearance.GEN_EditLabel">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
     </style>
     
