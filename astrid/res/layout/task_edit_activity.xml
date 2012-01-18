@@ -44,13 +44,19 @@
         android:id="@+id/indicator"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
+		  android:padding="5dip"
+		  android:layout_margin="3dip"
+		  android:layout_marginTop="10dip"
+        android:layout_weight="110"
+        style="@style/Widget.TabPageIndicator"
         />
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="200dip"
+        android:layout_weight="120"
         />
+<<<<<<< HEAD
         </LinearLayout>
     </ScrollView>
 

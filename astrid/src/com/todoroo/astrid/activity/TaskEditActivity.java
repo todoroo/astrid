@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -39,10 +38,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.SupportActivity;
 import android.support.v4.view.Menu;
 import android.support.v4.view.MenuItem;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -94,7 +95,6 @@ import com.todoroo.astrid.ui.HideUntilControlSet;
 import com.todoroo.astrid.ui.ImportanceControlSet;
 import com.todoroo.astrid.ui.ReminderControlSet;
 import com.todoroo.astrid.voice.VoiceInputAssistant;
-import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.TabPageIndicator;
 
 /**
@@ -229,7 +229,7 @@ public final class TaskEditActivity extends Fragment {
 
     private TaskEditViewPager mAdapter;
 
-    private PageIndicator mIndicator;
+    private TabPageIndicator mIndicator;
 
     /* ======================================================================
      * ======================================================= initialization
@@ -332,6 +332,7 @@ public final class TaskEditActivity extends Fragment {
                 R.layout.task_edit_when_controls, null);
         moreControls = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
                 R.layout.task_edit_more_controls, null);
+
 
         constructWhenDialog(whenDialogView);
 
@@ -923,10 +924,32 @@ public final class TaskEditActivity extends Fragment {
 
     public View getPageView(int position) {
         if (position == 0){
+
+            TextView text = new TextView(this);
+            text.setGravity(Gravity.CENTER);
+            text.setText("More");
+            text.setTextSize(20 * getResources().getDisplayMetrics().density);
+            text.setPadding(20, 20, 20, 20);
+
+            moreControls.setGravity(Gravity.CENTER);
+            moreControls.addView(text);
+
             return moreControls;
         }
         else {
-            return new View(getActivity());
+
+            TextView text = new TextView(this);
+            text.setGravity(Gravity.CENTER);
+            text.setText("Activity");
+            text.setTextSize(20 * getResources().getDisplayMetrics().density);
+            text.setPadding(20, 20, 20, 20);
+
+            LinearLayout layout = new LinearLayout(this);
+            layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+            layout.setGravity(Gravity.CENTER);
+            layout.addView(text);
+
+            return layout;
         }
     }
     private void adjustInfoPopovers() {

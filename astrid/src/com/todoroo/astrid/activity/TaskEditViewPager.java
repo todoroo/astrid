@@ -1,28 +1,24 @@
 package com.todoroo.astrid.activity;
 
-import android.content.Context;
-import android.os.Parcelable;
-import android.support.v4.view.PagerAdapter;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.viewpagerindicator.TitleProvider;
 
-public class TaskEditViewPager extends PagerAdapter implements TitleProvider
+public class TaskEditViewPager extends FragmentPagerAdapter implements TitleProvider
 {
     private static String[] titles = new String[]
                                           {
-"Activity", "More"
+"Activity", "More", "Awesome"
                                           };
-    private final Context context;
     public TaskEditActivity parent;
 
-
-    public TaskEditViewPager( Context context )
-    {
-        this.context = context;
+    public TaskEditViewPager(FragmentManager fm) {
+        super(fm);
     }
-
 
     @Override
     public int getCount()
@@ -39,34 +35,17 @@ public class TaskEditViewPager extends PagerAdapter implements TitleProvider
         return pageView;
     }
 
-    @Override
-    public void destroyItem( View pager, int position, Object view )
-    {
-        ((ViewPager)pager).removeView( (View)view );
-    }
-
-    @Override
-    public boolean isViewFromObject( View view, Object object )
-    {
-        return view.equals( object );
-    }
 
     @Override
     public String getTitle(int position) {
         return titles[position];
     }
 
-    @Override
-    public void finishUpdate( View view ) {}
 
     @Override
-    public void restoreState( Parcelable p, ClassLoader c ) {}
-
-    @Override
-    public Parcelable saveState() {
+    public Fragment getItem(int arg0) {
+        // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public void startUpdate( View view ) {}
 }
