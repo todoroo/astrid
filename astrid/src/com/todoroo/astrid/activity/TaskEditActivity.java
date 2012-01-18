@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -38,7 +39,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.SupportActivity;
 import android.support.v4.view.Menu;
 import android.support.v4.view.MenuItem;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -54,6 +54,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.timsu.astrid.R;
@@ -923,28 +924,19 @@ public final class TaskEditActivity extends Fragment {
     }
 
     public View getPageView(int position) {
-        if (position == 0){
-
-            TextView text = new TextView(this);
-            text.setGravity(Gravity.CENTER);
-            text.setText("More");
-            text.setTextSize(20 * getResources().getDisplayMetrics().density);
-            text.setPadding(20, 20, 20, 20);
-
-            moreControls.setGravity(Gravity.CENTER);
-            moreControls.addView(text);
+        if (position == 1){
 
             return moreControls;
         }
         else {
 
-            TextView text = new TextView(this);
+            TextView text = new TextView(getActivity());
             text.setGravity(Gravity.CENTER);
             text.setText("Activity");
             text.setTextSize(20 * getResources().getDisplayMetrics().density);
             text.setPadding(20, 20, 20, 20);
 
-            LinearLayout layout = new LinearLayout(this);
+            LinearLayout layout = new LinearLayout(getActivity());
             layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
             layout.setGravity(Gravity.CENTER);
             layout.addView(text);
