@@ -27,9 +27,9 @@
 	      style="@style/TextAppearance.EditRowDisplay" />
   </LinearLayout>
   <View
+	  android:id="@+id/TEA_Separator"
       android:layout_width="fill_parent"
       android:layout_height="1px"
-      android:padding="5dip"
       style="@style/TEA_Separator" />
     
 </LinearLayout>

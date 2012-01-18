@@ -12,7 +12,8 @@
 	  android:layout_alignParentTop="true"
 	  android:layout_width="fill_parent"
 	  android:layout_height="fill_parent"
-	  style="@style/Content">
+	  style="@style/Content"
+      android:background="#cccccc">
 	    
 	  <LinearLayout 
 	    android:orientation="vertical" 
@@ -21,47 +22,38 @@
 	    android:layout_height="fill_parent">
 	    
 		<LinearLayout 
-		  android:id="@+id/basic_controls"
+		  android:id="@+id/title_controls"
 		  android:layout_width="fill_parent"
 		  android:layout_height="fill_parent"
+		  android:padding="2dip"
+		  android:paddingRight="6dip"
+		  android:layout_margin="3dip"
+		  android:background="@drawable/task_edit_background"
 		  android:orientation="vertical">
 		</LinearLayout>
 		
-		<LinearLayout
-	      android:layout_width="fill_parent"
-	      android:layout_height="wrap_content"
-	      android:orientation="vertical">
-	       
-	        <LinearLayout
-	          android:id="@+id/more_header"
-	          android:layout_width="fill_parent"
-	          android:layout_height="fill_parent"
-	          android:orientation="vertical">
-	          
-	          <TextView
-	            android:layout_width="fill_parent"
-	            android:layout_height="50dip"
-	            android:layout_gravity="center_vertical"
-	            android:gravity="center"
-	            style="@style/TextAppearance.EditRowDisplay"
-	            android:textStyle="bold"
-	            android:text="@string/TEA_more"/>
-		        <View
-			      android:layout_width="fill_parent"
-			      android:layout_height="1px"
-			      android:padding="5dip"
-			      style="@style/TEA_Separator" />
-	        </LinearLayout>
-	        
-	      
+		<LinearLayout 
+		  android:id="@+id/basic_controls"
+		  android:layout_width="fill_parent"
+		  android:layout_height="fill_parent"
+		  android:padding="5dip"
+		  android:layout_margin="3dip"
+		  android:layout_marginTop="10dip"
+		  android:background="@drawable/task_edit_background"
+		  android:orientation="vertical">
+		</LinearLayout>
+		
 	        <LinearLayout
 		      android:id="@+id/more_controls"
 		      android:layout_width="fill_parent"
 		      android:layout_height="fill_parent"
 		      android:orientation="vertical"
-		      android:visibility="gone"/>
+		      android:background="@drawable/task_edit_background"
+		      android:padding="5dip"
+		      android:layout_margin="3dip"
+		      android:layout_marginTop="10dip"
+		      />
 	          
 	    </LinearLayout>
-	  </LinearLayout>
 	</ScrollView>
 </RelativeLayout>

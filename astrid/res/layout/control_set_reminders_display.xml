@@ -11,9 +11,6 @@
       android:layout_width="fill_parent"
       android:layout_height="50dip"
       android:gravity="center_vertical">
-      <ImageView 
-        style="@style/EditRowImage"
-        android:src="@drawable/icn_edit_reminders"/>
 	  <TextView
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
@@ -31,9 +28,9 @@
 	  <include layout="@layout/task_edit_arrow"/>
   </LinearLayout>
   <View
+	  android:id="@+id/TEA_Separator"
       android:layout_width="fill_parent"
       android:layout_height="1px"
-      android:padding="5dip"
       style="@style/TEA_Separator" />
     
 </LinearLayout>

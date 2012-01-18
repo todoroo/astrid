@@ -50,6 +50,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -306,8 +307,11 @@ public final class TaskEditActivity extends Fragment {
 
     /** Initialize UI components */
     private void setUpUIComponents() {
-        LinearLayout basicControls = (LinearLayout) getView().findViewById(R.id.basic_controls);
-        LinearLayout whenDialogView = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+        setContentView(R.layout.task_edit_activity);
+
+        LinearLayout basicControls = (LinearLayout) findViewById(R.id.basic_controls);
+        LinearLayout titleControls = (LinearLayout) findViewById(R.id.title_controls);
+        LinearLayout whenDialogView = (LinearLayout) LayoutInflater.from(this).inflate(
                 R.layout.task_edit_when_controls, null);
         LinearLayout moreControls = (LinearLayout) getView().findViewById(R.id.more_controls);
 
@@ -430,6 +434,7 @@ public final class TaskEditActivity extends Fragment {
             itemOrder = getResources().getStringArray(R.array.TEA_control_sets_prefs);
         String moreSectionTrigger = getString(R.string.TEA_ctrl_more_pref);
         String shareViewDescriptor = getString(R.string.TEA_ctrl_share_pref);
+        String titleViewDescriptor = getString(R.string.TEA_ctrl_title_pref);
         LinearLayout section = basicControls;
         for (int i = 0; i < itemOrder.length; i++) {
             String item = itemOrder[i];
@@ -437,16 +442,22 @@ public final class TaskEditActivity extends Fragment {
                 section = moreControls;
             } else {
                 TaskEditControlSet curr = controlSetMap.get(item);
-                if (item.equals(shareViewDescriptor))
+                if (item.equals(titleViewDescriptor))
+                    titleControls.addView(curr.getDisplayView());
+                else if (item.equals(shareViewDescriptor))
                     section.addView(peopleControlSet.getSharedWithRow());
-                else if (curr != null)
-                    section.addView(curr.getDisplayView());
+                else if (curr != null) {
+                    View control_set = (View) curr.getDisplayView();
+                    if (i+1 == itemOrder.length || (itemOrder[i+1] != null && itemOrder[i+1].equals(moreSectionTrigger))){
+                        View tea_separator = control_set.findViewById(R.id.TEA_Separator);
+                        if(tea_separator != null) {
+                            tea_separator.setVisibility(View.GONE);
+                        }
+                    }
+                    section.addView(control_set);
+                }
             }
         }
-        if (moreControls.getChildCount() == 0)
-            getView().findViewById(R.id.more_header).setVisibility(View.GONE);
-
-
 
         // Load task data in background
         new TaskEditBackgroundLoader().start();
@@ -454,30 +465,6 @@ public final class TaskEditActivity extends Fragment {
 
     /** Set up button listeners */
     private void setUpListeners() {
-        final View.OnClickListener mExpandMoreListener = new View.OnClickListener() {
-            final Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in);
-            final Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out);
-            @Override
-            public void onClick(View v) {
-                fadeIn.setDuration(300);
-                fadeOut.setDuration(300);
-                View moreView = getView().findViewById(R.id.more_controls);
-                View moreHeader = getView().findViewById(R.id.more_header);
-                if (moreView.getVisibility() == View.GONE) {
-                    moreView.setVisibility(View.VISIBLE);
-                    moreView.startAnimation(fadeIn);
-                    moreHeader.setVisibility(View.GONE);
-                    moreHeader.startAnimation(fadeOut);
-                }
-            }
-        };
-
-        // set up save, cancel, and delete buttons
-        try {
-            getView().findViewById(R.id.more_header).setOnClickListener(mExpandMoreListener);
-        } catch (Exception e) {
-            // error loading the proper activity
-        }
     }
 
     private void constructWhenDialog(View whenDialogView) {
@@ -526,18 +513,6 @@ public final class TaskEditActivity extends Fragment {
                 if (isNewTask) {
                     hideUntilControls.setDefaults();
                 }
-                autoExpand();
-            }
-        }
-
-        private void autoExpand() {
-            LinearLayout moreControls = (LinearLayout) getView().findViewById(R.id.more_controls);
-            LinearLayout moreHeader = (LinearLayout) getView().findViewById(R.id.more_header);
-
-            if (notesControlSet.hasNotes() && notesControlSet.getDisplayView().getParent() == moreControls) {
-                moreHeader.performClick();
-            } else if (tagsControlSet.hasLists() && tagsControlSet.getDisplayView().getParent() == moreControls) {
-                moreHeader.performClick();
             }
         }
 

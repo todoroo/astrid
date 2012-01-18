@@ -11,9 +11,6 @@
       android:layout_height="50dip"
       android:paddingLeft="5dip"
       android:gravity="center_vertical">
-      <ImageView 
-        style="@style/EditRowImage"
-        android:src="@drawable/icn_edit_calendar"/>
 	  <TextView
 	      android:id="@+id/calendar_display_which"
 	      android:layout_width="fill_parent"
@@ -26,9 +23,9 @@
 	      style="@style/TextAppearance.EditRowDisplay" />
   </LinearLayout>
   <View
+	  android:id="@+id/TEA_Separator"
       android:layout_width="fill_parent"
       android:layout_height="1px"
-      android:padding="5dip"
       style="@style/TEA_Separator" />
     
 </LinearLayout>
