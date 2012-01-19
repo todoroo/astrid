@@ -39,6 +39,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.SupportActivity;
 import android.support.v4.view.Menu;
 import android.support.v4.view.MenuItem;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -93,6 +94,8 @@ import com.todoroo.astrid.ui.HideUntilControlSet;
 import com.todoroo.astrid.ui.ImportanceControlSet;
 import com.todoroo.astrid.ui.ReminderControlSet;
 import com.todoroo.astrid.voice.VoiceInputAssistant;
+import com.viewpagerindicator.PageIndicator;
+import com.viewpagerindicator.TabPageIndicator;
 
 /**
  * This activity is responsible for creating new tasks and editing existing
@@ -189,6 +192,7 @@ public final class TaskEditActivity extends Fragment {
     private HideUntilControlSet hideUntilControls = null;
     private TagsControlSet tagsControlSet = null;
     private EditText title;
+    private LinearLayout moreControls;
 
     private final List<TaskEditControlSet> controls =
         Collections.synchronizedList(new ArrayList<TaskEditControlSet>());
@@ -218,7 +222,14 @@ public final class TaskEditActivity extends Fragment {
 
     // --- fragment handling variables
     OnTaskEditDetailsClickedListener mListener;
+
     private boolean mDualFragments = false;
+
+    private ViewPager mPager;
+
+    private TaskEditViewPager mAdapter;
+
+    private PageIndicator mIndicator;
 
     /* ======================================================================
      * ======================================================= initialization
@@ -266,6 +277,7 @@ public final class TaskEditActivity extends Fragment {
         }
 
         getActivity().setResult(Activity.RESULT_OK);
+
     }
 
     /* ======================================================================
@@ -280,6 +292,15 @@ public final class TaskEditActivity extends Fragment {
         View v = inflater.inflate(R.layout.task_edit_activity,
                 container, false);
 
+
+        mAdapter = new TaskEditViewPager(getActivity());
+        mAdapter.parent = this;
+
+        mPager = (ViewPager)v.findViewById(R.id.pager);
+        mPager.setAdapter(mAdapter);
+
+        mIndicator = (TabPageIndicator)v.findViewById(R.id.indicator);
+        mIndicator.setViewPager(mPager);
         return v;
     }
 
@@ -309,7 +330,8 @@ public final class TaskEditActivity extends Fragment {
         LinearLayout titleControls = (LinearLayout) getView().findViewById(R.id.title_controls);
         LinearLayout whenDialogView = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
                 R.layout.task_edit_when_controls, null);
-        LinearLayout moreControls = (LinearLayout) getView().findViewById(R.id.more_controls);
+        moreControls = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                R.layout.task_edit_more_controls, null);
 
         constructWhenDialog(whenDialogView);
 
@@ -899,6 +921,14 @@ public final class TaskEditActivity extends Fragment {
         StatisticsService.sessionStop(getActivity());
     }
 
+    public View getPageView(int position) {
+        if (position == 0){
+            return moreControls;
+        }
+        else {
+            return new View(getActivity());
+        }
+    }
     private void adjustInfoPopovers() {
         Preferences.setBoolean(R.string.p_showed_tap_task_help, true);
         if (!Preferences.isSet(getString(R.string.p_showed_lists_help)))

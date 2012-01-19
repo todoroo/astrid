@@ -58,7 +58,6 @@ public class GCalControlSet extends PopupControlSet {
     public GCalControlSet(final Activity activity, int viewLayout, int displayViewLayout, int title) {
         super(activity, viewLayout, displayViewLayout, title);
         this.displayText.setText(activity.getString(R.string.gcal_TEA_addToCalendar_label));
-        this.displayText.setMaxLines(1);
         DependencyInjectionService.getInstance().inject(this);
         ViewGroup parent = (ViewGroup) getView().getParent();
         parent.removeView(getView());

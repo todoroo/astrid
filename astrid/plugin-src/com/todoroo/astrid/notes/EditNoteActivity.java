@@ -9,18 +9,18 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.text.util.Linkify;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -52,8 +52,9 @@ import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
 import com.todoroo.astrid.utility.Flags;
 
-public class EditNoteActivity extends ListActivity {
+public class EditNoteActivity extends ListFragment {
 
+    public static final String EDIT_NOTELIST_FRAGMENT = "notelist_fragment";
     public static final String EXTRA_TASK_ID = "task"; //$NON-NLS-1$
     private static final int MENU_REFRESH_ID = Menu.FIRST;
     private static final String LAST_FETCH_KEY = "task-fetch-"; //$NON-NLS-1$
@@ -71,28 +72,45 @@ public class EditNoteActivity extends ListActivity {
     private TextView loadingText;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         DependencyInjectionService.getInstance().inject(this);
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_Dialog);
-        setContentView(R.layout.edit_note_activity);
+        setRetainInstance(true);
+    }
 
-        findViewById(R.id.dismiss_comments).setOnClickListener(dismissCommentsListener);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-        long taskId = getIntent().getLongExtra(EXTRA_TASK_ID, -1);
+        ViewGroup parent = (ViewGroup) inflater.inflate(
+                R.layout.edit_note_activity, container, false);
+
+
+        return parent;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().setTheme(R.style.Theme_Dialog);
+
+        getListView().findViewById(R.id.dismiss_comments).setOnClickListener(dismissCommentsListener);
+
+        long taskId = getActivity().getIntent().getLongExtra(EXTRA_TASK_ID, -1);
         task = PluginServices.getTaskService().fetchById(taskId, Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
         if(task == null) {
-            finish();
+            getActivity().finish();
             return;
         }
 
-        setTitle(task.getValue(Task.TITLE));
+        getActivity().setTitle(task.getValue(Task.TITLE));
 
         setUpInterface();
         setUpListAdapter();
 
         if(actFmPreferenceService.isLoggedIn()) {
-            findViewById(R.id.add_comment).setVisibility(View.VISIBLE);
+            getListView().findViewById(R.id.add_comment).setVisibility(View.VISIBLE);
 
             if(task.getValue(Task.REMOTE_ID) == 0)
                 refreshData(true, null);
@@ -114,8 +132,8 @@ public class EditNoteActivity extends ListActivity {
     // --- UI preparation
 
     private void setUpInterface() {
-        final View commentButton = findViewById(R.id.commentButton);
-        commentField = (EditText) findViewById(R.id.commentField);
+        final View commentButton = getListView().findViewById(R.id.commentButton);
+        commentField = (EditText) getListView().findViewById(R.id.commentField);
         commentField.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
@@ -148,7 +166,7 @@ public class EditNoteActivity extends ListActivity {
         });
 
         if(!TextUtils.isEmpty(task.getValue(Task.NOTES))) {
-            TextView notes = new TextView(this);
+            TextView notes = new TextView(getActivity());
             notes.setLinkTextColor(Color.rgb(100, 160, 255));
             notes.setTextSize(18);
             getListView().addHeaderView(notes);
@@ -156,7 +174,7 @@ public class EditNoteActivity extends ListActivity {
             notes.setPadding(5, 10, 5, 10);
             Linkify.addLinks(notes, Linkify.ALL);
         }
-        loadingText = (TextView) findViewById(R.id.loading);
+        loadingText = (TextView) getListView().findViewById(R.id.loading);
     }
 
     private void setUpListAdapter() {
@@ -200,12 +218,15 @@ public class EditNoteActivity extends ListActivity {
                     return -1;
             }
         });
-        adapter = new NoteAdapter(this, R.id.name, items);
+        adapter = new NoteAdapter(getActivity(), R.id.name, items);
         setListAdapter(adapter);
 
         getListView().setSelection(items.size() - 1);
     }
 
+
+    //TODO what to do with options?
+    /*
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if(menu.size() > 0)
@@ -219,7 +240,7 @@ public class EditNoteActivity extends ListActivity {
         }
 
         return true;
-    }
+    }*/
 
     // --- events
 
@@ -229,7 +250,7 @@ public class EditNoteActivity extends ListActivity {
             callback = existingCallback;
         else {
             callback = new ProgressBarSyncResultCallback(
-                    this, R.id.progressBar, new Runnable() {
+                    getActivity(), R.id.progressBar, new Runnable() {
                @Override
                 public void run() {
                    setUpListAdapter();
@@ -283,10 +304,12 @@ public class EditNoteActivity extends ListActivity {
     private final OnClickListener dismissCommentsListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            finish();
+            getActivity().finish();
         }
     };
 
+    //TODO figure out what to do with activity options menu since it is inside edit task now
+    /*
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         // handle my own menus
@@ -299,7 +322,7 @@ public class EditNoteActivity extends ListActivity {
 
         default: return false;
         }
-    }
+    }*/
 
     // --- adapter
 
@@ -360,7 +383,7 @@ public class EditNoteActivity extends ListActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if(convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.update_adapter_row, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.update_adapter_row, parent, false);
             }
             bindView(convertView, items.get(position));
             return convertView;

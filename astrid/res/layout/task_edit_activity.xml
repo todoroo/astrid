@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:astrid="http://schemas.android.com/apk/res/com.timsu.astrid"
     android:id="@+id/taskEditParent"
     style="@style/Content"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
@@ -11,7 +12,6 @@
         style="@style/Content"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentTop="true"
         android:background="#cccccc" >
 
         <LinearLayout
@@ -39,15 +39,18 @@
                 android:background="@drawable/task_edit_background"
                 android:orientation="vertical" >
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/more_controls"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_margin="3dip"
-                android:layout_marginTop="10dip"
-                android:background="@drawable/task_edit_background"
-                android:orientation="vertical" />
+            
+    <com.viewpagerindicator.TabPageIndicator
+        android:id="@+id/indicator"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        />
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
         </LinearLayout>
     </ScrollView>
 
@@ -99,4 +102,4 @@
             android:src="@drawable/ic_footer_add"
             android:scaleType="center"/> 
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>
