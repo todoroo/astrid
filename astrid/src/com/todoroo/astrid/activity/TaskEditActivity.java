@@ -48,7 +48,6 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -329,14 +328,14 @@ public final class TaskEditActivity extends Fragment {
 
         controls.add(peopleControlSet = new EditPeopleControlSet(
                 getActivity(), R.layout.control_set_assigned,
-                R.layout.control_set_assigned_display,
+                R.layout.control_set_default_display,
                 R.string.actfm_EPA_assign_label, REQUEST_LOG_IN));
         controlSetMap.put(getString(R.string.TEA_ctrl_who_pref),
                 peopleControlSet);
 
         RepeatControlSet repeatControls = new RepeatControlSet(
                 getActivity(), R.layout.control_set_repeat,
-                R.layout.control_set_repeat_display, R.string.repeat_enabled);
+                R.layout.control_set_default_display, R.string.repeat_enabled);
 
         GCalControlSet gcalControl = new GCalControlSet(getActivity(),
                 R.layout.control_set_gcal, R.layout.control_set_gcal_display,
@@ -347,16 +346,10 @@ public final class TaskEditActivity extends Fragment {
         //otherwise the correct date may not be written to the calendar event. Order matters!
         DeadlineControlSet deadlineControl = new DeadlineControlSet(
                 getActivity(), R.layout.control_set_deadline,
-                R.layout.control_set_deadline_display, repeatControls.getDisplayView(), gcalControl.getDisplayView());
-        controls.add(deadlineControl);
+                R.layout.control_set_default_display, repeatControls.getDisplayView(), gcalControl.getDisplayView());
         controlSetMap.put(getString(R.string.TEA_ctrl_when_pref), deadlineControl);
         controls.add(repeatControls);
         controls.add(gcalControl);
-
-        hideUntilControls = new HideUntilControlSet(getActivity(),
-                R.layout.control_set_hide, R.layout.control_set_hide_display,
-                R.string.hide_until_prompt);
-        controls.add(hideUntilControls);
 
         ImportanceControlSet importanceControl = new ImportanceControlSet(
                 getActivity(), R.layout.control_set_importance);
@@ -366,7 +359,7 @@ public final class TaskEditActivity extends Fragment {
                 importanceControl);
 
         tagsControlSet = new TagsControlSet(getActivity(),
-                R.layout.control_set_tags, R.layout.control_set_tags_display,
+                R.layout.control_set_tags, R.layout.control_set_default_display,
                 R.string.TEA_tags_label);
         controls.add(tagsControlSet);
         controlSetMap.put(getString(R.string.TEA_ctrl_lists_pref),
@@ -382,13 +375,13 @@ public final class TaskEditActivity extends Fragment {
 
         ReminderControlSet reminderControl = new ReminderControlSet(
                 getActivity(), R.layout.control_set_reminders,
-                R.layout.control_set_reminders_display);
+                R.layout.control_set_default_display);
         controls.add(reminderControl);
         controlSetMap.put(getString(R.string.TEA_ctrl_reminders_pref),
                 reminderControl);
 
         hideUntilControls = new HideUntilControlSet(getActivity(),
-                R.layout.control_set_hide, R.layout.control_set_hide_display,
+                R.layout.control_set_hide, R.layout.control_set_default_display,
                 R.string.hide_until_prompt);
         controls.add(hideUntilControls);
         reminderControl.addViewToBody(hideUntilControls.getDisplayView());
@@ -403,7 +396,7 @@ public final class TaskEditActivity extends Fragment {
 
         try {
             if(ProducteevUtilities.INSTANCE.isLoggedIn()) {
-                ProducteevControlSet producteevControl = new ProducteevControlSet(getActivity(), R.layout.control_set_producteev, R.layout.control_set_producteev_display, R.string.producteev_TEA_control_set_display);
+                ProducteevControlSet producteevControl = new ProducteevControlSet(getActivity(), R.layout.control_set_producteev, R.layout.control_set_default_display, R.string.producteev_TEA_control_set_display);
                 controls.add(producteevControl);
                 basicControls.addView(producteevControl.getDisplayView());
                 notesEditText.setHint(R.string.producteev_TEA_notes);

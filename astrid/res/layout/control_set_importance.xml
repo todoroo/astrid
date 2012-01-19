@@ -14,7 +14,7 @@
         android:layout_width="fill_parent"
         android:layout_height="50dip">
 	      <TextView
-	        android:id="@+id/importance_label"
+	        android:id="@+id/edit_label_display"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/TEA_importance_label"

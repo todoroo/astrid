@@ -82,7 +82,7 @@ public class RepeatControlSet extends PopupControlSet {
         DependencyInjectionService.getInstance().inject(this);
 
         this.activity = activity;
-
+        this.displayText.setText(activity.getString(R.string.repeat_enabled));
         value = (Button) getView().findViewById(R.id.repeatValue);
         interval = (Spinner) getView().findViewById(R.id.repeatInterval);
         type = (Spinner) getView().findViewById(R.id.repeatType);
@@ -306,7 +306,7 @@ public class RepeatControlSet extends PopupControlSet {
 
     @Override
     protected void refreshDisplayView() {
-        TextView repeatDisplay = (TextView) getDisplayView().findViewById(R.id.repeat_display);
+        TextView repeatDisplay = (TextView) getDisplayView().findViewById(R.id.edit_row_display);
         if (doRepeat) {
             repeatDisplay.setText(R.string.repeat_enabled);
         } else {
