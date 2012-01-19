@@ -30,7 +30,10 @@ public abstract class PopupControlSet extends TaskEditControlSet {
         super(activity, viewLayout);
         if (displayViewLayout != -1){
             this.displayView = LayoutInflater.from(activity).inflate(displayViewLayout, null);
-            displayText = (TextView) displayView.findViewById(R.id.edit_label_display);
+            displayText = (TextView) displayView.findViewById(R.id.display_row_title);
+            if (displayText != null) {
+            displayText.setMaxLines(2);
+            }
         }
         else {
             this.displayView = null;

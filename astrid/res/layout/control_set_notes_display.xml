@@ -11,6 +11,9 @@
       android:layout_width="fill_parent"
       android:minHeight="50dip"
       android:layout_height="wrap_content"
+
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
       android:gravity="center_vertical">
 	  <TextView
 	    android:layout_width="wrap_content"
@@ -26,12 +29,11 @@
 	      android:gravity="right"
 	      android:paddingLeft="10dip"
 	      style="@style/TextAppearance.EditRowDisplay" />
-	  <include layout="@layout/task_edit_arrow"/>
   </LinearLayout>
-  <View
-	  android:id="@+id/TEA_Separator"
-      android:layout_width="fill_parent"
-      android:layout_height="1px"
-      style="@style/TEA_Separator" />
     
+      <View
+	      android:id="@+id/TEA_Separator"
+	      android:layout_width="fill_parent"
+	      android:layout_height="1px"
+	      style="@style/TEA_Separator" />
 </LinearLayout>

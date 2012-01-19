@@ -180,7 +180,7 @@ public final class TaskEditActivity extends Fragment {
     @Autowired
     private ActFmPreferenceService actFmPreferenceService;
 
-	// --- UI components
+    // --- UI components
 
     private ImageButton voiceAddNoteButton;
 
@@ -193,19 +193,19 @@ public final class TaskEditActivity extends Fragment {
     private final List<TaskEditControlSet> controls =
         Collections.synchronizedList(new ArrayList<TaskEditControlSet>());
 
-	// --- other instance variables
+    // --- other instance variables
 
     /** true if editing started with a new task */
     boolean isNewTask = false;
 
-	/** task model */
-	Task model = null;
+    /** task model */
+    Task model = null;
 
-	/** whether task should be saved when this activity exits */
-	private boolean shouldSaveState = true;
+    /** whether task should be saved when this activity exits */
+    private boolean shouldSaveState = true;
 
-	/** edit control receiver */
-	private final ControlReceiver controlReceiver = new ControlReceiver();
+    /** edit control receiver */
+    private final ControlReceiver controlReceiver = new ControlReceiver();
 
     /** voice assistant for notes-creation */
     private VoiceInputAssistant voiceNoteAssistant;
@@ -248,24 +248,24 @@ public final class TaskEditActivity extends Fragment {
         DependencyInjectionService.getInstance().inject(this);
     }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         // Tell the framework to try to keep this fragment around
         // during a configuration change.
         setRetainInstance(true);
 
-		new StartupService().onStartupApplication(getActivity());
+        new StartupService().onStartupApplication(getActivity());
 
-		// if we were editing a task already, restore it
-		if(savedInstanceState != null && savedInstanceState.containsKey(TASK_IN_PROGRESS)) {
-		    Task task = savedInstanceState.getParcelable(TASK_IN_PROGRESS);
-		    if(task != null) {
-		        model = task;
-		    }
-		}
+        // if we were editing a task already, restore it
+        if(savedInstanceState != null && savedInstanceState.containsKey(TASK_IN_PROGRESS)) {
+            Task task = savedInstanceState.getParcelable(TASK_IN_PROGRESS);
+            if(task != null) {
+                model = task;
+            }
+        }
 
-		getActivity().setResult(Activity.RESULT_OK);
+        getActivity().setResult(Activity.RESULT_OK);
     }
 
     /* ======================================================================
@@ -278,7 +278,7 @@ public final class TaskEditActivity extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View v = inflater.inflate(R.layout.task_edit_activity,
-              container, false);
+                container, false);
 
         return v;
     }
@@ -338,7 +338,7 @@ public final class TaskEditActivity extends Fragment {
                 R.layout.control_set_default_display, R.string.repeat_enabled);
 
         GCalControlSet gcalControl = new GCalControlSet(getActivity(),
-                R.layout.control_set_gcal, R.layout.control_set_gcal_display,
+                R.layout.control_set_gcal, R.layout.control_set_default_display,
                 R.string.gcal_TEA_addToCalendar_label);
 
         //The deadline control set contains the repeat controls and the calendar controls.
@@ -388,7 +388,7 @@ public final class TaskEditActivity extends Fragment {
 
         TimerControlSet timerControl = new TimerControlSet(
                 getActivity(), R.layout.control_set_timers,
-                R.layout.control_set_timers_extras_display,
+                R.layout.control_set_default_display,
                 R.string.TEA_timer_controls);
         timerAction.setListener(timerControl);
         controls.add(timerControl);
@@ -426,6 +426,7 @@ public final class TaskEditActivity extends Fragment {
         String shareViewDescriptor = getString(R.string.TEA_ctrl_share_pref);
         String titleViewDescriptor = getString(R.string.TEA_ctrl_title_pref);
         LinearLayout section = basicControls;
+        int controlWidth = basicControls.getLayoutParams().width;
         for (int i = 0; i < itemOrder.length; i++) {
             String item = itemOrder[i];
             if (item.equals(moreSectionTrigger)) {
@@ -437,15 +438,28 @@ public final class TaskEditActivity extends Fragment {
                 else if (item.equals(shareViewDescriptor))
                     section.addView(peopleControlSet.getSharedWithRow());
                 else if (curr != null) {
-                    View control_set = (View) curr.getDisplayView();
+                    LinearLayout control_set = (LinearLayout) curr.getDisplayView();
                     if (control_set != null){
-                    if ((itemOrder[i+1] != null && itemOrder[i+1].equals(moreSectionTrigger))){
-                        View tea_separator = control_set.findViewById(R.id.TEA_Separator);
-                        if(tea_separator != null) {
-                            tea_separator.setVisibility(View.GONE);
+                        /*
+                    if ((itemOrder[i+1] != null || !itemOrder[i+1].equals(moreSectionTrigger))){
+                        View tea_separator = (View) LayoutInflater.from(getActivity()).inflate(
+                                R.layout.tea_separator, null);
+                        control_set.addView(tea_separator);
+                    }*/
+
+                        View teaSeparator = control_set.findViewById(R.id.TEA_Separator);
+
+                        if (teaSeparator != null){
+                            if ((itemOrder[i+1] == null || itemOrder[i+1].equals(moreSectionTrigger))){
+                                teaSeparator.setVisibility(View.GONE);
+                            }
+                            else {
+                                LayoutParams params = teaSeparator.getLayoutParams();
+                                params.width = controlWidth;
+                                teaSeparator.setLayoutParams(params);
+                            }
                         }
-                    }
-                    section.addView(control_set);
+                        section.addView(control_set);
                     }
                 }
             }
@@ -623,7 +637,7 @@ public final class TaskEditActivity extends Fragment {
 
         String processedToast = addDueTimeToToast(toast.toString());
         boolean cancelFinish = !onPause && peopleControlSet != null &&
-            !peopleControlSet.saveSharingSettings(processedToast);
+        !peopleControlSet.saveSharingSettings(processedToast);
 
         model.putTransitory("task-edit-save", true); //$NON-NLS-1$
         taskService.save(model);
@@ -749,21 +763,21 @@ public final class TaskEditActivity extends Fragment {
 
     protected void deleteButtonClick() {
         new AlertDialog.Builder(getActivity())
-            .setTitle(R.string.DLG_confirm_title)
-            .setMessage(R.string.DLG_delete_this_task_question)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setPositiveButton(android.R.string.ok,
-                    new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    taskService.delete(model);
-                    shouldSaveState = false;
-                    showDeleteToast();
-                    getActivity().setResult(Activity.RESULT_CANCELED);
-                    getActivity().finish();
-                }
-            })
-            .setNegativeButton(android.R.string.cancel, null)
-            .show();
+        .setTitle(R.string.DLG_confirm_title)
+        .setMessage(R.string.DLG_delete_this_task_question)
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                taskService.delete(model);
+                shouldSaveState = false;
+                showDeleteToast();
+                getActivity().setResult(Activity.RESULT_CANCELED);
+                getActivity().finish();
+            }
+        })
+        .setNegativeButton(android.R.string.cancel, null)
+        .show();
     }
 
     /**

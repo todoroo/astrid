@@ -116,7 +116,7 @@ public class EditPeopleControlSet extends PopupControlSet {
 
         sharedWithRow = LayoutInflater.from(activity).inflate(R.layout.control_set_default_display, null);
         sharedWithView = LayoutInflater.from(activity).inflate(R.layout.control_set_collaborators, null);
-        TextView sharedRowDisplayText = (TextView)sharedWithRow.findViewById(R.id.edit_row_display);
+        TextView sharedRowDisplayText = (TextView)sharedWithRow.findViewById(R.id.display_row_title);
         sharedRowDisplayText.setText(activity.getString(R.string.actfm_EPA_collaborators_header));
 
         sharedWithDialog = new Dialog(activity, ThemeService.getDialogTheme());
@@ -142,7 +142,7 @@ public class EditPeopleControlSet extends PopupControlSet {
         assignedList.setItemsCanFocus(false);
         assignedClear = getView().findViewById(R.id.assigned_clear);
 
-        assignedDisplay = (TextView) getDisplayView().findViewById(R.id.edit_row_display);
+        assignedDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
         sharedWithContainer = (PeopleContainer) getSharedWithView().findViewById(R.id.share_container);
         cbFacebook = (CheckBox) getSharedWithView().findViewById(R.id.checkbox_facebook);
         cbTwitter = (CheckBox) getSharedWithView().findViewById(R.id.checkbox_twitter);

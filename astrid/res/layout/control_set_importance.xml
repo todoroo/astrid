@@ -12,9 +12,11 @@
         android:paddingBottom="5dip"
         android:gravity="center_vertical"
         android:layout_width="fill_parent"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
         android:layout_height="50dip">
 	      <TextView
-	        android:id="@+id/edit_label_display"
+	        android:id="@+id/display_row_title"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/TEA_importance_label"

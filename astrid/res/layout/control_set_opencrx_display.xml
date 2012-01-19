@@ -10,6 +10,8 @@
       android:id="@+id/opencrx_body"
       android:layout_width="fill_parent"
       android:layout_height="50dip"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
       android:gravity="center_vertical">
 	  <TextView
 	    android:layout_width="wrap_content"

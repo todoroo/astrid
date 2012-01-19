@@ -42,7 +42,7 @@ public class DeadlineControlSet extends PopupControlSet {
 
     @Override
     protected void refreshDisplayView() {
-        TextView dateDisplay = (TextView) getDisplayView().findViewById(R.id.edit_row_display);
+        TextView dateDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
         String toDisplay = dateAndTimePicker.getDisplayString(activity);
         dateDisplay.setText(toDisplay);
     }

@@ -306,7 +306,7 @@ public class RepeatControlSet extends PopupControlSet {
 
     @Override
     protected void refreshDisplayView() {
-        TextView repeatDisplay = (TextView) getDisplayView().findViewById(R.id.edit_row_display);
+        TextView repeatDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
         if (doRepeat) {
             repeatDisplay.setText(R.string.repeat_enabled);
         } else {

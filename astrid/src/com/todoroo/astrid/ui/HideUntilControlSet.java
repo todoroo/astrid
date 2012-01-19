@@ -193,7 +193,7 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
     @Override
     protected void refreshDisplayView() {
         HideUntilValue value = adapter.getItem(spinner.getSelectedItemPosition());
-        TextView auxDisplay = (TextView) getDisplayView().findViewById(R.id.edit_row_display);
+        TextView auxDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
         auxDisplay.setText(value.toString());
     }
 
