@@ -75,7 +75,6 @@ public class EditNoteActivity extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         DependencyInjectionService.getInstance().inject(this);
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
     }
 
     @Override

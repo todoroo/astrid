@@ -928,6 +928,24 @@ public final class TaskEditActivity extends Fragment {
 
             return moreControls;
         }
+        else if (position == 5) {
+
+
+            EditNoteActivity frag = (EditNoteActivity) getSupportFragmentManager()
+                .findFragmentByTag(EditNoteActivity.EDIT_NOTELIST_FRAGMENT);
+            if (frag == null) {
+
+            try {
+//                frag = (EditNoteActivity)EditNoteActivity.instantiate(getActivity(), EditNoteActivity.class.toString());
+            } catch (Exception e) {
+                e.printStackTrace(); //Uh ohs
+            }
+                frag = new EditNoteActivity();
+            }
+
+
+            return frag.getView();
+        }
         else {
 
             TextView text = new TextView(getActivity());

@@ -3,9 +3,6 @@
                 android:id="@+id/more_controls"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:layout_margin="3dip"
-                android:layout_marginTop="10dip"
-                android:background="@drawable/task_edit_background"
     android:orientation="vertical" >
     
 
