@@ -9,24 +9,23 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.text.util.Linkify;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -52,9 +51,10 @@ import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
 import com.todoroo.astrid.utility.Flags;
 
-public class EditNoteActivity extends ListFragment {
+public class EditNoteActivity extends ListView {
 
-    public static final String EDIT_NOTELIST_FRAGMENT = "notelist_fragment";
+
+
     public static final String EXTRA_TASK_ID = "task"; //$NON-NLS-1$
     private static final int MENU_REFRESH_ID = Menu.FIRST;
     private static final String LAST_FETCH_KEY = "task-fetch-"; //$NON-NLS-1$
@@ -70,47 +70,32 @@ public class EditNoteActivity extends ListFragment {
     private NoteAdapter adapter;
     private EditText commentField;
     private TextView loadingText;
+    private final View commentsBar;
+    private final View parentView;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public EditNoteActivity(Context context, View parent, long t) {
+        super(context);
+
         DependencyInjectionService.getInstance().inject(this);
-        super.onCreate(savedInstanceState);
+
+        commentsBar = parent.findViewById(R.id.updatesFooter);
+        parentView = parent;
+//        findViewById(R.id.dismiss_comments).setOnClickListener(dismissCommentsListener);
+
+
+        loadViewForTaskID(t);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+    public void loadViewForTaskID(long t){
 
-        ViewGroup parent = (ViewGroup) inflater.inflate(
-                R.layout.edit_note_activity, container, false);
-
-
-        return parent;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getActivity().setTheme(R.style.Theme_Dialog);
-
-        getListView().findViewById(R.id.dismiss_comments).setOnClickListener(dismissCommentsListener);
-
-        long taskId = getActivity().getIntent().getLongExtra(EXTRA_TASK_ID, -1);
-        task = PluginServices.getTaskService().fetchById(taskId, Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
+        task = PluginServices.getTaskService().fetchById(t, Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
         if(task == null) {
-            getActivity().finish();
             return;
         }
-
-        getActivity().setTitle(task.getValue(Task.TITLE));
-
         setUpInterface();
         setUpListAdapter();
 
         if(actFmPreferenceService.isLoggedIn()) {
-            getListView().findViewById(R.id.add_comment).setVisibility(View.VISIBLE);
-
             if(task.getValue(Task.REMOTE_ID) == 0)
                 refreshData(true, null);
             else {
@@ -128,11 +113,13 @@ public class EditNoteActivity extends ListFragment {
         }
     }
 
+
+
     // --- UI preparation
 
     private void setUpInterface() {
-        final View commentButton = getListView().findViewById(R.id.commentButton);
-        commentField = (EditText) getListView().findViewById(R.id.commentField);
+        final View commentButton = commentsBar.findViewById(R.id.commentButton);
+        commentField = (EditText) commentsBar.findViewById(R.id.commentField);
         commentField.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
@@ -165,15 +152,17 @@ public class EditNoteActivity extends ListFragment {
         });
 
         if(!TextUtils.isEmpty(task.getValue(Task.NOTES))) {
-            TextView notes = new TextView(getActivity());
+            TextView notes = new TextView(getContext());
             notes.setLinkTextColor(Color.rgb(100, 160, 255));
             notes.setTextSize(18);
-            getListView().addHeaderView(notes);
+            addHeaderView(notes);
             notes.setText(task.getValue(Task.NOTES));
             notes.setPadding(5, 10, 5, 10);
             Linkify.addLinks(notes, Linkify.ALL);
         }
-        loadingText = (TextView) getListView().findViewById(R.id.loading);
+        //TODO add loading text back in
+//        loadingText = (TextView) findViewById(R.id.loading);
+        loadingText = new TextView(getContext());
     }
 
     private void setUpListAdapter() {
@@ -217,15 +206,12 @@ public class EditNoteActivity extends ListFragment {
                     return -1;
             }
         });
-        adapter = new NoteAdapter(getActivity(), R.id.name, items);
-        setListAdapter(adapter);
+        adapter = new NoteAdapter(getContext(), R.id.name, items);
+        setAdapter(adapter);
 
-        getListView().setSelection(items.size() - 1);
+        this.setSelection(items.size() - 1);
     }
-
-
-    //TODO what to do with options?
-    /*
+/*
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if(menu.size() > 0)
@@ -249,7 +235,7 @@ public class EditNoteActivity extends ListFragment {
             callback = existingCallback;
         else {
             callback = new ProgressBarSyncResultCallback(
-                    getActivity(), R.id.progressBar, new Runnable() {
+                    ((Activity)getContext()), (ProgressBar)parentView.findViewById(R.id.progressBar), R.id.progressBar, new Runnable() {
                @Override
                 public void run() {
                    setUpListAdapter();
@@ -300,15 +286,15 @@ public class EditNoteActivity extends ListFragment {
         StatisticsService.reportEvent(StatisticsConstants.ACTFM_TASK_COMMENT);
     }
 
+    //TODO figure out what to do with menu
+    /*
     private final OnClickListener dismissCommentsListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            getActivity().finish();
+            finish();
         }
     };
 
-    //TODO figure out what to do with activity options menu since it is inside edit task now
-    /*
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         // handle my own menus
@@ -382,7 +368,7 @@ public class EditNoteActivity extends ListFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if(convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.update_adapter_row, parent, false);
+                convertView = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.update_adapter_row, parent, false);
             }
             bindView(convertView, items.get(position));
             return convertView;

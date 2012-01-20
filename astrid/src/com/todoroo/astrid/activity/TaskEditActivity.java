@@ -194,6 +194,7 @@ public final class TaskEditActivity extends Fragment {
     private TagsControlSet tagsControlSet = null;
     private EditText title;
     private LinearLayout moreControls;
+    private EditNoteActivity editNotes;
 
     private final List<TaskEditControlSet> controls =
         Collections.synchronizedList(new ArrayList<TaskEditControlSet>());
@@ -294,14 +295,6 @@ public final class TaskEditActivity extends Fragment {
                 container, false);
 
 
-        mAdapter = new TaskEditViewPager(getActivity());
-        mAdapter.parent = this;
-
-        mPager = (ViewPager)v.findViewById(R.id.pager);
-        mPager.setAdapter(mAdapter);
-
-        mIndicator = (TabPageIndicator)v.findViewById(R.id.indicator);
-        mIndicator.setViewPager(mPager);
         return v;
     }
 
@@ -322,6 +315,17 @@ public final class TaskEditActivity extends Fragment {
 
         // disable keyboard until user requests it
         AndroidUtilities.suppressVirtualKeyboard(title);
+
+
+
+        mAdapter = new TaskEditViewPager(getActivity());
+        mAdapter.parent = this;
+
+        mPager = (ViewPager)getView().findViewById(R.id.pager);
+        mPager.setAdapter(mAdapter);
+
+        mIndicator = (TabPageIndicator)getView().findViewById(R.id.indicator);
+        mIndicator.setViewPager(mPager);
     }
 
     /** Initialize UI components */
@@ -618,6 +622,7 @@ public final class TaskEditActivity extends Fragment {
 
         // clear notification
         Notifications.cancelNotifications(model.getId());
+
     }
 
     /** Convenience method to populate fields after setting model to null */
@@ -634,6 +639,7 @@ public final class TaskEditActivity extends Fragment {
             for(TaskEditControlSet controlSet : controls)
                 controlSet.readFromTask(model);
         }
+
     }
 
     /** Populate UI component values from the model */
@@ -928,23 +934,23 @@ public final class TaskEditActivity extends Fragment {
 
             return moreControls;
         }
-        else if (position == 5) {
+        else if (position == 0) {
 
 
-            EditNoteActivity frag = (EditNoteActivity) getSupportFragmentManager()
-                .findFragmentByTag(EditNoteActivity.EDIT_NOTELIST_FRAGMENT);
-            if (frag == null) {
+            if (editNotes == null){
+                if(model == null)
+                {
+                    populateFields();
+                }
 
-            try {
-//                frag = (EditNoteActivity)EditNoteActivity.instantiate(getActivity(), EditNoteActivity.class.toString());
-            } catch (Exception e) {
-                e.printStackTrace(); //Uh ohs
+                long idParam = getActivity().getIntent().getLongExtra(TOKEN_ID, -1L);
+            editNotes = new EditNoteActivity(getActivity(), getView(), idParam);
+
+            editNotes.setLayoutParams(mPager.getLayoutParams());
             }
-                frag = new EditNoteActivity();
-            }
 
 
-            return frag.getView();
+            return editNotes;
         }
         else {
 

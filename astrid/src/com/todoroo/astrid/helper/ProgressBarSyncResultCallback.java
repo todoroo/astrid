@@ -30,6 +30,16 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
         progressBar.setProgress(0);
         progressBar.setMax(0);
     }
+    public ProgressBarSyncResultCallback(Activity activity, ProgressBar pBar,
+            int progressBarId, Runnable onFinished) {
+        this.progressBar = pBar;
+        this.activity = activity;
+        this.onFinished = onFinished;
+
+        progressBar.setProgress(0);
+        progressBar.setMax(0);
+    }
+
 
     @Override
     public void finished() {
