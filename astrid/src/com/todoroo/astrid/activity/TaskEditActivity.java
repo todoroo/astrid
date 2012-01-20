@@ -363,10 +363,10 @@ public final class TaskEditActivity extends Fragment {
 
         RepeatControlSet repeatControls = new RepeatControlSet(
                 getActivity(), R.layout.control_set_repeat,
-                R.layout.control_set_default_display, R.string.repeat_enabled);
+                R.layout.control_set_repeat_display, R.string.repeat_enabled);
 
         GCalControlSet gcalControl = new GCalControlSet(getActivity(),
-                R.layout.control_set_gcal, R.layout.control_set_default_display,
+                R.layout.control_set_gcal, R.layout.control_set_gcal_display,
                 R.string.gcal_TEA_addToCalendar_label);
 
         //The deadline control set contains the repeat controls and the calendar controls.
