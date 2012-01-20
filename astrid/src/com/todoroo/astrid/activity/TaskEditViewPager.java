@@ -10,10 +10,11 @@ import com.viewpagerindicator.TitleProvider;
 
 public class TaskEditViewPager extends PagerAdapter implements TitleProvider
 {
+
     private static String[] titles = new String[]
-                                          {
-"Activity", "More"
-                                          };
+                                                {
+        "Activity", "More"
+                                                };
     private final Context context;
     public TaskEditActivity parent;
 

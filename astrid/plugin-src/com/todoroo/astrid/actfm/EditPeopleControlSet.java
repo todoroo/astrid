@@ -112,7 +112,7 @@ public class EditPeopleControlSet extends PopupControlSet {
         super(activity, viewLayout, displayViewLayout, title);
         DependencyInjectionService.getInstance().inject(this);
         this.loginRequestCode = loginRequestCode;
-        displayText.setText(activity.getString(R.string.TEA_reminders_group_label));
+        displayText.setText(activity.getString(R.string.TEA_control_who));
 
         sharedWithRow = LayoutInflater.from(activity).inflate(R.layout.control_set_default_display, null);
         sharedWithView = LayoutInflater.from(activity).inflate(R.layout.control_set_collaborators, null);

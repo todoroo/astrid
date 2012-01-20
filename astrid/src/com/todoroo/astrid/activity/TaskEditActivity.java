@@ -195,6 +195,9 @@ public final class TaskEditActivity extends Fragment {
     private EditText title;
     private LinearLayout moreControls;
     private EditNoteActivity editNotes;
+    private ViewPager mPager;
+    private TaskEditViewPager mAdapter;
+    private TabPageIndicator mIndicator;
 
     private final List<TaskEditControlSet> controls =
         Collections.synchronizedList(new ArrayList<TaskEditControlSet>());
@@ -226,12 +229,6 @@ public final class TaskEditActivity extends Fragment {
     OnTaskEditDetailsClickedListener mListener;
 
     private boolean mDualFragments = false;
-
-    private ViewPager mPager;
-
-    private TaskEditViewPager mAdapter;
-
-    private TabPageIndicator mIndicator;
 
     /* ======================================================================
      * ======================================================= initialization
@@ -376,6 +373,7 @@ public final class TaskEditActivity extends Fragment {
                 getActivity(), R.layout.control_set_deadline,
                 R.layout.control_set_default_display, repeatControls.getDisplayView(), gcalControl.getDisplayView());
         controlSetMap.put(getString(R.string.TEA_ctrl_when_pref), deadlineControl);
+        controls.add(deadlineControl);
         controls.add(repeatControls);
         controls.add(gcalControl);
 
@@ -929,6 +927,23 @@ public final class TaskEditActivity extends Fragment {
         StatisticsService.sessionStop(getActivity());
     }
 
+
+
+    private void adjustInfoPopovers() {
+        Preferences.setBoolean(R.string.p_showed_tap_task_help, true);
+        if (!Preferences.isSet(getString(R.string.p_showed_lists_help)))
+            Preferences.setBoolean(R.string.p_showed_lists_help, false);
+    }
+
+    /* ======================================================================
+     * ========================================== UI component helper classes
+     * ====================================================================== */
+
+    /**
+     * Returns the correct view for TaskEditViewPager
+     * @param position in the horizontal scroll view
+     */
+
     public View getPageView(int position) {
         if (position == 1){
 
@@ -968,14 +983,5 @@ public final class TaskEditActivity extends Fragment {
             return layout;
         }
     }
-    private void adjustInfoPopovers() {
-        Preferences.setBoolean(R.string.p_showed_tap_task_help, true);
-        if (!Preferences.isSet(getString(R.string.p_showed_lists_help)))
-            Preferences.setBoolean(R.string.p_showed_lists_help, false);
-    }
-
-    /* ======================================================================
-     * ========================================== UI component helper classes
-     * ====================================================================== */
 
 }
