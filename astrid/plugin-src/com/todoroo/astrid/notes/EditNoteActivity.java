@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -49,9 +48,10 @@ import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
+import com.todoroo.astrid.ui.NestedListView;
 import com.todoroo.astrid.utility.Flags;
 
-public class EditNoteActivity extends ListView {
+public class EditNoteActivity extends NestedListView {
 
 
 
@@ -193,6 +193,16 @@ public class EditNoteActivity extends ListView {
             } finally {
                 updates.close();
             }
+        }
+
+        // (debug)
+        for(int i = 0; i < 10; i++) {
+            NoteOrUpdate note = new NoteOrUpdate(
+                    "http://cdn.tdfimg.com/wp-content/uploads/2008/11/the-private-life-of-a-cat-128x128.jpg",
+                    "Cat Fan",
+                    "I really love cats. I really love cats. I really love cats",
+                    DateUtilities.now() - i * 20 * 3600 * 1000L);
+            items.add(note);
         }
 
         Collections.sort(items, new Comparator<NoteOrUpdate>() {

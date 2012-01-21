@@ -976,7 +976,8 @@ public final class TaskEditActivity extends Fragment {
             text.setPadding(20, 20, 20, 20);
 
             LinearLayout layout = new LinearLayout(getActivity());
-            layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+            layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+                    LayoutParams.WRAP_CONTENT));
             layout.setGravity(Gravity.CENTER);
             layout.addView(text);
 

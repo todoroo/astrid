@@ -8,48 +8,37 @@ import android.view.View;
 
 import com.viewpagerindicator.TitleProvider;
 
-public class TaskEditViewPager extends PagerAdapter implements TitleProvider
-{
+public class TaskEditViewPager extends PagerAdapter implements TitleProvider {
 
-    private static String[] titles = new String[]
-                                                {
-        "Activity", "More"
-                                                };
+    private static String[] titles = new String[] { "Activity", "More" };
     private final Context context;
     public TaskEditActivity parent;
 
-
-    public TaskEditViewPager( Context context )
-    {
+    public TaskEditViewPager(Context context) {
         this.context = context;
     }
 
-
     @Override
-    public int getCount()
-    {
+    public int getCount() {
         return titles.length;
     }
 
     @Override
-    public Object instantiateItem( View pager, int position )
-    {
+    public Object instantiateItem(View pager, int position) {
         View pageView = parent.getPageView(position);
 
-        ((ViewPager)pager).addView( pageView, 0 );
+        ((ViewPager) pager).addView(pageView, 0);
         return pageView;
     }
 
     @Override
-    public void destroyItem( View pager, int position, Object view )
-    {
-        ((ViewPager)pager).removeView( (View)view );
+    public void destroyItem(View pager, int position, Object view) {
+        ((ViewPager) pager).removeView((View) view);
     }
 
     @Override
-    public boolean isViewFromObject( View view, Object object )
-    {
-        return view.equals( object );
+    public boolean isViewFromObject(View view, Object object) {
+        return view.equals(object);
     }
 
     @Override
@@ -58,10 +47,12 @@ public class TaskEditViewPager extends PagerAdapter implements TitleProvider
     }
 
     @Override
-    public void finishUpdate( View view ) {}
+    public void finishUpdate(View view) {
+    }
 
     @Override
-    public void restoreState( Parcelable p, ClassLoader c ) {}
+    public void restoreState(Parcelable p, ClassLoader c) {
+    }
 
     @Override
     public Parcelable saveState() {
@@ -69,5 +60,6 @@ public class TaskEditViewPager extends PagerAdapter implements TitleProvider
     }
 
     @Override
-    public void startUpdate( View view ) {}
+    public void startUpdate(View view) {
+    }
 }
