@@ -2,7 +2,6 @@
 package com.todoroo.astrid.welcome.tutorial;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -10,7 +9,6 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -21,24 +19,26 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.astrid.actfm.ActFmLoginActivity;
 import com.todoroo.astrid.activity.Eula;
-import com.todoroo.astrid.welcome.WelcomeLogin;
 import com.viewpagerindicator.CirclePageIndicator;
 import com.viewpagerindicator.PageIndicator;
 
 public class WelcomeWalkthrough extends ActFmLoginActivity {
-    ViewPager mPager;
-    ViewPagerAdapter mAdapter;
-    PageIndicator mIndicator;
-    View currentView;
-    int currentPage;
+    private ViewPager mPager;
+    private ViewPagerAdapter mAdapter;
+    private PageIndicator mIndicator;
+    private View currentView;
+    private int currentPage;
+
+    public static final String KEY_SHOWED_WELCOME_LOGIN = "key_showed_welcome_login"; //$NON-NLS-1$
+
+    public static final String TOKEN_MANUAL_SHOW = "manual"; //$NON-NLS-1$
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.welcome_walkthrough);
 
-        mAdapter = new ViewPagerAdapter(this);
+        mAdapter = new ViewPagerAdapter(this, getIntent().hasExtra(TOKEN_MANUAL_SHOW));
         mAdapter.parent = this;
 
         mPager = (ViewPager)findViewById(R.id.pager);
@@ -46,6 +46,7 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
 
         mIndicator = (CirclePageIndicator)findViewById(R.id.indicator);
         mIndicator.setViewPager(mPager);
+
     }
     @Override
     protected int getContentViewResource() {
@@ -57,7 +58,6 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
         return 0;
     }
     public void pageScrolled(int position, View view){
-        Log.d(null, "Updated ui");
         currentView = view;
         currentPage = position;
         if (position == mAdapter.getCount()-1) {
@@ -71,10 +71,22 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
     protected void initializeUI() {
         if(mAdapter == null)
             return;
-        if(currentPage == mAdapter.getCount()-1){
-            super.initializeUI();
-            setupTermsOfService();
-            setupLoginLater();
+        if(currentPage == mAdapter.getCount()-1) {
+            if(findViewById(R.id.fb_login) != null) {
+                super.initializeUI();
+                setupTermsOfService();
+                setupLoginLater();
+            } else {
+                OnClickListener done = new OnClickListener() {
+                    @Override
+                    public void onClick(View arg0) {
+                        finish();
+                    }
+                };
+                currentView.findViewById(R.id.welcome_walkthrough_title).setOnClickListener(done);
+                currentView.findViewById(R.id.welcome_walkthrough_image).setOnClickListener(done);
+            }
+
         }
     }
 
@@ -90,7 +102,7 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
             @Override
             public void updateDrawState(TextPaint ds) {
                 ds.setUnderlineText(true);
-                ds.setColor(Color.rgb(255, 255, 255));
+                ds.setColor(Color.rgb(68, 68, 68));
             }
         };
         link.setSpan(linkSpan, start, link.length() + endOffset, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -109,12 +121,6 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
         Button pwLogin = (Button) findViewById(R.id.pw_login);
         pwLogin.setOnClickListener(signUpListener);
     }
-    /*
-    protected void setupWalkthroughLogin() {
-        Button loginButton = (Button)currentView.findViewById(R.id.walkthrough_login);
-        loginButton.setOnClickListener(showWalkthroughLoginListener);
-    }*/
-
 
     protected void setupLoginLater() {
         TextView loginLater = (TextView)currentView.findViewById(R.id.login_later);
@@ -129,7 +135,7 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
             @Override
             public void updateDrawState(TextPaint ds) {
                 ds.setUnderlineText(true);
-                ds.setColor(Color.rgb(255, 255, 255));
+                ds.setColor(Color.rgb(68, 68, 68));
             }
         };
         loginLaterLink.setSpan(laterSpan, 0, loginLaterBase.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -140,17 +146,6 @@ public class WelcomeWalkthrough extends ActFmLoginActivity {
         @Override
         public void onClick(View v) {
             Eula.showEulaBasic(WelcomeWalkthrough.this);
-        }
-    };
-    private void showWelcomeLoginActivty() {
-        Intent showWelcomeLogin = new Intent(this, WelcomeLogin.class);
-        showWelcomeLogin.putExtra(ActFmLoginActivity.SHOW_TOAST, false);
-        startActivity(showWelcomeLogin);
-    }
-    protected final OnClickListener showWalkthroughLoginListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            showWelcomeLoginActivty();
         }
     };
 

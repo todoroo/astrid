@@ -13,8 +13,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.timsu.astrid.R;
+import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.DependencyInjectionService;
+import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
+import com.viewpagerindicator.TitleProvider;
 
-public class ViewPagerAdapter extends PagerAdapter
+public class ViewPagerAdapter extends PagerAdapter implements TitleProvider
 {
     private static int[] images = new int[]
                                           {
@@ -24,7 +28,7 @@ public class ViewPagerAdapter extends PagerAdapter
                                               R.drawable.welcome_walkthrough_4,
                                               R.drawable.welcome_walkthrough_5,
                                               R.drawable.welcome_walkthrough_6,
-                                              R.drawable.welcome_screen
+                                              0
                                           };
     private static int[] title = new int[]
                                           {
@@ -59,10 +63,20 @@ public class ViewPagerAdapter extends PagerAdapter
                                           };
     private final Context context;
     public WelcomeWalkthrough parent;
+    @Autowired ActFmPreferenceService actFmPreferenceService;
 
-    public ViewPagerAdapter( Context context )
+    public ViewPagerAdapter( Context context, boolean manual)
     {
         this.context = context;
+        DependencyInjectionService.getInstance().inject(this);
+
+        if(manual) {
+            layouts[layouts.length - 1] = R.layout.welcome_walkthrough_page;
+            title[title.length - 1] = R.string.welcome_title_7_return;
+            images[images.length - 1] = R.drawable.welcome_walkthrough_1;
+            body[body.length - 1] = R.string.welcome_body_7_return;
+        }
+
     }
 
 
@@ -80,14 +94,15 @@ public class ViewPagerAdapter extends PagerAdapter
         View pageView = inflater.inflate(layouts[position], null, true);
         pageView.setLayoutParams( new ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
 
-        if (position != getCount()-1){
-        ImageView imageView = (ImageView) pageView.findViewById(R.id.welcome_walkthrough_image);
-        imageView.setImageResource(images[position]);
+        if (pageView.findViewById(R.id.welcome_walkthrough_image) != null) {
+            ImageView imageView = (ImageView) pageView.findViewById(R.id.welcome_walkthrough_image);
+            imageView.setImageResource(images[position]);
 
-        TextView titleView = (TextView) pageView.findViewById(R.id.welcome_walkthrough_title);
-        titleView.setText(title[position]);
-        TextView bodyView = (TextView) pageView.findViewById(R.id.welcome_walkthrough_body);
-        bodyView.setText(body[position]);
+            TextView titleView = (TextView) pageView.findViewById(R.id.welcome_walkthrough_title);
+            titleView.setText(title[position]);
+
+            TextView bodyView = (TextView) pageView.findViewById(R.id.welcome_walkthrough_body);
+            bodyView.setText(body[position]);
         }
 
         ((ViewPager)pager).addView( pageView, 0 );
@@ -120,4 +135,11 @@ public class ViewPagerAdapter extends PagerAdapter
 
     @Override
     public void startUpdate( View view ) {}
+
+
+    @Override
+    public String getTitle(int position) {
+        return context.getString(title[position]);
+    }
+
 }

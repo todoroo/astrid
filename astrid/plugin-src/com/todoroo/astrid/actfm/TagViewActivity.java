@@ -211,17 +211,17 @@ public class TagViewActivity extends TaskListActivity {
 
         super.onNewIntent(intent);
 
-        if (intent.getBooleanExtra(TOKEN_START_ACTIVITY, false)) {
-            getView().findViewById(R.id.activity).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent i = new Intent(getActivity(), TagUpdatesActivity.class);
-                    i.putExtra(EXTRA_TAG_DATA, tagData);
-                    startActivity(i);
-                    AndroidUtilities.callOverridePendingTransition(getActivity(), R.anim.slide_left_in, R.anim.slide_left_out);
-                }
-            }, 500);
-        }
+//        if (intent.getBooleanExtra(TOKEN_START_ACTIVITY, false)) {
+//            getView().findViewById(R.id.activity).postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Intent i = new Intent(getActivity(), TagUpdatesActivity.class);
+//                    i.putExtra(EXTRA_TAG_DATA, tagData);
+//                    startActivity(i);
+//                    AndroidUtilities.callOverridePendingTransition(getActivity(), R.anim.slide_left_in, R.anim.slide_left_out);
+//                }
+//            }, 500);
+//        }
     }
 
     @Override
@@ -241,9 +241,11 @@ public class TagViewActivity extends TaskListActivity {
 
     @Override
     protected void initiateAutomaticSync() {
-        long lastAutoSync = Preferences.getLong(LAST_FETCH_KEY + tagData.getId(), 0);
-        if(DateUtilities.now() - lastAutoSync > DateUtilities.ONE_HOUR)
-            refreshData(false);
+        if (tagData != null) {
+            long lastAutoSync = Preferences.getLong(LAST_FETCH_KEY + tagData.getId(), 0);
+            if(DateUtilities.now() - lastAutoSync > DateUtilities.ONE_HOUR)
+                refreshData(false);
+        }
     }
 
     /** refresh the list with latest data from the web */
@@ -254,9 +256,7 @@ public class TagViewActivity extends TaskListActivity {
                 R.id.progressBar, new Runnable() {
             @Override
             public void run() {
-                setUpMembersGallery();
-                loadTaskListContent(true);
-                ((TextView)taskListView.findViewById(android.R.id.empty)).setText(R.string.TLA_no_items);
+                ContextManager.getContext().sendBroadcast(new Intent(AstridApiConstants.BROADCAST_EVENT_REFRESH));
             }
         }));
         Preferences.setLong(LAST_FETCH_KEY + tagData.getId(), DateUtilities.now());
@@ -465,6 +465,13 @@ public class TagViewActivity extends TaskListActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void refresh() {
+        setUpMembersGallery();
+        loadTaskListContent(true);
+        ((TextView)taskListView.findViewById(android.R.id.empty)).setText(R.string.TLA_no_items);
     }
 
 }

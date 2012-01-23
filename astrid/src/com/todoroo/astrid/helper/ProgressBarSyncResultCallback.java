@@ -8,11 +8,10 @@ import android.view.animation.AlphaAnimation;
 import android.widget.ProgressBar;
 
 import com.todoroo.andlib.utility.AndroidUtilities;
-import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
 
-public class ProgressBarSyncResultCallback implements SyncResultCallback {
+public class ProgressBarSyncResultCallback extends SyncResultCallbackAdapter {
 
-    private final ProgressBar progressBar;
+    private ProgressBar progressBar;
     private final Activity activity;
     private final Runnable onFinished;
 
@@ -23,6 +22,10 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
         this.progressBar = (ProgressBar) activity.findViewById(progressBarId);
         this.activity = activity;
         this.onFinished = onFinished;
+
+        if(progressBar == null)
+            progressBar = new ProgressBar(activity);
+
         progressBar.setProgress(0);
         progressBar.setMax(0);
     }
@@ -33,14 +36,18 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    progressBar.setMax(100);
-                    progressBar.setProgress(100);
-                    AlphaAnimation animation = new AlphaAnimation(1, 0);
-                    animation.setFillAfter(true);
-                    animation.setDuration(1000L);
-                    progressBar.startAnimation(animation);
+                    try {
+                        progressBar.setMax(100);
+                        progressBar.setProgress(100);
+                        AlphaAnimation animation = new AlphaAnimation(1, 0);
+                        animation.setFillAfter(true);
+                        animation.setDuration(1000L);
+                        progressBar.startAnimation(animation);
 
-                    onFinished.run();
+                        onFinished.run();
+                    } catch (Exception e) {
+                        // ignore, view could have been destroyed
+                    }
                 }
             });
             new Thread() {
@@ -50,7 +57,11 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressBar.setVisibility(View.GONE);
+                            try {
+                                progressBar.setVisibility(View.GONE);
+                            } catch (Exception e) {
+                                // ignore
+                            }
                         }
                     });
                 }
@@ -63,7 +74,11 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressBar.setMax(progressBar.getMax() + incrementBy);
+                try {
+                    progressBar.setMax(progressBar.getMax() + incrementBy);
+                } catch (Exception e) {
+                    // ignore
+                }
             }
         });
     }
@@ -73,7 +88,11 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressBar.incrementProgressBy(incrementBy);
+                try {
+                    progressBar.incrementProgressBy(incrementBy);
+                } catch (Exception e) {
+                    // ignore
+                }
             }
         });
     }

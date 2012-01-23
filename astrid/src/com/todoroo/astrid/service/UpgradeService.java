@@ -41,6 +41,8 @@ import com.todoroo.astrid.utility.AstridPreferences;
 
 public final class UpgradeService {
 
+    public static final int V3_9_2_2 = 209;
+    public static final int V3_9_2_1 = 208;
     public static final int V3_9_2 = 207;
     public static final int V3_9_1_1 = 206;
     public static final int V3_9_1 = 205;
@@ -172,11 +174,12 @@ public final class UpgradeService {
         Preferences.clear(AstridPreferences.P_UPGRADE_FROM);
         StringBuilder changeLog = new StringBuilder();
 
-        if (from < V3_9_2) {
-            newVersionString(changeLog, "3.9.2 (01/13/12)", new String[] {
-                "Made selecting dates and times easier:",
-                "New tutorial walkthrough for new users",
-                "Stomped on a few bugs",
+        if (from >= V3_9_2 && from < V3_9_2_2) {
+            newVersionString(changeLog, "3.9.2.2 (1/19/12)", new String[] {
+                "Astrid now recognizes words like 'tomorrow', 'monday', '!!!' and '2 pm' to set date and importance",
+                "New tutorial walkthrough for new users. Access it from the settings menu!",
+                "Reduced APK size",
+                "Minor UI tweaks, bug fixes",
                 "Feedback welcomed!"
             });
         }
@@ -184,7 +187,7 @@ public final class UpgradeService {
         if (from >= V3_9_1 && from < V3_9_1_1) {
             newVersionString(changeLog, "3.9.1.1 (01/06/12)", new String[] {
                 "Fixed a few bugs:",
-                " Crash when selecting certain  lists",
+                " Crash when selecting certain lists",
                 " Some lists not displayed",
                 " Wrong text color when assigning tasks in Night theme"
             });

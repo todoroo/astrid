@@ -12,7 +12,7 @@
         <item name="asSeparatorBackground">@android:drawable/divider_horizontal_dark</item>
         <item name="asTextColor">#ffffffff</item>
         <item name="asDetailsColor">#ff777777</item>
-        <item name="asDueDateColor">#ff7777aa</item>
+        <item name="asDueDateColor">#878787</item>
         <item name="asDueDateOverdueColor">#ffee5555</item>
         <item name="asDueDateCompletedColor">#ff777777</item>
         <item name="asFilterHeaderColor">#ffcccccc</item>
@@ -55,7 +55,7 @@
         <item name="asHeaderButtonBackground">@drawable/header_button_white</item>
         <item name="asTextColor">#ff000000</item>
         <item name="asDetailsColor">#ff6666aa</item>
-        <item name="asDueDateColor">#ff000000</item>
+        <item name="asDueDateColor">#878787</item>
         <item name="asFilterHeaderColor">#ffffff</item>
         <item name="asFilterHeaderBackground">@drawable/edit_titlebar_white</item>
         <item name="asMembersHeaderBackground">@drawable/ios_fabric_480</item>
@@ -63,7 +63,7 @@
         <item name="abBackground">@android:color/white</item>
         <item name="abDisplayOptions">useLogo|showHome|showTitle</item>
         <item name="abLogo">@drawable/icon_48</item>
-        <item name="asAbTextColor">#d00000</item>
+        <item name="asAbTextColor">@color/red_text_color</item>
     </style>
     
     <style name="Theme.TransparentWhite" parent="@style/Theme.White">
@@ -75,7 +75,7 @@
         <item name="abBackground">@android:color/white</item>
         <item name="abDisplayOptions">useLogo|showHome|showTitle</item>
         <item name="abLogo">@drawable/icon_48</item>
-        <item name="asAbTextColor">#d00000</item>
+        <item name="asAbTextColor">@color/red_text_color</item>
     </style>
     
     <style name="Theme_Dialog" parent="@android:style/Theme.Dialog">
@@ -124,6 +124,9 @@
     
     <style name="TEA_Separator">
         <item name="android:background">?attr/asSeparatorBackground</item>
+    </style>
+    
+    <style name="FLA_Separator" parent="TEA_Separator">
     </style>
     
     <style name="TextAppearance" parent="android:TextAppearance">
@@ -255,6 +258,7 @@
     
     <style name="TextAppearance.TAd_ItemDueDate" parent="TextAppearance.TAd_ItemDetails">
         <item name="android:textColor">?attr/asDueDateColor</item>
+        <item name="android:textStyle">bold</item>
     </style>
     
     <style name="TextAppearance.TAd_ItemDueDate_Overdue" parent="TextAppearance.TAd_ItemDueDate">
@@ -270,7 +274,11 @@
     <style name="TextAppearance.FLA_Filter">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?attr/asTextColor</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+    <style name="TextAppearance.FLA_Button" parent="TextAppearance.FLA_Filter">
+        <item name="android:textColor">@color/new_list_button_text</item>
     </style>
     
     <style name="TextAppearance.FLA_Header" parent="TextAppearance.FLA_Filter">
@@ -284,11 +292,11 @@
         <item name="android:textColor">@android:color/black</item>                                                                                                                                                   
     </style>
     <style name="CustomCirclePageIndicator">
-        <item name="fillColor">#FFFFFFFF</item>
-        <item name="strokeColor">#FF000000</item>
+        <item name="fillColor">#333333</item>
+        <item name="strokeColor">#333333</item>
         <item name="strokeWidth">2dp</item>
-        <item name="radius">10dp</item>
+        <item name="radius">5dp</item>
         <item name="centered">true</item>
-        <item name="android:background">#FFCCCCCC</item>
+        <item name="android:background">#333333</item>
     </style> 
 </resources>

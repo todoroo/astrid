@@ -99,7 +99,9 @@ public class AstridWrapperActivity extends FragmentActivity
             if(item instanceof Filter) {
                 Filter filter = (Filter)item;
                 if(filter instanceof FilterWithCustomIntent) {
+                    int lastSelectedList = intent.getIntExtra(FilterListActivity.TOKEN_LAST_SELECTED, 0);
                     intent = ((FilterWithCustomIntent)filter).getCustomIntent();
+                    intent.putExtra(FilterListActivity.TOKEN_LAST_SELECTED, lastSelectedList);
                 } else {
                     intent.putExtra(TaskListActivity.TOKEN_FILTER, filter);
                 }
@@ -139,7 +141,7 @@ public class AstridWrapperActivity extends FragmentActivity
             transaction.replace(R.id.tasklist_fragment_container, newFragment, TaskListActivity.TAG_TASKLIST_FRAGMENT);
             transaction.commit();
         } catch (Exception e) {
-            e.printStackTrace(); //Uh ohs
+            // Don't worry about it
         }
     }
 
@@ -170,8 +172,8 @@ public class AstridWrapperActivity extends FragmentActivity
     public void onTaskListItemClicked(long taskId) {
         Intent intent = new Intent(this, TaskEditWrapperActivity.class);
         intent.putExtra(TaskEditActivity.TOKEN_ID, taskId);
-        if (intent.hasExtra(TaskListActivity.TOKEN_FILTER))
-            intent.putExtra(TaskListActivity.TOKEN_FILTER, intent.getParcelableExtra(TaskListActivity.TOKEN_FILTER));
+        if (getIntent().hasExtra(TaskListActivity.TOKEN_FILTER))
+            intent.putExtra(TaskListActivity.TOKEN_FILTER, getIntent().getParcelableExtra(TaskListActivity.TOKEN_FILTER));
         if (this instanceof TaskEditWrapperActivity) {
             TaskEditActivity editActivity = getTaskEditFragment();
             editActivity.save(true);
