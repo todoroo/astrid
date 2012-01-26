@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -502,6 +503,22 @@ public class AndroidUtilities {
     }
 
     /**
+     * If you want to set a transition, please use this method rather than <code>callApiMethod</code> to ensure
+     * you really pass an Activity-instance.
+     *
+     * @param activity the activity-instance for which to set the finish-transition
+     * @param enterAnim the incoming-transition of the next activity
+     * @param exitAnim the outgoing-transition of this activity
+     */
+    public static void callOverridePendingTransition(Activity activity, int enterAnim, int exitAnim) {
+        callApiMethod(5,
+                activity,
+                "overridePendingTransition", //$NON-NLS-1$
+                new Class<?>[] { Integer.TYPE, Integer.TYPE },
+                enterAnim, exitAnim);
+    }
+
+    /**
      * Call a method via reflection if API level is at least minSdk
      * @param minSdk minimum sdk number (i.e. 8)
      * @param receiver object to call method on
@@ -718,6 +735,16 @@ public class AndroidUtilities {
         for (View v : views) {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
+    }
+
+    /**
+     * Returns true if the screen is large or xtra large
+     * @param context
+     * @return
+     */
+    public static boolean isTabletSized(Context context) {
+        int screenSize = context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        return (screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE);
     }
 
 }

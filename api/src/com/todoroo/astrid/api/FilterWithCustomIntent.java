@@ -17,6 +17,7 @@ public class FilterWithCustomIntent extends Filter {
      * Custom activity name
      */
     public ComponentName customTaskList = null;
+    public ComponentName customWrapperActivity = null;
 
     /**
      * Bundle with extras set. Can be null
@@ -37,13 +38,18 @@ public class FilterWithCustomIntent extends Filter {
         super(listingTitle, title, sqlQuery, valuesForNewTasks);
     }
 
-    public void start(Activity activity, int resultCode) {
+    public Intent getCustomIntent() {
         Intent intent = new Intent();
         intent.putExtra("filter", this); //$NON-NLS-1$
-        intent.setComponent(customTaskList);
+        intent.setComponent(customWrapperActivity);
         if(customExtras != null)
             intent.putExtras(customExtras);
-        activity.startActivityForResult(intent, resultCode);
+
+        return intent;
+    }
+
+    public void start(Activity activity, int resultCode) {
+        activity.startActivityForResult(getCustomIntent(), resultCode);
     }
 
     // --- parcelable
@@ -63,6 +69,7 @@ public class FilterWithCustomIntent extends Filter {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeParcelable(customTaskList, 0);
+        dest.writeParcelable(customWrapperActivity, 0);
         dest.writeParcelable(customExtras, 0);
     }
 
@@ -70,6 +77,7 @@ public class FilterWithCustomIntent extends Filter {
     public void readFromParcel(Parcel source) {
         super.readFromParcel(source);
         customTaskList = source.readParcelable(ComponentName.class.getClassLoader());
+        customWrapperActivity = source.readParcelable(ComponentName.class.getClassLoader());
         customExtras = source.readParcelable(Bundle.class.getClassLoader());
     }
 

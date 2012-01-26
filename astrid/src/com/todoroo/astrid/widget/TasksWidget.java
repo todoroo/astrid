@@ -27,8 +27,11 @@ import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.TaskEditActivity;
+import com.todoroo.astrid.activity.TaskEditWrapperActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
+import com.todoroo.astrid.activity.TaskListWrapperActivity;
 import com.todoroo.astrid.api.Filter;
+import com.todoroo.astrid.api.FilterWithCustomIntent;
 import com.todoroo.astrid.api.PermaSql;
 import com.todoroo.astrid.core.CoreFilterExposer;
 import com.todoroo.astrid.core.SortHelper;
@@ -205,11 +208,10 @@ public class TasksWidget extends AppWidgetProvider {
 
             updateForScreenSize(views);
 
-            Intent listIntent = new Intent(context, TaskListActivity.class);
+            Intent listIntent = new Intent(context, TaskListWrapperActivity.class);
             String customIntent = Preferences.getStringValue(WidgetConfigActivity.PREF_CUSTOM_INTENT
                     + widgetId);
             if(customIntent != null) {
-                listIntent.setComponent(ComponentName.unflattenFromString(customIntent));
                 String serializedExtras = Preferences.getStringValue(WidgetConfigActivity.PREF_CUSTOM_EXTRAS
                         + widgetId);
                 Bundle extras = AndroidUtilities.bundleFromSerializedString(serializedExtras);
@@ -228,14 +230,17 @@ public class TasksWidget extends AppWidgetProvider {
             views.setOnClickPendingIntent(R.id.taskbody, pListIntent);
 
 
-            Intent editIntent = new Intent(context, TaskEditActivity.class);
+            Intent editIntent = new Intent(context, TaskEditWrapperActivity.class);
             editIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             editIntent.putExtra(TaskEditActivity.OVERRIDE_FINISH_ANIM, false);
-            if(filter != null && filter.valuesForNewTasks != null) {
-                String values = AndroidUtilities.contentValuesToSerializedString(filter.valuesForNewTasks);
-                values = PermaSql.replacePlaceholders(values);
-                editIntent.putExtra(TaskEditActivity.TOKEN_VALUES, values);
-                editIntent.setAction("E" + widgetId + values);
+            if(filter != null) {
+                editIntent.putExtra(TaskListActivity.TOKEN_FILTER, filter);
+                if (filter.valuesForNewTasks != null) {
+                    String values = AndroidUtilities.contentValuesToSerializedString(filter.valuesForNewTasks);
+                    values = PermaSql.replacePlaceholders(values);
+                    editIntent.putExtra(TaskEditActivity.TOKEN_VALUES, values);
+                    editIntent.setAction("E" + widgetId + values);
+                }
             } else {
                 editIntent.setAction("E" + widgetId);
             }
@@ -261,6 +266,7 @@ public class TasksWidget extends AppWidgetProvider {
         }
 
         private Filter getFilter(int widgetId) {
+
             // base our filter off the inbox filter, replace stuff if we have it
             Filter filter = CoreFilterExposer.buildInboxFilter(getResources());
             String sql = Preferences.getStringValue(WidgetConfigActivity.PREF_SQL + widgetId);
@@ -272,6 +278,14 @@ public class TasksWidget extends AppWidgetProvider {
             String contentValues = Preferences.getStringValue(WidgetConfigActivity.PREF_VALUES + widgetId);
             if(contentValues != null)
                 filter.valuesForNewTasks = AndroidUtilities.contentValuesFromSerializedString(contentValues);
+
+            String customComponent = Preferences.getStringValue(WidgetConfigActivity.PREF_CUSTOM_INTENT
+                    + widgetId);
+            if (customComponent != null) {
+                ComponentName component = ComponentName.unflattenFromString(customComponent);
+                filter = new FilterWithCustomIntent(filter.title, filter.title, filter.sqlQuery, filter.valuesForNewTasks);
+                ((FilterWithCustomIntent) filter).customTaskList = component;
+            }
 
             return filter;
         }

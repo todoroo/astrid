@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+  
+    <!-- Filter List -->
+    <FrameLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_weight="40"
+	    android:background="@android:color/white"
+	    android:id="@+id/filterlist_fragment_container" />
+  
+	<View 
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="#000000"/>
+  
+    <!-- Task List -->
+	<FrameLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+        android:layout_weight="33"
+        android:id="@+id/tasklist_fragment_container" />
+  
+	<View 
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="#000000"/>
+  
+    <!-- Task Edit -->
+	<FrameLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+        android:layout_weight="33"
+        android:id="@+id/taskedit_fragment_container"
+        android:visibility="invisible" />
+  
+</LinearLayout>

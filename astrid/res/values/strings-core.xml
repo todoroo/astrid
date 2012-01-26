@@ -147,7 +147,7 @@
   <string name="TAd_flingText"></string>
   
   <!-- indicates task was completed. %s => date or time ago -->
-  <string name="TAd_completed">Finished %s</string>
+  <string name="TAd_completed">Finished\n%s</string>
   
   <!-- Action Button: edit task -->
   <string name="TAd_actionEditTask">Edit</string>
@@ -317,6 +317,9 @@
   <!-- Menu: Delete Task -->
   <string name="TEA_menu_delete">Delete Task</string>
   
+  <!-- Menu: Task comments -->
+  <string name="TEA_menu_comments">Comments</string>
+  
    <!-- Toast: task saved with deadline (%s => preposition + time units) -->
   <string name="TEA_onTaskSave_due">Task Saved: due %s</string>
   
@@ -374,6 +377,12 @@
   
   <!-- More row -->
   <string name="TEA_more">More</string>
+  
+  <!-- Text when no activity to show -->
+  <string name="TEA_no_activity">No Activity to Show.</string>
+  
+  <!-- Text to load more activity -->
+  <string name="TEA_load_more">Load more...</string>
   
   <!-- When controls dialog -->
   <string name="TEA_when_dialog_title">When is this due?</string>

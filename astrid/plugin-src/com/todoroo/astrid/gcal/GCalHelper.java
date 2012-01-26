@@ -65,7 +65,6 @@ public class GCalHelper {
         try{
             // FIXME test this with empty quickadd and full quickadd and taskedit-page
             Uri uri = Calendars.getCalendarContentUri(Calendars.CALENDAR_CONTENT_EVENTS);
-            System.err.println("URI: " + uri);
             values.put("title", task.getValue(Task.TITLE));
             values.put("description", task.getValue(Task.NOTES));
             values.put("hasAlarm", 0);
@@ -82,10 +81,8 @@ public class GCalHelper {
                 }
             }
 
-            System.err.println("Creating start and end date");
             createStartAndEndDate(task, values);
 
-            System.err.println("Inserting event");
             Uri eventUri = cr.insert(uri, values);
             cr.notifyChange(eventUri, null);
 
@@ -93,7 +90,6 @@ public class GCalHelper {
 
         } catch (Exception e) {
             Log.e("astrid-gcal", "error-creating-calendar-event", e); //$NON-NLS-1$ //$NON-NLS-2$
-            e.printStackTrace();
         }
 
         return null;

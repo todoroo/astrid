@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -38,6 +37,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
@@ -69,11 +69,13 @@ import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.sync.ActFmInvoker;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
-import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
+import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.gtasks.auth.ModernAuthManager;
+import com.todoroo.astrid.helper.SyncResultCallbackAdapter;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
+import com.todoroo.astrid.service.SyncV2Service;
 import com.todoroo.astrid.service.TaskService;
 
 /**
@@ -82,7 +84,7 @@ import com.todoroo.astrid.service.TaskService;
  * @author Tim Su <tim@astrid.com>
  *
  */
-public class ActFmLoginActivity extends Activity implements AuthListener {
+public class ActFmLoginActivity extends FragmentActivity implements AuthListener {
 
     public static final String APP_ID = "183862944961271"; //$NON-NLS-1$
 
@@ -92,6 +94,8 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
     protected TaskService taskService;
     @Autowired
     protected ActFmPreferenceService actFmPreferenceService;
+
+    @Autowired protected SyncV2Service syncService;
     private final ActFmInvoker actFmInvoker = new ActFmInvoker();
     private Random rand;
 
@@ -136,6 +140,9 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         setContentView(getContentViewResource());
         if(getTitleResource() != 0)
             setTitle(getTitleResource());
+
+        if (getSupportActionBar() != null)
+            getSupportActionBar().hide();
 
         rand = new Random(DateUtilities.now());
 
@@ -472,7 +479,17 @@ public class ActFmLoginActivity extends Activity implements AuthListener {
         finish();
 
         if (!noSync) {
-            new ActFmSyncProvider().synchronize(ActFmLoginActivity.this, showToast);
+            new Thread() {
+                @Override
+                public void run() {
+                    syncService.synchronizeActiveTasks(false, new SyncResultCallbackAdapter() {
+                        @Override
+                        public void finished() {
+                            ContextManager.getContext().sendBroadcast(new Intent(AstridApiConstants.BROADCAST_EVENT_REFRESH));
+                        }
+                    });
+                }
+            }.start();
         }
 
         try {

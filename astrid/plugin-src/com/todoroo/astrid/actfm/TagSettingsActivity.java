@@ -13,11 +13,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -44,7 +47,12 @@ import com.todoroo.astrid.ui.PeopleContainer;
 import com.todoroo.astrid.utility.Flags;
 import com.todoroo.astrid.welcome.HelpInfoPopover;
 
-public class TagSettingsActivity extends Activity {
+public class TagSettingsActivity extends FragmentActivity {
+
+    public static final String TOKEN_NEW_FILTER = "newFilter";
+
+    private static final int MENU_SAVE_ID = R.string.TEA_menu_save;
+    private static final int MENU_DISCARD_ID = R.string.TEA_menu_discard;
 
     protected static final int REQUEST_ACTFM_LOGIN = 3;
 
@@ -65,7 +73,8 @@ public class TagSettingsActivity extends Activity {
     private CheckBox isSilent;
     private Bitmap setBitmap;
 
-    boolean isNewTag = false;
+    private boolean isNewTag = false;
+    private boolean isDialog;
 
     public TagSettingsActivity() {
         DependencyInjectionService.getInstance().inject(this);
@@ -73,15 +82,22 @@ public class TagSettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setupForDialogOrFullscreen();
         super.onCreate(savedInstanceState);
-        ThemeService.applyTheme(this);
         setContentView(R.layout.tag_settings_activity);
         tagData = getIntent().getParcelableExtra(TagViewActivity.EXTRA_TAG_DATA);
         if (tagData == null) {
             isNewTag = true;
             tagData = new TagData();
         }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            actionBar.setCustomView(R.layout.header_title_view);
+        }
+
         setUpSettingsPage();
 
         if(savedInstanceState != null && savedInstanceState.containsKey(MEMBERS_IN_PROGRESS)) {
@@ -100,6 +116,15 @@ public class TagSettingsActivity extends Activity {
             }).start();
         }
         showCollaboratorsPopover();
+
+    }
+
+    private void setupForDialogOrFullscreen() {
+        isDialog = AndroidUtilities.isTabletSized(this);
+        if (isDialog)
+            setTheme(ThemeService.getDialogTheme());
+        else
+            ThemeService.applyTheme(this);
     }
 
     private void showCollaboratorsPopover() {
@@ -111,6 +136,22 @@ public class TagSettingsActivity extends Activity {
     }
 
     protected void setUpSettingsPage() {
+        if (isDialog) {
+            findViewById(R.id.save_and_cancel).setVisibility(View.VISIBLE);
+            findViewById(R.id.cancel).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            findViewById(R.id.save).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveSettings();
+                }
+            });
+        }
+
         tagMembers = (PeopleContainer) findViewById(R.id.members_container);
         tagName = (EditText) findViewById(R.id.tag_name);
         tagDescription = (EditText) findViewById(R.id.tag_description);
@@ -128,20 +169,6 @@ public class TagSettingsActivity extends Activity {
             @Override
             public void onClick(View arg0) {
                 ActFmCameraModule.showPictureLauncher(TagSettingsActivity.this, null);
-            }
-        });
-
-        findViewById(R.id.saveMembers).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                saveSettings();
-            }
-        });
-
-        findViewById(R.id.cancel).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                finish();
             }
         });
 
@@ -212,16 +239,11 @@ public class TagSettingsActivity extends Activity {
             Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
             tagDataService.save(tagData);
 
-            final String name = newName;
             final Runnable loadTag = new Runnable() {
                 @Override
                 public void run() {
-                    Intent intent = new Intent(TagSettingsActivity.this, TagViewActivity.class);
-                    intent.putExtra(TagViewActivity.EXTRA_TAG_NAME, name);
-                    intent.putExtra(TagViewActivity.TOKEN_FILTER,
-                            TagFilterExposer.filterFromTagData(TagSettingsActivity.this, tagData));
+                    setResult(RESULT_OK, new Intent().putExtra(TOKEN_NEW_FILTER, TagFilterExposer.filterFromTagData(TagSettingsActivity.this, tagData)));
                     finish();
-                    startActivity(intent);
                 }
             };
 
@@ -250,28 +272,36 @@ public class TagSettingsActivity extends Activity {
 
     @Override
     public void finish() {
-        finishWithAnimation(true);
+        finishWithAnimation(!isDialog);
     }
 
     private void finishWithAnimation(boolean backAnimation) {
         super.finish();
         if (backAnimation) {
-            overridePendingTransition(R.anim.slide_right_in, R.anim.slide_right_out);
-        } else {
-            overridePendingTransition(R.anim.slide_left_in, R.anim.slide_left_out);
+            AndroidUtilities.callOverridePendingTransition(this, R.anim.slide_right_in, R.anim.slide_right_out);
         }
     }
 
     @SuppressWarnings("nls")
     private void refreshSettingsPage() {
         tagName.setText(tagData.getValue(TagData.NAME));
-        if (isNewTag) {
-            ((TextView)findViewById(R.id.listLabel)).setText(getString(R.string.tag_new_list));
+        ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            View customView = ab.getCustomView();
+            TextView titleView = (TextView) customView.findViewById(R.id.title);
+            if (isNewTag) {
+                titleView.setText(getString(R.string.tag_new_list));
+            } else {
+                titleView.setText(getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            }
         } else {
-            ((TextView) findViewById(R.id.listLabel)).setText(this.getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            if (isNewTag) {
+                setTitle(getString(R.string.tag_new_list));
+            } else {
+                setTitle(getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            }
         }
         picture.setUrl(tagData.getValue(TagData.PICTURE));
-        setTitle(tagData.getValue(TagData.NAME));
 
         TextView ownerLabel = (TextView) findViewById(R.id.tag_owner);
         try {
@@ -354,5 +384,37 @@ public class TagSettingsActivity extends Activity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem item;
+        item = menu.add(Menu.NONE, MENU_DISCARD_ID, 0, R.string.TEA_menu_discard);
+        item.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+        item = menu.add(Menu.NONE, MENU_SAVE_ID, 0, R.string.TEA_menu_save);
+        item.setIcon(android.R.drawable.ic_menu_save);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+        case MENU_DISCARD_ID:
+            finish();
+            break;
+        case MENU_SAVE_ID:
+            saveSettings();
+            break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
+
+
+
 
 }

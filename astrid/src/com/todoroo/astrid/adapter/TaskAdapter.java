@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,13 +62,13 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
+import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Pair;
 import com.todoroo.andlib.utility.Preferences;
-import com.todoroo.astrid.activity.TaskEditActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.api.TaskAction;
@@ -122,11 +121,18 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         Task.USER
     };
 
-    private static int[] IMPORTANCE_RESOURCES = new int[] {
-        R.drawable.importance_1, //task_indicator_0,
-        R.drawable.importance_2, //task_indicator_1,
-        R.drawable.importance_3, //task_indicator_2,
-        R.drawable.importance_4, //task_indicator_3,
+    public static int[] IMPORTANCE_RESOURCES = new int[] {
+        R.drawable.importance_check_1, //task_indicator_0,
+        R.drawable.importance_check_2, //task_indicator_1,
+        R.drawable.importance_check_3, //task_indicator_2,
+        R.drawable.importance_check_4, //task_indicator_3,
+    };
+
+    public static int[] IMPORTANCE_REPEAT_RESOURCES = new int[] {
+        R.drawable.importance_check_repeat_1, //task_indicator_0,
+        R.drawable.importance_check_repeat_2, //task_indicator_1,
+        R.drawable.importance_check_repeat_3, //task_indicator_2,
+        R.drawable.importance_check_repeat_4, //task_indicator_3,
     };
 
     // --- instance variables
@@ -137,7 +143,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     @Autowired
     private TaskService taskService;
 
-    protected final ListActivity activity;
+    protected final TaskListActivity fragment;
     protected final HashMap<Long, Boolean> completedItems = new HashMap<Long, Boolean>(0);
     protected OnCompletedTaskListener onCompletedTaskListener = null;
     public boolean isFling = false;
@@ -167,7 +173,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     /**
      * Constructor
      *
-     * @param activity
+     * @param fragment
      * @param resource
      *            layout resource to inflate
      * @param c
@@ -177,32 +183,34 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
      * @param onCompletedTaskListener
      *            task listener. can be null
      */
-    public TaskAdapter(ListActivity activity, int resource,
+    public TaskAdapter(TaskListActivity fragment, int resource,
             Cursor c, AtomicReference<String> query, boolean autoRequery,
             OnCompletedTaskListener onCompletedTaskListener) {
-        super(activity, c, autoRequery);
+        super(ContextManager.getContext(), c, autoRequery);
         DependencyInjectionService.getInstance().inject(this);
 
-        inflater = (LayoutInflater) activity.getSystemService(
+        inflater = (LayoutInflater) fragment.getActivity().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
         this.query = query;
         this.resource = resource;
-        this.activity = activity;
+        this.fragment = fragment;
         this.onCompletedTaskListener = onCompletedTaskListener;
 
         fontSize = Preferences.getIntegerFromString(R.string.p_fontSize, 20);
         paint = new Paint();
         displayMetrics = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        fragment.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
-        detailLoader = new DetailLoaderThread();
-        detailLoader.start();
+        if (Preferences.getBoolean(R.string.p_default_showdetails_key, false)) {
+            detailLoader = new DetailLoaderThread();
+            detailLoader.start();
+        }
 
         decorationManager = new DecorationManager();
         taskActionManager = new TaskActionManager();
 
-        scaleAnimation = new ScaleAnimation(1.6f, 1.0f, 1.6f, 1.0f,
+        scaleAnimation = new ScaleAnimation(1.4f, 1.0f, 1.4f, 1.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         scaleAnimation.setDuration(100);
 
@@ -221,7 +229,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         // perform query
         TodorooCursor<Task> newCursor = taskService.fetchFiltered(
                 query.get(), constraint, TaskAdapter.PROPERTIES);
-        activity.startManagingCursor(newCursor);
+        fragment.getActivity().startManagingCursor(newCursor);
         return newCursor;
     }
 
@@ -242,12 +250,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         viewHolder.nameView = (TextView)view.findViewById(R.id.title);
         viewHolder.picture = (AsyncImageView)view.findViewById(R.id.picture);
         viewHolder.completeBox = (CheckBox)view.findViewById(R.id.completeBox);
-        viewHolder.completeArea = view.findViewById(R.id.completeArea);
         viewHolder.dueDate = (TextView)view.findViewById(R.id.dueDate);
         viewHolder.details1 = (TextView)view.findViewById(R.id.details1);
         viewHolder.details2 = (TextView)view.findViewById(R.id.details2);
         viewHolder.taskRow = (LinearLayout)view.findViewById(R.id.task_row);
-        viewHolder.importance = (View)view.findViewById(R.id.importance);
 
         view.setTag(viewHolder);
         for(int i = 0; i < view.getChildCount(); i++)
@@ -295,11 +301,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         public ViewGroup rowBody;
         public TextView nameView;
         public CheckBox completeBox;
-        public View completeArea;
         public AsyncImageView picture;
         public TextView dueDate;
         public TextView details1, details2;
-        public View importance;
         public LinearLayout taskRow;
 
         public View[] decorations;
@@ -307,7 +311,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
     /** Helper method to set the contents and visibility of each field */
     public synchronized void setFieldContentsAndVisibility(View view) {
-        Resources r = activity.getResources();
+        Resources r = fragment.getResources();
         ViewHolder viewHolder = (ViewHolder)view.getTag();
         Task task = viewHolder.task;
 
@@ -328,17 +332,17 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             if(!task.isCompleted() && task.hasDueDate()) {
                 long dueDate = task.getValue(Task.DUE_DATE);
                 if(dueDate > DateUtilities.now())
-                    dueDateView.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemDueDate);
+                    dueDateView.setTextAppearance(fragment.getActivity(), R.style.TextAppearance_TAd_ItemDueDate);
                 else
-                    dueDateView.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemDueDate_Overdue);
+                    dueDateView.setTextAppearance(fragment.getActivity(), R.style.TextAppearance_TAd_ItemDueDate_Overdue);
                 String dateValue = formatDate(dueDate);
                 dueDateView.setText(dateValue);
                 dueDateTextWidth = paint.measureText(dateValue);
                 setVisibility(dueDateView);
             } else if(task.isCompleted()) {
-                String dateValue = DateUtilities.getDateStringWithTime(activity, new Date(task.getValue(Task.COMPLETION_DATE)));
+                String dateValue = formatDate(task.getValue(Task.COMPLETION_DATE));
                 dueDateView.setText(r.getString(R.string.TAd_completed, dateValue));
-                dueDateView.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemDueDate_Completed);
+                dueDateView.setTextAppearance(fragment.getActivity(), R.style.TextAppearance_TAd_ItemDueDate_Completed);
                 dueDateTextWidth = paint.measureText(dateValue);
                 setVisibility(dueDateView);
             } else {
@@ -375,12 +379,32 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         }
 
         // importance bar
-        final View importanceView = viewHolder.importance; {
+        final CheckBox checkBoxView = viewHolder.completeBox; {
             int value = task.getValue(Task.IMPORTANCE);
             if(value < IMPORTANCE_RESOURCES.length)
-                importanceView.setBackgroundResource(IMPORTANCE_RESOURCES[value]);
+            {
+                if (!TextUtils.isEmpty(task.getValue(Task.RECURRENCE)))
+                {
+                    checkBoxView.setButtonDrawable(IMPORTANCE_REPEAT_RESOURCES[value]);
+                    pictureView.setBackgroundResource(IMPORTANCE_REPEAT_RESOURCES[value]);
+                }
+                else
+                {
+                    checkBoxView.setButtonDrawable(IMPORTANCE_RESOURCES[value]);
+                    pictureView.setBackgroundResource(IMPORTANCE_RESOURCES[value]);
+                }
+            }
             else
-                importanceView.setBackgroundResource(0);
+            {
+                checkBoxView.setButtonDrawable(R.drawable.btn_check);
+            }
+            if (pictureView.getVisibility() == View.VISIBLE){
+                checkBoxView.setVisibility(View.INVISIBLE);
+            }
+            else
+            {
+                checkBoxView.setVisibility(View.VISIBLE);
+            }
         }
 
         String details;
@@ -392,7 +416,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             if(TextUtils.isEmpty(details) || DETAIL_SEPARATOR.equals(details) || task.isCompleted()) {
                 viewHolder.details1.setVisibility(View.GONE);
                 viewHolder.details2.setVisibility(View.GONE);
-            } else {
+            } else if (Preferences.getBoolean(R.string.p_default_showdetails_key, false)) {
                 viewHolder.details1.setVisibility(View.VISIBLE);
                 if (details.startsWith(DETAIL_SEPARATOR)) {
                     StringBuffer buffer = new StringBuffer(details);
@@ -408,8 +432,13 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         if(Math.abs(DateUtilities.now() - task.getValue(Task.MODIFICATION_DATE)) < 2000L)
             mostRecentlyMade = task.getId();
 
-//        // details and decorations, expanded
-        decorationManager.request(viewHolder);
+        //        // details and decorations, expanded
+
+
+        if (Preferences.getBoolean(R.string.p_default_showdecorations_key, false)) {
+            decorationManager.request(viewHolder);
+        }
+
     }
 
     @SuppressWarnings("nls")
@@ -422,7 +451,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         viewHolder.completeBox.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         rightWidth = rightWidth + viewHolder.dueDate.getPaddingRight();
         float left = viewHolder.completeBox.getMeasuredWidth() +
-            ((MarginLayoutParams)viewHolder.completeBox.getLayoutParams()).leftMargin;
+        ((MarginLayoutParams)viewHolder.completeBox.getLayoutParams()).leftMargin;
         int availableWidth = (int) (displayMetrics.widthPixels - left - (rightWidth + 16) * displayMetrics.density);
 
         int i = 0;
@@ -472,9 +501,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             }
         };
         viewHolder.completeBox.setOnTouchListener(otl);
-        viewHolder.completeArea.setOnTouchListener(otl);
         viewHolder.completeBox.setOnClickListener(completeBoxListener);
-        viewHolder.completeArea.setOnClickListener(completeBoxListener);
 
         if(applyListenersToRowBody) {
             viewHolder.rowBody.setOnCreateContextMenuListener(listener);
@@ -511,10 +538,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         if(dateCache.containsKey(date))
             return dateCache.get(date);
 
-        String string = DateUtilities.getRelativeDay(activity, date);
+        String string = DateUtilities.getRelativeDay(fragment.getActivity(), date);
         if(Task.hasDueTime(date))
-            string = String.format("%s, %s", string, //$NON-NLS-1$
-                    DateUtilities.getTimeString(activity, new Date(date)));
+            string = String.format("%s\n%s", string, //$NON-NLS-1$
+                    DateUtilities.getTimeString(fragment.getActivity(), new Date(date)));
 
         dateCache.put(date, string);
         return string;
@@ -555,8 +582,8 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                         continue;
                     } else if(Constants.DEBUG) {
                         System.err.println("Forced loading of details: " + task.getId() + //$NON-NLS-1$
-                        		"\n  details: " + new Date(task.getValue(Task.DETAILS_DATE)) + //$NON-NLS-1$
-                        		"\n  modified: " + new Date(task.getValue(Task.MODIFICATION_DATE))); //$NON-NLS-1$
+                                "\n  details: " + new Date(task.getValue(Task.DETAILS_DATE)) + //$NON-NLS-1$
+                                "\n  modified: " + new Date(task.getValue(Task.MODIFICATION_DATE))); //$NON-NLS-1$
                     }
                     addTaskToLoadingArray(task);
 
@@ -567,7 +594,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                     requestNewDetails(task);
                 }
                 if(taskDetailLoader.size() > 0) {
-                    activity.runOnUiThread(new Runnable() {
+                    fragment.getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             notifyDataSetChanged();
@@ -583,7 +610,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
         private boolean detailsAreRecentAndUpToDate(Task task) {
             return task.getValue(Task.DETAILS_DATE) >= task.getValue(Task.MODIFICATION_DATE) &&
-                !TextUtils.isEmpty(task.getValue(Task.DETAILS));
+            !TextUtils.isEmpty(task.getValue(Task.DETAILS));
         }
 
         private void addTaskToLoadingArray(Task task) {
@@ -594,7 +621,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         private void requestNewDetails(Task task) {
             Intent broadcastIntent = new Intent(AstridApiConstants.BROADCAST_REQUEST_DETAILS);
             broadcastIntent.putExtra(AstridApiConstants.EXTRAS_TASK_ID, task.getId());
-            activity.sendOrderedBroadcast(broadcastIntent, AstridApiConstants.PERMISSION_READ);
+            fragment.getActivity().sendOrderedBroadcast(broadcastIntent, AstridApiConstants.PERMISSION_READ);
         }
     }
 
@@ -621,7 +648,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             taskService.save(task);
         }
 
-        activity.runOnUiThread(new Runnable() {
+        fragment.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 notifyDataSetChanged();
@@ -634,7 +661,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             new HashMap<Integer, Drawable>(3);
         @SuppressWarnings("nls")
         public Drawable getDrawable(String source) {
-            Resources r = activity.getResources();
+            Resources r = fragment.getResources();
 
             if(source.equals("silk_clock"))
                 source = "details_alarm";
@@ -650,8 +677,8 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 return null;
             Drawable d;
             if(!cache.containsKey(drawable)) {
-                 d = r.getDrawable(drawable);
-                 d.setBounds(0,0,d.getIntrinsicWidth(),d.getIntrinsicHeight());
+                d = r.getDrawable(drawable);
+                d.setBounds(0,0,d.getIntrinsicWidth(),d.getIntrinsicHeight());
                 cache.put(drawable, d);
             } else
                 d = cache.get(drawable);
@@ -694,7 +721,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
     public class DecorationManager extends TaskAdapterAddOnManager<TaskDecoration> {
 
         public DecorationManager() {
-            super(activity);
+            super(fragment);
         }
 
         private final TaskDecorationExposer[] exposers = new TaskDecorationExposer[] {
@@ -749,7 +776,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                     viewHolder.view.setBackgroundColor(decoration.color);
                 }
                 if(decoration.decoration != null) {
-                    View view = decoration.decoration.apply(activity, viewHolder.taskRow);
+                    View view = decoration.decoration.apply(fragment.getActivity(), viewHolder.taskRow);
                     viewHolder.decorations[i] = view;
                     switch(decoration.position) {
                     case TaskDecoration.POSITION_LEFT: {
@@ -800,7 +827,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         private final Intent broadcastIntent = new Intent(AstridApiConstants.BROADCAST_REQUEST_ACTIONS);
 
         public TaskActionManager() {
-            super(activity);
+            super(fragment);
         }
 
         @Override
@@ -813,7 +840,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         public synchronized void addNew(long taskId, String addOn, final TaskAction item, ViewHolder thisViewHolder) {
             addIfNotExists(taskId, addOn, item);
             if(mBar != null) {
-                ListView listView = activity.getListView();
+                ListView listView = fragment.getListView();
                 ViewHolder myHolder = null;
 
                 // update view if it is visible
@@ -828,7 +855,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
                 if(myHolder != null) {
                     final ViewHolder viewHolder = myHolder;
-                    activity.runOnUiThread(new Runnable() {
+                    fragment.getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mBarListener.addWithAction(item);
@@ -872,7 +899,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
             int[] location = new int[2];
             v.getLocationOnScreen(location);
-            ViewHolder viewHolder = (ViewHolder)((View)v.getParent().getParent()).getTag();
+            ViewHolder viewHolder = getTagFromCheckBox(v);
 
             if(Math.abs(location[1] + lastTouchYRawY.getLeft() - lastTouchYRawY.getRight()) > 10) {
                 viewHolder.completeBox.setChecked(!viewHolder.completeBox.isChecked());
@@ -889,6 +916,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         }
     };
 
+    protected ViewHolder getTagFromCheckBox(View v) {
+        return (ViewHolder)((View)v.getParent()).getTag();
+    }
+
     private final class QuickActionListener implements OnQuickActionClickListener {
         private final HashMap<Integer, TaskAction> positionActionMap =
             new HashMap<Integer, TaskAction>(2);
@@ -901,16 +932,16 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             itemCount = 0;
             positionActionMap.clear();
             mBar.setOnQuickActionClickListener(this);
-            iconWidth = activity.getResources().getDrawable(R.drawable.ic_qbar_edit).getIntrinsicHeight();
+            iconWidth = fragment.getResources().getDrawable(R.drawable.ic_qbar_edit).getIntrinsicHeight();
         }
 
         public void addWithAction(TaskAction item) {
             Drawable drawable;
             if(item.drawable > 0)
-                drawable = activity.getResources().getDrawable(item.drawable);
+                drawable = fragment.getResources().getDrawable(item.drawable);
             else {
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(item.icon, iconWidth, iconWidth, true);
-                drawable = new BitmapDrawable(activity.getResources(), scaledBitmap);
+                drawable = new BitmapDrawable(fragment.getResources(), scaledBitmap);
             }
             addWithAction(new QuickAction(drawable, item.text), item);
         }
@@ -926,12 +957,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             mBar = null;
 
             if(position == 0) {
-                Intent intent = new Intent(activity, TaskEditActivity.class);
-                intent.putExtra(TaskEditActivity.TOKEN_ID, taskId);
-                activity.startActivityForResult(intent, TaskListActivity.ACTIVITY_EDIT_TASK);
-                AndroidUtilities.callApiMethod(5, activity, "overridePendingTransition",
-                        new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                        R.anim.slide_left_in, R.anim.slide_left_out);
+                editTask(taskId);
             } else {
                 flushSpecific(taskId);
                 try {
@@ -940,7 +966,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                         taskAction.intent.send();
                     }
                 } catch (Exception e) {
-                    exceptionService.displayAndReportError(activity,
+                    exceptionService.displayAndReportError(fragment.getActivity(),
                             "Error launching action", e); //$NON-NLS-1$
                 }
             }
@@ -953,8 +979,8 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         // prepare quick action bar
         private void prepareQuickActionBar(ViewHolder viewHolder, Collection<TaskAction> collection){
             mBar = new QuickActionBar(viewHolder.view.getContext());
-            QuickAction editAction = new QuickAction(activity, R.drawable.ic_qbar_edit,
-                    activity.getString(R.string.TAd_actionEditTask));
+            QuickAction editAction = new QuickAction(fragment.getActivity(), R.drawable.ic_qbar_edit,
+                    fragment.getString(R.string.TAd_actionEditTask));
             mBarListener.initialize(viewHolder.task.getId());
 
             mBarListener.addWithAction(editAction, null);
@@ -988,18 +1014,13 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
                 if (actions.size() > 0)
                     mBar.show(v);
                 else {
-                    Intent intent = new Intent(activity, TaskEditActivity.class);
-                    intent.putExtra(TaskEditActivity.TOKEN_ID, taskId);
-                    activity.startActivityForResult(intent, TaskListActivity.ACTIVITY_EDIT_TASK);
-                    AndroidUtilities.callApiMethod(5, activity, "overridePendingTransition",
-                            new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                            R.anim.slide_left_in, R.anim.slide_left_out);
+                    editTask(taskId);
                 }
             } else if (!viewHolder.task.getFlag(Task.FLAGS, Task.FLAG_IS_READONLY)) {
                 // Register a temporary receiver in case we clicked a task with no actions forthcoming and should start
                 IntentFilter filter = new IntentFilter(AstridApiConstants.BROADCAST_REQUEST_ACTIONS);
                 filter.setPriority(-1);
-                activity.registerReceiver(new TaskActionsFinishedReceiver(), filter);
+                fragment.getActivity().registerReceiver(new TaskActionsFinishedReceiver(), filter);
             }
             taskActionManager.request(viewHolder);
 
@@ -1017,22 +1038,21 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             if (taskId != -1) {
                 Collection<TaskAction> actions = taskActionManager.get(taskId);
                 if (actions != null && actions.size() == 0) {
-                    Intent editIntent = new Intent(activity, TaskEditActivity.class);
-                    editIntent.putExtra(TaskEditActivity.TOKEN_ID, taskId);
-                    activity.startActivityForResult(editIntent, TaskListActivity.ACTIVITY_EDIT_TASK);
-                    AndroidUtilities.callApiMethod(5, activity, "overridePendingTransition",
-                            new Class<?>[] { Integer.TYPE, Integer.TYPE },
-                            R.anim.slide_left_in, R.anim.slide_left_out);
+                    editTask(taskId);
                 }
             }
 
             try {
-                activity.unregisterReceiver(this);
+                fragment.getActivity().unregisterReceiver(this);
             } catch (IllegalArgumentException e) {
                 // ignore
             }
         }
 
+    }
+
+    private void editTask(long taskId) {
+        fragment.onTaskListItemClicked(taskId);
     }
 
     /**
@@ -1062,10 +1082,10 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         TextView name = viewHolder.nameView;
         if(state) {
             name.setPaintFlags(name.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            name.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemTitle_Completed);
+            name.setTextAppearance(fragment.getActivity(), R.style.TextAppearance_TAd_ItemTitle_Completed);
         } else {
             name.setPaintFlags(name.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            name.setTextAppearance(activity, R.style.TextAppearance_TAd_ItemTitle);
+            name.setTextAppearance(fragment.getActivity(), R.style.TextAppearance_TAd_ItemTitle);
         }
         name.setTextSize(fontSize);
         float detailTextSize = Math.max(10, fontSize * 12 / 20);

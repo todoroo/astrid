@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
-import android.app.ListActivity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.commonsware.cwac.tlv.TouchListView;
 import com.timsu.astrid.R;
@@ -52,13 +50,13 @@ public class DraggableTaskListActivity extends TaskListActivity {
 
     @Override
     protected View getListBody(ViewGroup root) {
-        return getLayoutInflater().inflate(R.layout.task_list_body_draggable, root, false);
+        return getActivity().getLayoutInflater().inflate(R.layout.task_list_body_draggable, root, false);
     }
 
     @Override
     protected void setUpUiComponents() {
         super.setUpUiComponents();
-        findViewById(R.id.sortContainer).setVisibility(View.GONE);
+        //getView().findViewById(R.id.sortContainer).setVisibility(View.GONE);
     }
 
     // --- task adapter
@@ -72,12 +70,10 @@ public class DraggableTaskListActivity extends TaskListActivity {
         sqlQueryTemplate.set(SortHelper.adjustQueryForFlagsAndSort(filter.sqlQuery,
                 sortFlags, sortSort));
 
-        ((TextView)findViewById(R.id.listLabel)).setText(filter.title);
-
         // perform query
         TodorooCursor<Task> currentCursor = taskService.fetchFiltered(
                 sqlQueryTemplate.get(), null, getProperties());
-        startManagingCursor(currentCursor);
+        getActivity().startManagingCursor(currentCursor);
 
         // set up list adapters
         taskAdapter = new DraggableTaskAdapter(this, R.layout.task_adapter_draggable_row,
@@ -106,13 +102,18 @@ public class DraggableTaskListActivity extends TaskListActivity {
 
     private final class DraggableTaskAdapter extends TaskAdapter {
 
-        private DraggableTaskAdapter(ListActivity activity, int resource,
+        private DraggableTaskAdapter(TaskListActivity activity, int resource,
                 Cursor c, AtomicReference<String> query, boolean autoRequery,
                 OnCompletedTaskListener onCompletedTaskListener) {
             super(activity, resource, c, query, autoRequery,
                     onCompletedTaskListener);
 
             applyListenersToRowBody = true;
+        }
+
+        @Override
+        protected ViewHolder getTagFromCheckBox(View v) {
+            return (ViewHolder)((View)v.getParent()).getTag();
         }
 
         @Override

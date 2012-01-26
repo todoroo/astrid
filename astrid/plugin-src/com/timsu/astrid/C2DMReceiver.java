@@ -10,6 +10,8 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -21,12 +23,13 @@ import com.todoroo.andlib.service.NotificationManager;
 import com.todoroo.andlib.service.NotificationManager.AndroidNotificationManager;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.sql.QueryTemplate;
+import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.TagViewActivity;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
-import com.todoroo.astrid.actfm.sync.ActFmSyncProvider;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
+import com.todoroo.astrid.actfm.sync.ActFmSyncV2Provider;
 import com.todoroo.astrid.activity.ShortcutActivity;
 import com.todoroo.astrid.activity.TaskListActivity;
 import com.todoroo.astrid.api.AstridApiConstants;
@@ -36,6 +39,7 @@ import com.todoroo.astrid.dao.UpdateDao;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.helper.SyncResultCallbackAdapter;
 import com.todoroo.astrid.reminders.Notifications;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.TagDataService;
@@ -52,16 +56,43 @@ public class C2DMReceiver extends BroadcastReceiver {
     private static final String PREF_REGISTRATION = "c2dm_key";
     private static final String PREF_LAST_C2DM = "c2dm_last";
 
-    private static final long MIN_MILLIS_BETWEEN_FULL_SYNCS = 5 * DateUtilities.ONE_MINUTE;
+    private static final long MIN_MILLIS_BETWEEN_FULL_SYNCS = DateUtilities.ONE_HOUR;
 
-    @Autowired ActFmSyncService actFmSyncService;
     @Autowired TaskService taskService;
     @Autowired TagDataService tagDataService;
     @Autowired UpdateDao updateDao;
     @Autowired ActFmPreferenceService actFmPreferenceService;
+    @Autowired ActFmSyncService actFmSyncService;
 
     static {
         AstridDependencyInjector.initialize();
+    }
+
+    private final SyncResultCallbackAdapter refreshOnlyCallback = new SyncResultCallbackAdapter() {
+        @Override
+        public void finished() {
+            ContextManager.getContext().sendBroadcast(new Intent(AstridApiConstants.BROADCAST_EVENT_REFRESH));
+        }
+    };
+
+    private static String getDeviceID() {
+        String id = Secure.getString(ContextManager.getContext().getContentResolver(), Secure.ANDROID_ID);;
+        if(AndroidUtilities.getSdkVersion() > 8) { //Gingerbread and above
+
+            //the following uses relection to get android.os.Build.SERIAL to avoid having to build with Gingerbread
+            try {
+                if(!Build.UNKNOWN.equals(Build.SERIAL))
+                    id = Build.SERIAL;
+            } catch(Exception e) {
+                // Ah well
+            }
+        }
+
+        if (TextUtils.isEmpty(id) || "9774d56d682e549c".equals(id)) { // check for failure or devices affected by the "9774d56d682e549c" bug
+            return null;
+        }
+
+        return id;
     }
 
     @Override
@@ -74,13 +105,15 @@ public class C2DMReceiver extends BroadcastReceiver {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if(intent.hasExtra("web_update") && actFmPreferenceService.isLoggedIn())
-                        if (DateUtilities.now() - actFmPreferenceService.getLastSyncDate() > MIN_MILLIS_BETWEEN_FULL_SYNCS && !actFmPreferenceService.isOngoing())
-                            new ActFmSyncProvider().synchronize(ContextManager.getContext());
+                    if (actFmPreferenceService.isLoggedIn()) {
+                        if(intent.hasExtra("web_update"))
+                            if (DateUtilities.now() - actFmPreferenceService.getLastSyncDate() > MIN_MILLIS_BETWEEN_FULL_SYNCS && !actFmPreferenceService.isOngoing())
+                                new ActFmSyncV2Provider().synchronizeActiveTasks(false, refreshOnlyCallback);
+                            else
+                                handleWebUpdate(intent);
                         else
-                            handleWebUpdate(intent);
-                    else
-                        handleMessage(intent);
+                            handleMessage(intent);
+                    }
                 }
             }).start();
          }
@@ -362,7 +395,11 @@ public class C2DMReceiver extends BroadcastReceiver {
                 @Override
                 public void run() {
                     try {
-                        actFmSyncService.invoke("user_set_c2dm", "c2dm", registration);
+                        String deviceId = getDeviceID();
+                        if (deviceId != null)
+                            actFmSyncService.invoke("user_set_c2dm", "c2dm", registration, "device_id", deviceId);
+                        else
+                            actFmSyncService.invoke("user_set_c2dm", "c2dm", registration);
                         Preferences.setString(PREF_REGISTRATION, registration);
                     } catch (IOException e) {
                         Log.e("astrid-actfm", "error-c2dm-transfer", e);

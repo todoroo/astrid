@@ -2,13 +2,15 @@ package com.todoroo.astrid.gtasks;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
+import android.view.MenuInflater;
 
 import com.commonsware.cwac.tlv.TouchListView;
 import com.commonsware.cwac.tlv.TouchListView.DropListener;
 import com.commonsware.cwac.tlv.TouchListView.SwipeListener;
 import com.timsu.astrid.R;
+import com.todoroo.andlib.data.Property;
 import com.todoroo.andlib.data.Property.IntegerProperty;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
@@ -17,34 +19,57 @@ import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.activity.DraggableTaskListActivity;
 import com.todoroo.astrid.adapter.TaskAdapter.OnCompletedTaskListener;
+import com.todoroo.astrid.dao.StoreObjectDao;
+import com.todoroo.astrid.data.StoreObject;
 import com.todoroo.astrid.data.Task;
-import com.todoroo.astrid.gtasks.sync.GtasksSyncOnSaveService;
+import com.todoroo.astrid.gtasks.sync.GtasksSyncService;
 
 public class GtasksListActivity extends DraggableTaskListActivity {
 
     protected static final int MENU_CLEAR_COMPLETED_ID = MENU_ADDON_INTENT_ID + 1;
 
+    public static final String TOKEN_STORE_ID = "storeId";
+
+    protected static final int MENU_REFRESH_ID = MENU_SYNC_ID;
+
+    private static final String LAST_FETCH_KEY_GTASKS = "gtasksLastFetch";
+
+    @Autowired private StoreObjectDao storeObjectDao;
+
     @Autowired private GtasksTaskListUpdater gtasksTaskListUpdater;
 
-    @Autowired private GtasksSyncOnSaveService gtasksSyncOnSaveService;
+    @Autowired private GtasksSyncService gtasksSyncService;
 
     @Autowired private GtasksMetadataService gtasksMetadataService;
+
+    @Autowired private GtasksPreferenceService gtasksPreferenceService;
+
+    private StoreObject list;
 
     @Override
     protected IntegerProperty getIndentProperty() {
         return GtasksMetadata.INDENT;
     }
 
+    private static final Property<?>[] LIST_PROPERTIES = new Property<?>[] {
+        StoreObject.ID,
+        StoreObject.TYPE,
+        GtasksList.REMOTE_ID,
+        GtasksList.ORDER,
+        GtasksList.NAME,
+        GtasksList.LAST_SYNC
+    };
+
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onActivityCreated(Bundle icicle) {
+        super.onActivityCreated(icicle);
 
         getTouchListView().setDropListener(dropListener);
         getTouchListView().setSwipeListener(swipeListener);
 
         if(!Preferences.getBoolean(GtasksPreferenceService.PREF_SHOWN_LIST_HELP, false)) {
             Preferences.setBoolean(GtasksPreferenceService.PREF_SHOWN_LIST_HELP, true);
-            DialogUtilities.okDialog(this,
+            DialogUtilities.okDialog(getActivity(),
                     getString(R.string.gtasks_help_title),
                     android.R.drawable.ic_dialog_info,
                     getString(R.string.gtasks_help_body), null);
@@ -56,6 +81,9 @@ public class GtasksListActivity extends DraggableTaskListActivity {
                 setCompletedForItemAndSubtasks(item, newState);
             }
         });
+
+        long storeObjectId = getActivity().getIntent().getLongExtra(TOKEN_STORE_ID, 0);
+        list = storeObjectDao.fetch(storeObjectId, LIST_PROPERTIES);
     }
 
     private final TouchListView.DropListener dropListener = new DropListener() {
@@ -68,7 +96,7 @@ public class GtasksListActivity extends DraggableTaskListActivity {
                 gtasksTaskListUpdater.moveTo(targetTaskId, -1);
             else
                 gtasksTaskListUpdater.moveTo(targetTaskId, destinationTaskId);
-            gtasksSyncOnSaveService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
+            gtasksSyncService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
             loadTaskListContent(true);
         }
     };
@@ -78,7 +106,7 @@ public class GtasksListActivity extends DraggableTaskListActivity {
         public void swipeRight(int which) {
             long targetTaskId = taskAdapter.getItemId(which);
             gtasksTaskListUpdater.indent(targetTaskId, 1);
-            gtasksSyncOnSaveService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
+            gtasksSyncService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
             loadTaskListContent(true);
         }
 
@@ -86,32 +114,43 @@ public class GtasksListActivity extends DraggableTaskListActivity {
         public void swipeLeft(int which) {
             long targetTaskId = taskAdapter.getItemId(which);
             gtasksTaskListUpdater.indent(targetTaskId, -1);
-            gtasksSyncOnSaveService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
+            gtasksSyncService.triggerMoveForMetadata(gtasksMetadataService.getTaskMetadata(targetTaskId));
             loadTaskListContent(true);
         }
     };
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MenuItem item = menu.add(Menu.NONE, MENU_CLEAR_COMPLETED_ID, Menu.FIRST, this.getString(R.string.gtasks_GTA_clear_completed));
-        item.setIcon(android.R.drawable.ic_input_delete); // Needs new icon
-        return true;
+    protected void initiateAutomaticSync() {
+        if (list != null && DateUtilities.now() - list.getValue(GtasksList.LAST_SYNC) > DateUtilities.ONE_HOUR) {
+            syncService.synchronizeList(list, false, syncResultCallback);
+        }
     }
 
     @Override
-    public boolean onMenuItemSelected(int featureId, final MenuItem item) {
-        if (item.getItemId() == MENU_CLEAR_COMPLETED_ID) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        MenuItem item = menu.add(Menu.NONE, MENU_CLEAR_COMPLETED_ID, Menu.FIRST, this.getString(R.string.gtasks_GTA_clear_completed));
+        item.setIcon(android.R.drawable.ic_input_delete); // Needs new icon
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle my own menus
+        switch (item.getItemId()) {
+        case MENU_REFRESH_ID:
+            syncService.synchronizeList(list, true, syncResultCallback);
+            return true;
+        case MENU_CLEAR_COMPLETED_ID:
             clearCompletedTasks();
             return true;
-        } else {
-            return super.onMenuItemSelected(featureId, item);
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void clearCompletedTasks() {
 
-        final ProgressDialog pd = new ProgressDialog(this);
+        final ProgressDialog pd = new ProgressDialog(getActivity());
         final TodorooCursor<Task> tasks = taskService.fetchFiltered(filter.sqlQuery, null, Task.ID, Task.COMPLETION_DATE);
         pd.setMessage(this.getString(R.string.gtasks_GTA_clearing));
         pd.show();
@@ -133,18 +172,29 @@ public class GtasksListActivity extends DraggableTaskListActivity {
                     }
                 } finally {
                     tasks.close();
-                    DialogUtilities.dismissDialog(GtasksListActivity.this, pd);
+                    DialogUtilities.dismissDialog(getActivity(), pd);
                 }
                 if (listId != null) {
                     gtasksTaskListUpdater.correctMetadataForList(listId);
                 }
-                GtasksListActivity.this.runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         loadTaskListContent(true);
                     }
                 });
             }
         }.start();
+    }
+
+    @Override
+    protected void addSyncRefreshMenuItem(Menu menu) {
+        if(gtasksPreferenceService.isLoggedIn()) {
+            MenuItem item = menu.add(Menu.NONE, MENU_REFRESH_ID, Menu.NONE,
+                    R.string.actfm_TVA_menu_refresh);
+            item.setIcon(R.drawable.ic_menu_refresh);
+        } else {
+            super.addSyncRefreshMenuItem(menu);
+        }
     }
 
     private void setCompletedForItemAndSubtasks(Task item, boolean completedState) {
@@ -180,7 +230,7 @@ public class GtasksListActivity extends DraggableTaskListActivity {
                 } finally {
                     tasks.close();
                 }
-                GtasksListActivity.this.runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         loadTaskListContent(true);
                     }
