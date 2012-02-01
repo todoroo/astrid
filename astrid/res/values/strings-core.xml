@@ -63,6 +63,8 @@
   
   <string name="DLG_cancel">Cancel</string>
   
+  <string name="DLG_undo">Undo</string>
+  
   <!-- =============================================================== UI == -->
   
   <!-- Label for DateButtons with no value -->
@@ -146,6 +148,26 @@
       <item>Done</item>
       <item>Hidden</item>      
   </string-array>
+  
+  <!-- Title for confirmation dialog after quick add markup -->
+  <string name="TLA_quickadd_confirm_title">You said, \"%s\"</string>
+  
+  <!-- Text for speech bubble in dialog after quick add markup -->
+  <!-- First string is task title, second is due date, third is priority -->
+  <string name="TLA_quickadd_confirm_speech_bubble">I created a task called \"%1$s\" %2$s at %3$s</string>
+  
+  <string name="TLA_quickadd_confirm_speech_bubble_date">for %s</string>
+  
+  <string name="TLA_quickadd_confirm_hide_helpers">Don\'t display future confirmations</string>
+  
+  <string-array name="TLA_priority_strings">
+      <item>highest priority</item>
+      <item>high priority</item>
+      <item>medium priority</item>
+      <item>low priority</item>
+  </string-array>
+  
+  
   
   <!-- ====================================================== TaskAdapter == -->
   
@@ -427,6 +449,10 @@
   
   <!-- Preference: Task List Font Size Title -->
   <string name="EPr_fontSize_title">Task List Size</string>
+  
+  <!-- Preference: Show confirmation for smart reminders -->
+  <string name="EPr_showSmartConfirmation_title">Show confirmation for smart reminders</string>
+  
   <!-- Preference: Task List Font Size Description -->                                                                                                                                                  
   <string name="EPr_fontSize_desc">Font size on the main listing page</string>  
   

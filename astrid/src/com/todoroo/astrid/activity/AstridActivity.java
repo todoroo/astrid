@@ -1,6 +1,8 @@
 package com.todoroo.astrid.activity;
 
 import android.app.PendingIntent.CanceledException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,14 +13,21 @@ import android.view.View;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.utility.AndroidUtilities;
+import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterListItem;
 import com.todoroo.astrid.api.FilterWithCustomIntent;
 import com.todoroo.astrid.api.IntentFilter;
+import com.todoroo.astrid.core.PluginServices;
 import com.todoroo.astrid.core.SearchFilter;
+import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.reminders.NotificationFragment;
+import com.todoroo.astrid.reminders.Notifications;
+import com.todoroo.astrid.reminders.ReminderDialog;
 import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
+import com.todoroo.astrid.ui.DateChangedAlerts;
 
 /**
  * This wrapper activity contains all the glue-code to handle the callbacks between the different
@@ -41,6 +50,9 @@ public class AstridActivity extends FragmentActivity
     public static final int LAYOUT_TRIPLE = 2;
 
     protected int fragmentLayout = LAYOUT_SINGLE;
+
+    private final ReminderReceiver reminderReceiver = new ReminderReceiver();
+    private final RepeatConfirmationReceiver repeatConfirmationReceiver = new RepeatConfirmationReceiver();
 
     public FilterListFragment getFilterListFragment() {
         FilterListFragment frag = (FilterListFragment) getSupportFragmentManager()
@@ -78,6 +90,22 @@ public class AstridActivity extends FragmentActivity
         if (frag != null) {
             frag.onNewIntent(intent);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        android.content.IntentFilter reminderIntentFilter = new android.content.IntentFilter(Notifications.BROADCAST_IN_APP_NOTIFY);
+        reminderIntentFilter.setPriority(1);
+        registerReceiver(reminderReceiver, reminderIntentFilter);
+        registerReceiver(repeatConfirmationReceiver, new android.content.IntentFilter(AstridApiConstants.BROADCAST_EVENT_TASK_REPEATED));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(reminderReceiver);
+        unregisterReceiver(repeatConfirmationReceiver);
     }
 
     /**
@@ -246,6 +274,37 @@ public class AstridActivity extends FragmentActivity
     @Deprecated
     public boolean isMultipleFragments() {
         return fragmentLayout != LAYOUT_SINGLE;
+    }
+
+    private class ReminderReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Process in app notification
+            Intent customIntent = intent.getExtras().getParcelable(Notifications.EXTRAS_CUSTOM_INTENT);
+            long taskId = customIntent.getLongExtra(NotificationFragment.TOKEN_ID, 0);
+            if (taskId > 0) {
+                String text = intent.getStringExtra(Notifications.EXTRAS_TEXT);
+                ReminderDialog.showReminderDialog(AstridActivity.this, taskId, text);
+            }
+
+            // Remove broadcast
+            abortBroadcast();
+        }
+
+    }
+
+    private class RepeatConfirmationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long taskId = intent.getLongExtra(AstridApiConstants.EXTRAS_TASK_ID, 0);
+            if (taskId > 0) {
+                long oldDueDate = intent.getLongExtra(AstridApiConstants.EXTRAS_OLD_DUE_DATE, 0);
+                long newDueDate = intent.getLongExtra(AstridApiConstants.EXTRAS_NEW_DUE_DATE, 0);
+                Task task = PluginServices.getTaskService().fetchById(taskId, DateChangedAlerts.REPEAT_RESCHEDULED_PROPERTIES);
+
+                DateChangedAlerts.showRepeatTaskRescheduledDialog(AstridActivity.this, task, oldDueDate, newDueDate);
+            }
+        }
     }
 
 }
