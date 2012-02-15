@@ -101,6 +101,8 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
 
     private static final String LAST_TAG_FETCH_TIME = "actfm_lastTag"; //$NON-NLS-1$
 
+    private static final String LAST_USERS_FETCH_TIME = "actfm_lastUsers";  //$NON-NLS-1$
+
     // --- synchronize active tasks
 
     @Override
@@ -108,15 +110,42 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
             final SyncResultCallback callback) {
 
         callback.started();
-        callback.incrementMax(100);
+        callback.incrementMax(120);
 
-        final AtomicInteger finisher = new AtomicInteger(2);
+        final AtomicInteger finisher = new AtomicInteger(3);
+
+        startUsersFetcher(callback, finisher);
 
         startTagFetcher(callback, finisher);
 
         startTaskFetcher(manual, callback, finisher);
 
         callback.incrementProgress(50);
+    }
+
+    /** fetch changes to users/friends */
+    private void startUsersFetcher(final SyncResultCallback callback,
+            final AtomicInteger finisher) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int time = Preferences.getInt(LAST_USERS_FETCH_TIME, 0);
+                try {
+                    time = actFmSyncService.fetchUsers(time);
+                    Preferences.setInt(LAST_USERS_FETCH_TIME, time);
+                } catch (JSONException e) {
+                    handler.handleException("actfm-sync", e); //$NON-NLS-1$
+                } catch (IOException e) {
+                    handler.handleException("actfm-sync", e); //$NON-NLS-1$
+                } finally {
+                    callback.incrementProgress(20);
+                    if(finisher.decrementAndGet() == 0) {
+                        actFmPreferenceService.recordSuccessfulSync();
+                        callback.finished();
+                    }
+                }
+            }
+        }).start();
     }
 
     /** fetch changes to tags */

@@ -42,13 +42,17 @@ import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.service.ExceptionService;
+import com.todoroo.andlib.sql.Order;
+import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
+import com.todoroo.astrid.dao.UserDao;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.AsyncImageView;
+import com.todoroo.astrid.data.User;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.TagDataService;
@@ -73,6 +77,8 @@ public class EditPeopleControlSet extends PopupControlSet {
     @Autowired ActFmSyncService actFmSyncService;
 
     @Autowired TaskService taskService;
+
+    @Autowired UserDao userDao;
 
     @Autowired MetadataService metadataService;
 
@@ -334,11 +340,13 @@ public class EditPeopleControlSet extends PopupControlSet {
 
         boolean hasTags = t.getTransitory("tags") != null &&
                 ((HashSet<String>)t.getTransitory("tags")).size() > 0;
-        if (actFmPreferenceService.isLoggedIn() && hasTags) {
+        boolean addUnassigned = actFmPreferenceService.isLoggedIn() && hasTags;
+        if (addUnassigned) {
             JSONObject unassigned = new JSONObject();
             unassigned.put("id", Task.USER_ID_UNASSIGNED);
             sharedPeople.add(1, unassigned);
         }
+        addAstridFriends(sharedPeople);
 
         // de-duplicate by user id and/or email
         listValues.clear();
@@ -401,7 +409,7 @@ public class EditPeopleControlSet extends PopupControlSet {
         for (AssignedChangedListener l : listeners) {
             if (l.shouldShowTaskRabbit()) {
                 taskRabbitUser = new AssignedToUser(activity.getString(R.string.actfm_EPA_task_rabbit), new JSONObject().put("default_picture", R.drawable.task_rabbit_image));
-                listValues.add(taskRabbitUser);
+                listValues.add(addUnassigned ? 2 : 1, taskRabbitUser);
                 if(l.didPostToTaskRabbit()){
                     assignedIndex = listValues.size()-1;
                 }
@@ -420,6 +428,27 @@ public class EditPeopleControlSet extends PopupControlSet {
             }
         });
     }
+
+    private void addAstridFriends(ArrayList<JSONObject> sharedPeople) {
+        TodorooCursor<User> users = userDao.query(Query.select(User.PROPERTIES).orderBy(Order.asc(User.NAME)));
+        try {
+            User user = new User();
+            for (users.moveToFirst(); !users.isAfterLast(); users.moveToNext()) {
+                user.readFromCursor(users);
+                JSONObject userJson = new JSONObject();
+                try {
+                    ActFmSyncService.JsonHelper.jsonFromUser(userJson, user);
+                    sharedPeople.add(userJson);
+                } catch (JSONException e) {
+                    // Ignored
+                }
+            }
+        } finally {
+            users.close();
+        }
+    }
+
+
 
     private class AssignedUserAdapter extends ArrayAdapter<AssignedToUser> {
 
