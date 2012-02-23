@@ -409,9 +409,12 @@ public class EditPeopleControlSet extends PopupControlSet {
         for (AssignedChangedListener l : listeners) {
             if (l.shouldShowTaskRabbit()) {
                 taskRabbitUser = new AssignedToUser(activity.getString(R.string.actfm_EPA_task_rabbit), new JSONObject().put("default_picture", R.drawable.task_rabbit_image));
-                listValues.add(addUnassigned ? 2 : 1, taskRabbitUser);
+                int taskRabbitIndex = addUnassigned ? 2 : 1;
+                if (assignedIndex >= taskRabbitIndex)
+                    assignedIndex++;
+                listValues.add(taskRabbitIndex, taskRabbitUser);
                 if(l.didPostToTaskRabbit()){
-                    assignedIndex = listValues.size()-1;
+                    assignedIndex = taskRabbitIndex;
                 }
             }
         }
