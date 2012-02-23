@@ -48,7 +48,7 @@
 	        android:button="@drawable/btn_check" />
     <!-- assignee photo -->
 
-	    <greendroid.widget.AsyncImageView
+	    <com.todoroo.astrid.helper.AsyncImageView
 	        android:id="@+id/picture"
 	        android:layout_width="35dip"
 	        android:layout_height="35dip"
