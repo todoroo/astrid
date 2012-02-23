@@ -31,18 +31,16 @@ import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
-import com.todoroo.astrid.activity.BeastModePreferenceActivity;
 import com.todoroo.astrid.backup.BackupConstants;
 import com.todoroo.astrid.backup.BackupService;
 import com.todoroo.astrid.backup.TasksXmlImporter;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.gtasks.GtasksPreferenceService;
-import com.todoroo.astrid.gtasks.sync.GtasksSyncOnSaveService;
+import com.todoroo.astrid.gtasks.sync.GtasksSyncService;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
 import com.todoroo.astrid.producteev.ProducteevUtilities;
 import com.todoroo.astrid.reminders.ReminderStartupReceiver;
 import com.todoroo.astrid.service.abtesting.ABChooser;
-import com.todoroo.astrid.service.abtesting.ABOptions;
 import com.todoroo.astrid.service.abtesting.FeatureFlipper;
 import com.todoroo.astrid.utility.AstridPreferences;
 import com.todoroo.astrid.utility.Constants;
@@ -83,7 +81,7 @@ public class StartupService {
 
     @Autowired ActFmPreferenceService actFmPreferenceService;
 
-    @Autowired GtasksSyncOnSaveService gtasksSyncOnSaveService;
+    @Autowired GtasksSyncService gtasksSyncService;
 
     @Autowired FeatureFlipper featureFlipper;
 
@@ -103,7 +101,7 @@ public class StartupService {
 
     /** Called when this application is started up */
     public synchronized void onStartupApplication(final Context context) {
-        if(hasStartedUp)
+        if(hasStartedUp || context == null)
             return;
 
         // sets up context manager
@@ -111,6 +109,8 @@ public class StartupService {
 
         Crittercism.init(context.getApplicationContext(), Constants.CRITTERCISM_APP_ID,
                 Constants.CRITTERCISM_OATH_KEY, Constants.CRITTERCISM_SECRET, StatisticsService.dontCollectStatistics());
+
+        database.openForWriting();
 
         // show notification if reminders are silenced
         if(context instanceof Activity) {
@@ -134,17 +134,9 @@ public class StartupService {
             if (Preferences.getLong(AstridPreferences.P_FIRST_LAUNCH, -1) < 0) {
                 Preferences.setLong(AstridPreferences.P_FIRST_LAUNCH, DateUtilities.now());
             }
-
-            int defaultTheme = abChooser.getChoiceForOption(ABOptions.AB_THEME_KEY);
-            if (defaultTheme == 0)
-                Preferences.setString(R.string.p_theme, "white"); //$NON-NLS-1$
-            else
-                Preferences.setString(R.string.p_theme, "black"); //$NON-NLS-1$
         } else {
-            abChooser.setChoiceForOption(ABOptions.AB_THEME_KEY, 0);
             Preferences.setLong(AstridPreferences.P_FIRST_LAUNCH, 0);
         }
-        BeastModePreferenceActivity.migrateBeastModePreferences(context);
 
         int version = 0;
         try {
@@ -183,7 +175,6 @@ public class StartupService {
                 am.setInexactRepeating(AlarmManager.RTC, 0,
                         Constants.WIDGET_UPDATE_INTERVAL, pendingIntent);
 
-                database.openForWriting();
                 taskService.cleanup();
 
                 // if sync ongoing flag was set, clear it
@@ -198,7 +189,7 @@ public class StartupService {
                 BackupService.scheduleService(context);
                 actFmSyncService.initialize();
 
-                gtasksSyncOnSaveService.initialize();
+                gtasksSyncService.initialize();
 
                 // get and display update messages
                 if (finalLatestVersion != 0)
@@ -217,8 +208,6 @@ public class StartupService {
 
         hasStartedUp = true;
     }
-
-    public static final int INTRO_TASK_SIZE = 0;
 
     /**
      * If database exists, no tasks but metadata, and a backup file exists, restore it

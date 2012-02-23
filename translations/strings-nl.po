@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-07-14 18:38-0700\n"
-"PO-Revision-Date: 2011-07-21 16:22+0000\n"
-"Last-Translator: Alfred Spijker <Unknown>\n"
+"PO-Revision-Date: 2011-12-23 09:11+0000\n"
+"Last-Translator: Christophe Seynaeve <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2011-12-24 05:57+0000\n"
+"X-Generator: Launchpad (build 14560)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,8 +18,8 @@ msgid "Share"
 msgstr "Delen"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
 msgstr "Naam contactpersoon"
 
 #. task sharing dialog: shared with hint
@@ -34,8 +34,8 @@ msgstr "Op server opgeslagen"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Opslaan mislukt"
+msgid "Save Failed: %s"
+msgstr "Opslaan mislukt: %s"
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
@@ -51,6 +51,11 @@ msgstr "Een foto maken"
 #: translations/strings.xml:29( name="actfm_picture_gallery")
 msgid "Pick from Gallery"
 msgstr "Uit galerij halen"
+
+#. menu item to clear picture selection
+#: translations/strings.xml:32( name="actfm_picture_clear")
+msgid "Clear Picture"
+msgstr ""
 
 #. filter list activity: refresh tags
 #: translations/strings.xml:32( name="actfm_FLA_menu_refresh")
@@ -103,8 +108,8 @@ msgid "none"
 msgstr "geen"
 
 #. Tag Settings: list collaborators label
-#: translations/strings.xml:65( name="actfm_TVA_members_label")
-msgid "Collaborators:"
+#: translations/strings.xml:74( name="actfm_TVA_members_label")
+msgid "Shared With:"
 msgstr "Medewerkers:"
 
 #. Tag Settings: tag picture
@@ -137,9 +142,9 @@ msgid "Save &amp; Share"
 msgstr "Opslaan &amp; Delen"
 
 #. task sharing dialog: assigned label
-#: translations/strings.xml:85( name="actfm_EPA_assign_label")
-msgid "Assigned to:"
-msgstr "Toegewezen aan:"
+#: translations/strings.xml:94( name="actfm_EPA_assign_label") translations/strings.xml:703( name="TEA_control_who")
+msgid "Who"
+msgstr ""
 
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")

@@ -1,6 +1,7 @@
 package com.todoroo.astrid.service;
 
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
 import org.weloveastrid.rmilk.data.MilkTaskFields;
 
@@ -14,6 +15,7 @@ import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Functions;
 import com.todoroo.andlib.sql.Query;
+import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.PermaSql;
@@ -28,6 +30,7 @@ import com.todoroo.astrid.gtasks.GtasksMetadata;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
 import com.todoroo.astrid.producteev.sync.ProducteevTask;
 import com.todoroo.astrid.tags.TagService;
+import com.todoroo.astrid.utility.Flags;
 import com.todoroo.astrid.utility.TitleParser;
 
 
@@ -38,6 +41,10 @@ import com.todoroo.astrid.utility.TitleParser;
  *
  */
 public class TaskService {
+
+    public static final String TRANS_QUICK_ADD_MARKUP = "markup"; //$NON-NLS-1$
+
+    public static final String TRANS_REPEAT_CHANGED = "repeat_changed"; //$NON-NLS-1$
 
     @Autowired
     private TaskDao taskDao;
@@ -212,9 +219,9 @@ public class TaskService {
 
         if(queryTemplate == null) {
             if(whereConstraint == null)
-                return taskDao.query(Query.select(properties));
+                return taskDao.query(Query.selectDistinct(properties));
             else
-                return taskDao.query(Query.select(properties).where(whereConstraint));
+                return taskDao.query(Query.selectDistinct(properties).where(whereConstraint));
         }
 
         String sql;
@@ -336,10 +343,11 @@ public class TaskService {
      * <li>@context - add the tag "@context"
      * <li>!4 - set priority to !!!!
      */
-    public void quickAdd(Task task) {
+    public boolean quickAdd(Task task) {
         ArrayList<String> tags = new ArrayList<String>();
+        boolean quickAddMarkup = false;
         try {
-            parseQuickAddMarkup(task, tags);
+            quickAddMarkup = parseQuickAddMarkup(task, tags);
         } catch (Throwable e) {
             exceptionService.reportError("parse-quick-add", e); //$NON-NLS-1$
         }
@@ -352,12 +360,88 @@ public class TaskService {
             metadata.setValue(TagService.TAG, tag);
             metadataDao.createNew(metadata);
         }
+        return quickAddMarkup;
     }
 
-    public static void parseQuickAddMarkup(Task task, ArrayList<String> tags) {
-        new TitleParser(task, tags).parse();
+    /**
+     * Parse quick add markup for the given task
+     * @param task
+     * @param tags an empty array to apply tags to
+     * @return
+     */
+    public static boolean parseQuickAddMarkup(Task task, ArrayList<String> tags) {
+        return new TitleParser(task, tags).parse();
+    }
+
+    /**
+     * Create an uncompleted copy of this task and edit it
+     * @param itemId
+     * @return cloned item id
+     */
+    public long duplicateTask(long itemId) {
+        Task original = new Task();
+        original.setId(itemId);
+        Task clone = clone(original);
+        clone.setValue(Task.CREATION_DATE, DateUtilities.now());
+        clone.setValue(Task.COMPLETION_DATE, 0L);
+        clone.setValue(Task.DELETION_DATE, 0L);
+        clone.setValue(Task.CALENDAR_URI, ""); //$NON-NLS-1$
+        GCalHelper.createTaskEventIfEnabled(clone);
+
+        Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
+        Flags.set(Flags.GTASKS_SUPPRESS_SYNC);
+        save(clone);
+        return clone.getId();
     }
 
 
+    /**
+     * Create task from the given content values, saving it.
+     *
+     * @param values
+     * @param title
+     * @param taskService
+     * @param metadataService
+     * @return
+     */
+    public static Task createWithValues(ContentValues values, String title,
+            TaskService taskService, MetadataService metadataService) {
+        Task task = new Task();
+        if (title != null)
+            task.setValue(Task.TITLE, title);
+
+        ContentValues forMetadata = null;
+        if (values != null && values.size() > 0) {
+            ContentValues forTask = new ContentValues();
+            forMetadata = new ContentValues();
+            outer: for (Entry<String, Object> item : values.valueSet()) {
+                String key = item.getKey();
+                Object value = item.getValue();
+                if (value instanceof String)
+                    value = PermaSql.replacePlaceholders((String) value);
+
+                for (Property<?> property : Metadata.PROPERTIES)
+                    if (property.name.equals(key)) {
+                        AndroidUtilities.putInto(forMetadata, key, value);
+                        continue outer;
+                    }
+
+                AndroidUtilities.putInto(forTask, key, value);
+            }
+            task.mergeWith(forTask);
+        }
+        boolean markup = taskService.quickAdd(task);
+        if (markup)
+            task.putTransitory(TRANS_QUICK_ADD_MARKUP, true);
+
+        if (forMetadata != null && forMetadata.size() > 0) {
+            Metadata metadata = new Metadata();
+            metadata.setValue(Metadata.TASK, task.getId());
+            metadata.mergeWith(forMetadata);
+            metadataService.save(metadata);
+        }
+
+        return task;
+    }
 
 }

@@ -174,6 +174,7 @@
   <string-array name="EPr_theme_settings">
     <!-- theme_settings: options for preference menu -->
     <item>white</item>
+    <item>white-blue</item>
     <item>black</item>
     <item>transparent</item>
     <item>transparent-white</item>
@@ -196,7 +197,16 @@
     <item>36</item>
     <item>48</item>
   </string-array>
+  
+  <string name="p_showSmartConfirmation_key">showSmartConfirmation</string>
 
+  <string name="p_allowCompressedTaskRows">allowCompressedTaskRows</string>
+  
+  <string name="p_useLegacyImportanceStyle">legacyImportanceStyle</string>
+  
+  <string name="p_taskRowPrefs">taskRowPrefs</string>
+  
+  <string name="p_fullTaskTitle">fullTaskTitle</string>
   <!-- ========================================================= DEFAULTS == -->
   
   <!-- default urgency setting (corresponds to entry in TEA_urgency) -->  
@@ -263,6 +273,9 @@
     <item>-1</item>
   </string-array>
 
+  <!-- show task decorations (corresponds to showing notes icon in the task adapter) -->
+  <string name="p_default_showdecorations_key">p_show_decorations</string>
+  
   <!-- ============================================================ SYNC == -->
   
     <string-array name="sync_SPr_interval_values">
@@ -307,9 +320,6 @@
   
     <string name="gtasks_GPr_interval_key">gtasks_sync_freq</string>
     
-    
-    <string name="gtasks_GPr_sync_on_save_key">gtasks_sync_on_save</string>
-    
   <!-- ========================================================== SHARING == -->
   
     <string name="actfm_APr_interval_key">actfm_sync_freq</string>
@@ -318,6 +328,9 @@
 
   <!-- Anonymous usage statistics -->
   <string name="p_statistics">statistics</string>
+
+  <!-- Ideas tab autoloading -->
+  <string name="p_autoIdea">ideaauto</string>
   
   <!-- ================================================= NEW USER EXPERIENCE -->
   <!-- Preference Keys (do not translate) -->
@@ -343,6 +356,18 @@
   <!-- placeholder string for info about translators (i.e. YOU!) -->
   <string name="about_translators"></string>
   
+  <string-array name="TEA_control_sets_beast">
+      <item >@string/TEA_control_who</item>
+      <item >@string/TEA_control_when</item>
+      <item >@string/TEA_control_more_section</item>
+      <item >@string/TEA_control_importance</item>
+      <item >@string/TEA_control_lists</item>
+      <item >@string/TEA_control_notes</item>
+      <item >@string/TEA_control_reminders</item>
+      <item >@string/TEA_control_timer</item>
+      <item >@string/TEA_control_share</item>
+  </string-array>
+  
   <string-array name="TEA_control_sets">
       <item>@string/TEA_control_title</item>
       <item>@string/TEA_control_who</item>
@@ -356,10 +381,10 @@
       <item>@string/TEA_control_share</item>
   </string-array>
   
-      
-  <string name="TEA_ctrl_title_pref">TEA_ctrl_title_pref</string>
+  <string name="TEA_ctrl_title_pref">TEA_ctrl_title_pref</string> <!-- Deprecated -->
   <string name="TEA_ctrl_who_pref">TEA_ctrl_who_pref</string>
   <string name="TEA_ctrl_when_pref">TEA_ctrl_when_pref</string>
+  <string name="TEA_ctrl_task_rabbit_pref">TEA_ctrl_task_rabbit_pref</string>
   <string name="TEA_ctrl_more_pref">TEA_ctrl_more_pref</string>
   <string name="TEA_ctrl_importance_pref">TEA_ctrl_importance_pref</string>
   <string name="TEA_ctrl_lists_pref">TEA_ctrl_lists_pref</string>
@@ -369,7 +394,6 @@
   <string name="TEA_ctrl_share_pref">TEA_ctrl_share_pref</string>
       
   <string-array name="TEA_control_sets_prefs">
-      <item>@string/TEA_ctrl_title_pref</item>
       <item>@string/TEA_ctrl_who_pref</item>
       <item>@string/TEA_ctrl_when_pref</item>
       <item>@string/TEA_ctrl_more_pref</item>
@@ -380,5 +404,6 @@
       <item>@string/TEA_ctrl_timer_pref</item>
       <item>@string/TEA_ctrl_share_pref</item>
   </string-array>
+  
   
 </resources>

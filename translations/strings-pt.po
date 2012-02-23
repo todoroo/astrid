@@ -9,8 +9,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2011-09-19 04:44+0000\n"
+"X-Generator: Launchpad (build 13955)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -19,7 +19,7 @@ msgstr "Partilha"
 
 #. task sharing dialog: assigned hint
 #: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
+msgid "Contact or Email"
 msgstr "Nome de Contacto"
 
 #. task sharing dialog: shared with hint

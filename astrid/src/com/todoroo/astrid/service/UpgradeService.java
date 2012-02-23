@@ -21,6 +21,7 @@ import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
+import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
@@ -40,6 +41,7 @@ import com.todoroo.astrid.utility.AstridPreferences;
 
 public final class UpgradeService {
 
+    public static final int V4_0_0 = 251;
     public static final int V3_9_2_3 = 210;
     public static final int V3_9_2_2 = 209;
     public static final int V3_9_2_1 = 208;
@@ -110,6 +112,12 @@ public final class UpgradeService {
     public void performUpgrade(final Context context, final int from) {
         if(from == 135)
             AddOnService.recordOem();
+
+        if (from > 0 && from < V4_0_0) {
+            String preference = Preferences.getStringValue(R.string.p_theme);
+            if (ThemeService.THEME_WHITE.equals(preference))
+                Preferences.setString(R.string.p_theme, ThemeService.THEME_WHITE_BLUE);
+        }
 
         if(from > 0 && from < V3_8_2) {
             if(Preferences.getBoolean(R.string.p_transparent_deprecated, false))
@@ -415,7 +423,8 @@ public final class UpgradeService {
             return;
 
         changeLog.append("Have a spectacular day!</body></html>");
-        String changeLogHtml = "<html><body style='color: white'>" + changeLog;
+        String color = (AndroidUtilities.getSdkVersion() >= 14 ? "black" : "white");
+        String changeLogHtml = "<html><body style='color: " + color +"'>" + changeLog;
 
         DialogUtilities.htmlDialog(context, changeLogHtml,
                 R.string.UpS_changelog_title);

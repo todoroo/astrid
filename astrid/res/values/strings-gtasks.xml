@@ -25,10 +25,6 @@
     <!-- short help title for Gtasks -->
     <string name="gtasks_help_title">Welcome to Google Tasks!</string>
     
-    <!-- short help for GTasks list activity -->
-    <string name="gtasks_help_body">Drag the grabber on the left side of a task 
-    to rearrange it. Swipe the grabber left or right to change indentation.</string>
-
     <string name="CFC_gtasks_list_text">In List: ?</string>
 
     <string name="CFC_gtasks_list_name">In GTasks List...</string>
@@ -86,11 +82,7 @@
     <!-- ============================================== GtasksPreferences == -->
 
     <!-- GTasks Preferences Title -->    
-    <string name="gtasks_GPr_header">Google Tasks (Beta!)</string>
-    
-    <string name="gtasks_GPr_sync_on_save">Sync on Save</string>
-    
-    <string name="gtasks_GPr_sync_on_save_summary">Sync individual tasks as they are saved</string>
+    <string name="gtasks_GPr_header">Google Tasks</string>
     
     <!-- ================================================ Synchronization == -->    
     

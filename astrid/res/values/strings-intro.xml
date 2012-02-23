@@ -53,8 +53,11 @@
   <!-- Shown the first time a user sees the list settings tab -->
   <string name="help_popover_collaborators">People you share with can help you build your list or finish tasks</string>
   
-  <!-- Shown after user adds a task -->
-  <string name="help_popover_lists">Tap to edit or share lists</string>
+  <!-- Shown after user adds a task on tablet-->
+  <string name="help_popover_add_lists">Tap add a list</string>
+  
+  <!-- Shown after a user adds a task on phones -->
+  <string name="help_popover_switch_lists">Tap to add a list or switch between lists</string>
   
   <string name="help_popover_when_shortcut">Tap this shortcut to quick select date and time</string>
   
@@ -83,4 +86,7 @@
   For free, you get online backup, full synchronization with Astrid.com, the 
   ability to add tasks via email, and you can even share task lists with friends!</string>
   
+  
+  <!-- Shown after user goes to task rabbit activity-->
+  <string name="help_popover_taskrabbit_type">Change the type of task</string>
 </resources>

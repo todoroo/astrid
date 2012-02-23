@@ -1,13 +1,17 @@
 package com.todoroo.astrid.timers;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import android.app.Activity;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Chronometer;
-import android.widget.TextView;
+import android.widget.Chronometer.OnChronometerTickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.timsu.astrid.R;
 import com.todoroo.andlib.utility.DateUtilities;
@@ -16,39 +20,39 @@ import com.todoroo.astrid.helper.TaskEditControlSet;
 
 public class TimerActionControlSet extends TaskEditControlSet {
 
-    private final Button timerButton;
+    private final ImageView timerButton;
     private final Chronometer chronometer;
-    private final TextView timerLabel;
+    private final LinearLayout timerContainer;
     private boolean timerActive;
-    private final Activity activity;
-    private Task task;
-    private TimerStoppedListener listener;
+    private final List<TimerActionListener> listeners = new LinkedList<TimerActionListener>();
 
     public TimerActionControlSet(Activity activity, View parent) {
         super(activity, -1);
-        this.activity = activity;
-        timerButton = (Button) parent.findViewById(R.id.timer_button);
-        timerButton.setOnClickListener(timerListener);
-
+        timerContainer = (LinearLayout) parent.findViewById(R.id.timer_container);
+        timerButton = (ImageView) parent.findViewById(R.id.timer_button);
+        timerContainer.setOnClickListener(timerListener);
         chronometer = (Chronometer) parent.findViewById(R.id.timer);
-        timerLabel = (TextView) parent.findViewById(R.id.timer_label);
     }
 
     @Override
     @SuppressWarnings("hiding")
-    public void readFromTask(Task task) {
-        if (task.getValue(Task.TIMER_START) == 0)
+    protected void readFromTaskOnInitialize() {
+        if (model.getValue(Task.TIMER_START) == 0)
             timerActive = false;
         else
             timerActive = true;
 
-        this.task = task;
         updateDisplay();
     }
 
     @Override
+    protected void afterInflate() {
+        // Do nothing
+    }
+
+    @Override
     @SuppressWarnings("hiding")
-    public String writeToModel(Task task) {
+    protected String writeToModelAfterInitialized(Task task) {
         // Nothing to do here
         return null;
     }
@@ -57,12 +61,15 @@ public class TimerActionControlSet extends TaskEditControlSet {
         @Override
         public void onClick(View v) {
             if (timerActive) {
-                TimerPlugin.updateTimer(activity, task, false);
-                if (listener != null)
-                    listener.timerStopped(task);
+                TimerPlugin.updateTimer(activity, model, false);
+
+                for(TimerActionListener listener : listeners)
+                    listener.timerStopped(model);
                 chronometer.stop();
             } else {
-                TimerPlugin.updateTimer(activity, task, true);
+                TimerPlugin.updateTimer(activity, model, true);
+                for(TimerActionListener listener : listeners)
+                    listener.timerStarted(model);
                 chronometer.start();
             }
             timerActive = !timerActive;
@@ -75,34 +82,43 @@ public class TimerActionControlSet extends TaskEditControlSet {
         if(timerActive) {
             drawable = R.drawable.icn_timer_stop;
         } else {
-            if (task.getValue(Task.ELAPSED_SECONDS) == 0)
-                drawable = R.drawable.icn_edit_timer;
-            else
-                drawable = R.drawable.icn_timer_start;
+            drawable = R.drawable.icn_edit_timer;
         }
-        timerButton.setBackgroundResource(drawable);
+        timerButton.setImageResource(drawable);
 
 
-        long elapsed = task.getValue(Task.ELAPSED_SECONDS) * 1000L;
+        long elapsed = model.getValue(Task.ELAPSED_SECONDS) * 1000L;
         if (timerActive) {
             chronometer.setVisibility(View.VISIBLE);
-            timerLabel.setVisibility(View.GONE);
-            elapsed += DateUtilities.now() - task.getValue(Task.TIMER_START);
+            elapsed += DateUtilities.now() - model.getValue(Task.TIMER_START);
             chronometer.setBase(SystemClock.elapsedRealtime() - elapsed);
+            if (elapsed > DateUtilities.ONE_DAY) {
+                chronometer.setOnChronometerTickListener(new OnChronometerTickListener() {
+                    public void onChronometerTick(Chronometer cArg) {
+                        long t = SystemClock.elapsedRealtime() - cArg.getBase();
+                        cArg.setText(DateFormat.format("d'd' h:mm", t));
+                    }
+                });
+
+            }
             chronometer.start();
         } else {
             chronometer.setVisibility(View.GONE);
-            timerLabel.setVisibility(View.VISIBLE);
-            timerLabel.setText(DateUtils.formatElapsedTime(elapsed / 1000L));
             chronometer.stop();
         }
     }
 
-    public interface TimerStoppedListener {
+    public interface TimerActionListener {
         public void timerStopped(Task task);
+        public void timerStarted(Task task);
     }
 
-    public void setListener(TimerStoppedListener listener) {
-        this.listener = listener;
+    public void addListener(TimerActionListener listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeListener(TimerActionListener listener) {
+        if (listeners.contains(listener))
+            listeners.remove(listener);
     }
 }

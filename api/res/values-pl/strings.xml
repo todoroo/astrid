@@ -92,6 +92,12 @@
   <!-- today -->
   <string name="yesterday">Wczoraj</string>
   
+  <!-- tomorrow abbreviated -->
+  <string name="tmrw">Tmrw</string>
+  
+  <!-- today abbreviated -->
+  <string name="yest">Yest</string>
+  
   <!-- ================================================== Generic Dialogs == -->
   
   <!-- confirmation dialog title -->
@@ -119,7 +125,7 @@
   <string name="DLG_close">Zamknij</string>
   
   <!-- general dialog done -->
-  <string name="DLG_done">Gotowe</string>
+  <string name="DLG_done">Ukończone</string>
   
   <!-- error dialog (%s => error message)-->
   <string name="DLG_error">Ups! Wygląda na to, że wystąpił jakiś błąd! Oto, co się stało:\n\n%s</string>
@@ -154,7 +160,7 @@
   <!-- Status: ongoing -->    
   <string name="sync_status_ongoing">Synchronizacja trwa...</string>
   <!-- Sync Status: success status (%s -> last sync date). Keep it short!-->    
-  <string name="sync_status_success">Ostatnia synchronizacja:\n%s</string>
+  <string name="sync_status_success">Last Sync:\n%s</string>
   <!-- Sync Status: failure status (%s -> last attempted sync date) -->    
   <string name="sync_status_failed">Nieudana: %s</string>
   <!-- Sync Status: error status (%s -> last sync date) -->    
@@ -165,7 +171,7 @@
   <string name="sync_status_never">Nigdy nie synchronizowano!</string>
 
   <!-- Options Group Label -->    
-  <string name="sync_SPr_group_options">Ustawienia</string>
+  <string name="sync_SPr_group_options">Opcje</string>
 
   <!-- Preference: Synchronization Interval Title -->    
   <string name="sync_SPr_interval_title">Synchronizacja w tle</string>

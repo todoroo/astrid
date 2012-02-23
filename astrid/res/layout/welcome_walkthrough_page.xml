@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" 
-    android:background="@drawable/welcome_walkthrough_fabric">
+    android:background="#d0d0d0">
 
     <TextView
         android:id="@+id/welcome_walkthrough_title"
@@ -25,7 +25,7 @@
         android:layout_weight="1"
         android:src="@drawable/welcome_walkthrough_1" 
         android:scaleType="fitCenter"/>
-
+        
     <TextView
         android:id="@+id/welcome_walkthrough_body"
         android:layout_width="fill_parent"
@@ -39,6 +39,5 @@
         android:shadowRadius="2"
         android:shadowDy="1"
         android:shadowColor="@android:color/white" />
-
 
 </LinearLayout>

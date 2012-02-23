@@ -36,8 +36,8 @@ if [ ! -e /usr/bin/gettext ]; then
 fi    
 
 # Set the languages here (po -> name of .po file. res -> name of res folder)
-po_lang=( "ca" "cs" "da" "de" "es" "fr" "he" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "th" "zh_CN"  "zh_TW")
-res_lang=("ca" "cs" "da" "de" "es" "fr" "he" "it" "ja" "ko" "nb" "nl" "pl" "pt" "ru" "sv" "th" "zh-rCN" "zh-rTW")
+po_lang=( "ca" "cs" "da" "de" "es" "fr" "he" "it" "ja" "ko" "nb" "nl" "pl" "pt" "pt_BR" "ru" "sv" "th" "tr" "zh_CN"  "zh_TW")
+res_lang=("ca" "cs" "da" "de" "es" "fr" "he" "it" "ja" "ko" "nb" "nl" "pl" "pt" "pt-rBR" "ru" "sv" "th" "tr" "zh-rCN" "zh-rTW")
 
 #Change the dirs where the files are located.
 launchpad_po_files_dir="translations"
@@ -117,7 +117,7 @@ function usage
 {
     echo "Wrapper for xml2po for android and launchpad."
     echo "Usage: androidxml2po -i        Import .xml's from .po's. Updates the .xml's."
-    echo "       androidxml2po -e        Export/update .po's from string.xml's. Overwrites the .pot and merges the .po's."
+    echo "       androidxml2po -e        Export/update .po's from string.xml's. Overwrites the .pot and merges the .po's. (NOTE: SUPER BROKEN)"
     echo "       androidxml2po -t        Export/update .pot file"
     echo "Set variables correctly inside. Provide a string with value "translator-credits" for Launchpad."
     echo ""
@@ -146,3 +146,4 @@ while [ "$1" != "" ]; do
     shift
 done
 usage
+

@@ -3,10 +3,10 @@
 	<classpathentry excluding="javax/xml/validation/|javax/xml/transform/dom/|javax/xml/parsers/|org/jaxp/transform/dom/|org/jaxp/transform/sax/|org/jaxp/transform/stax/|org/jaxp/transform/stream/|org/jaxp/stream/events/|org/jaxp/stream/util/|org/jaxp/parsers/|org/jaxp/stream/|org/jaxp/validation/" kind="src" path="src"/>
 	<classpathentry kind="src" path="src-legacy"/>
 	<classpathentry kind="src" path="common-src"/>
-	<classpathentry excluding="com/todoroo/astrid/rmilk/EditOperationExposer.java|com/todoroo/astrid/rmilk/MilkEditActivity.java|com/todoroo/astrid/actfm/TaskFields.java|com/todoroo/astrid/actfm/ShowProjectExposer.java|com/todoroo/astrid/actfm/ProjectDetailExposer.java|com/todoroo/astrid/actfm/ProjectListActivity.java" kind="src" path="plugin-src"/>
+	<classpathentry excluding="com/todoroo/astrid/actfm/ProjectDetailExposer.java|com/todoroo/astrid/actfm/ProjectListActivity.java|com/todoroo/astrid/actfm/ShowProjectExposer.java|com/todoroo/astrid/actfm/TaskFields.java|com/todoroo/astrid/rmilk/EditOperationExposer.java|com/todoroo/astrid/rmilk/MilkEditActivity.java" kind="src" path="plugin-src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="src" path="rmilk-src"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="lib" path="libs/annotations.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/commons-codec-1.3.jar"/>
@@ -16,19 +16,19 @@
 	<classpathentry exported="true" kind="lib" path="libs/httpmime-4.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/rfc2445-4Mar2011.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jackson-core-asl-1.6.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-api-client-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-api-client-extensions-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-api-client-extensions-android2-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-http-client-1.5.0-beta.jar" sourcepath="libs/google-http-client-1.5.0-beta-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-http-client-extensions-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-http-client-extensions-android2-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-oauth-client-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-oauth-client-extensions-1.5.0-beta.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/gson-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/google-api-services-tasks-v1-1.2.5-beta.jar"/>
-	<classpathentry kind="lib" path="libs/crittercism_v1_2_5.jar"/>
-	<classpathentry kind="lib" path="libs/jchronic-0.2.3.jar"/>
-	<classpathentry kind="lib" path="libs/android-support-v4.jar"/>
-	<classpathentry kind="lib" path="libs/guava-11.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jchronic-0.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/guava-11.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-api-client-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-api-client-extensions-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-api-client-extensions-android2-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-api-services-tasks-v1-1.3.0-beta.jar" sourcepath="libs/google-api-services-tasks-v1-1.3.0-beta-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-http-client-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-http-client-extensions-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-http-client-extensions-android2-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-http-client-extensions-android3-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-oauth-client-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/google-oauth-client-extensions-1.6.0-beta.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/gson-1.7.1.jar"/>
+	<classpathentry kind="lib" path="libs/crittercism_v2_0_1.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

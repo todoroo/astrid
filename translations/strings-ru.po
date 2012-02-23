@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-07-14 18:38-0700\n"
-"PO-Revision-Date: 2011-08-22 19:42+0000\n"
-"Last-Translator: Breeder <Unknown>\n"
+"PO-Revision-Date: 2012-01-02 16:18+0000\n"
+"Last-Translator: niki sedoff <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2012-01-03 04:56+0000\n"
+"X-Generator: Launchpad (build 14616)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,14 +18,14 @@ msgid "Share"
 msgstr "Опубликовать"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
 msgstr "Имя контакта"
 
 #. task sharing dialog: shared with hint
 #: translations/strings.xml:14( name="actfm_person_or_tag_hint")
 msgid "Contact or Shared List"
-msgstr ""
+msgstr "Контакт или общий список"
 
 #. toast on transmit success
 #: translations/strings.xml:17( name="actfm_toast_success")
@@ -34,13 +34,13 @@ msgstr "Сохранено на сервере"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Неудачное сохранение"
+msgid "Save Failed: %s"
+msgstr ""
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
 msgid "Sorry, this operation is not yet supported for shared tags."
-msgstr ""
+msgstr "Извините, эта операция не поддерживает общие метки"
 
 #. menu item to take a picture
 #: translations/strings.xml:26( name="actfm_picture_camera")
@@ -90,7 +90,7 @@ msgstr "Обновить"
 #. Tag Settings: tag name label
 #: translations/strings.xml:56( name="actfm_TVA_tag_label")
 msgid "List Name:"
-msgstr ""
+msgstr "Название списка"
 
 #. Tag Settings: tag owner label
 #: translations/strings.xml:59( name="actfm_TVA_tag_owner_label")
@@ -110,7 +110,7 @@ msgstr ""
 #. Tag Settings: tag picture
 #: translations/strings.xml:68( name="actfm_TVA_tag_picture")
 msgid "List Picture"
-msgstr ""
+msgstr "Укажите фото:"
 
 #. Tag Settings: silence notifications label
 #: translations/strings.xml:71( name="actfm_TVA_silence_label")
@@ -144,17 +144,22 @@ msgstr ""
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")
 msgid "Me"
+msgstr "Я"
+
+#. task sharing dialog: anyone
+#: translations/strings.xml:100( name="actfm_EPA_unassigned")
+msgid "Anyone"
 msgstr ""
 
 #. task sharing dialog: custom email assignment
 #: translations/strings.xml:91( name="actfm_EPA_assign_custom")
 msgid "Custom..."
-msgstr ""
+msgstr "Свой..."
 
 #. task sharing dialog: shared with label
 #: translations/strings.xml:94( name="actfm_EPA_share_with")
 msgid "Add Collaborators:"
-msgstr ""
+msgstr "Добавить содействующих"
 
 #. task sharing dialog: collaborator list name (%s => name of list)
 #: translations/strings.xml:97( name="actfm_EPA_list") translations/strings.xml:1912( name="tag_FEx_name")
@@ -174,7 +179,7 @@ msgstr "Помогите мне выполнить это!"
 #. task sharing dialog: message hint
 #: translations/strings.xml:109( name="actfm_EPA_tag_label")
 msgid "Create a shared tag?"
-msgstr ""
+msgstr "Создать совместный тэг"
 
 #. task sharing dialog: message hint
 #: translations/strings.xml:112( name="actfm_EPA_tag_hint")
@@ -184,12 +189,12 @@ msgstr "(например Клубный Клуб)"
 #. task sharing dialog: share with Facebook
 #: translations/strings.xml:115( name="actfm_EPA_facebook")
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #. task sharing dialog: share with Twitter
 #: translations/strings.xml:118( name="actfm_EPA_twitter")
 msgid "Twitter"
-msgstr ""
+msgstr "Твиттер"
 
 #. task sharing dialog: # of e-mails sent (%s => # people plural string)
 #: translations/strings.xml:121( name="actfm_EPA_emailed_toast")
@@ -258,7 +263,7 @@ msgstr "Уже есть учетная запись?"
 #. share login: Name
 #: translations/strings.xml:160( name="actfm_ALA_name_label")
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 #. share login: Email
 #: translations/strings.xml:163( name="actfm_ALA_email_label")
@@ -298,7 +303,7 @@ msgstr ""
 #. Preferences Title: Act.fm
 #: translations/strings.xml:186( name="actfm_APr_header")
 msgid "Astrid.com (Beta!)"
-msgstr ""
+msgstr "Astrid.com (Бета!)"
 
 #. title for notification tray after synchronizing
 #: translations/strings.xml:189( name="actfm_notification_title")
@@ -838,7 +843,7 @@ msgstr "В указанное время?"
 #. Task urgency specific time title when specific time false
 #: translations/strings.xml:564( name="TEA_urgency_none")
 msgid "None"
-msgstr ""
+msgstr "Пусто"
 
 #. Task hide until label
 #: translations/strings.xml:567( name="TEA_hideUntil_label")
@@ -1373,17 +1378,17 @@ msgstr ""
 #. Criteria: tag - name of criteria
 #: translations/strings.xml:914( name="CFC_tag_name")
 msgid "List..."
-msgstr ""
+msgstr "Назовите..."
 
 #. Criteria: tag_contains - name of criteria
 #: translations/strings.xml:917( name="CFC_tag_contains_name")
 msgid "List name contains..."
-msgstr ""
+msgstr "Название содержит..."
 
 #. Criteria: tag_contains - text (? -> user input)
 #: translations/strings.xml:919( name="CFC_tag_contains_text")
 msgid "List name contains: ?"
-msgstr ""
+msgstr "Название содержит: ?"
 
 #. Criteria: title_contains - name of criteria
 #: translations/strings.xml:922( name="CFC_title_contains_name")
@@ -1458,7 +1463,7 @@ msgstr ""
 #. error to show when list creation fails
 #: translations/strings.xml:982( name="gtasks_FEx_create_list_error")
 msgid "Error creating new list"
-msgstr ""
+msgstr "Ошибка при создании нового списка"
 
 #. short help title for Gtasks
 #: translations/strings.xml:985( name="gtasks_help_title")
@@ -1476,11 +1481,11 @@ msgstr ""
 
 #: translations/strings.xml:991( name="CFC_gtasks_list_text")
 msgid "In List: ?"
-msgstr ""
+msgstr "В Списке: ?"
 
 #: translations/strings.xml:993( name="CFC_gtasks_list_name")
 msgid "In GTasks List..."
-msgstr ""
+msgstr "В GTask Список..."
 
 #. Activity Title: Gtasks Login
 #: translations/strings.xml:998( name="gtasks_GLA_title")

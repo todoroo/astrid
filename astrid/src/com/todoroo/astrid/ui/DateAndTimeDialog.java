@@ -26,7 +26,7 @@ public class DateAndTimeDialog extends Dialog {
     private DateAndTimeDialogListener listener;
 
     public DateAndTimeDialog(Context context, long startDate) {
-        super(context, ThemeService.getDialogTheme());
+        super(context, ThemeService.getEditDialogTheme());
 
         /** 'Window.FEATURE_NO_TITLE' - Used to hide the title */
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -93,10 +93,10 @@ public class DateAndTimeDialog extends Dialog {
     }
 
     public String getDisplayString(Context context) {
-        return dateAndTimePicker.getDisplayString(context);
+        return dateAndTimePicker.getDisplayString(context, false, false);
     }
 
     public String getDisplayString(Context context, long forDate) {
-        return dateAndTimePicker.getDisplayString(context, forDate);
+        return DateAndTimePicker.getDisplayString(context, forDate, false, false);
     }
 }

@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-07-14 18:38-0700\n"
-"PO-Revision-Date: 2011-11-09 13:48+0000\n"
-"Last-Translator: Daniele Arcangeli <Unknown>\n"
+"PO-Revision-Date: 2012-01-03 06:52+0000\n"
+"Last-Translator: Gianluca Vieri <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2012-01-04 04:54+0000\n"
+"X-Generator: Launchpad (build 14616)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -19,7 +19,7 @@ msgstr "Condividi"
 
 #. task sharing dialog: assigned hint
 #: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
+msgid "Contact or Email"
 msgstr "Nome del contatto"
 
 #. task sharing dialog: shared with hint
@@ -65,7 +65,7 @@ msgstr "Inserisci un commento..."
 #. Tag View Activity: task comment ($1 - user name, $2 - task title)
 #: translations/strings.xml:40( name="UAd_title_comment")
 msgid "%1$s re: %2$s"
-msgstr ""
+msgstr "%1$s re: %2$s"
 
 #. Tab for showing tasks
 #: translations/strings.xml:45(item)

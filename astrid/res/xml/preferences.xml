@@ -6,31 +6,67 @@
     <PreferenceScreen android:title="@string/p_about" android:key="@string/p_about" />
     <PreferenceScreen android:title="@string/welcome_setting" android:key="@string/p_tutorial"/>
     <PreferenceScreen android:title="@string/p_help" android:key="@string/p_help"/>
+    
     <PreferenceCategory
         android:title="@string/EPr_appearance_header">
-        <com.todoroo.astrid.ui.MultilineListPreference
-            android:key="@string/p_fontSize"
-            android:entries="@array/EPr_font_size"
-            android:entryValues="@array/EPr_font_size"
-            android:title="@string/EPr_fontSize_title"
-            android:summary="@string/EPr_fontSize_desc" />
         
-        <PreferenceScreen android:title="" android:key="@string/p_beastMode" android:summary="@string/EPr_beastMode_desc"/>
+        <PreferenceScreen android:title="@string/EPr_taskRowPrefs_title" android:key="@string/p_taskRowPrefs">
         
-        <com.todoroo.astrid.ui.MultilineCheckboxPreference
-            android:key="@string/p_showNotes"
-            android:title="@string/EPr_showNotes_title"
-            android:defaultValue="false" />
-            
+	        <com.todoroo.astrid.ui.MultilineListPreference
+	            android:key="@string/p_fontSize"
+	            android:entries="@array/EPr_font_size"
+	            android:entryValues="@array/EPr_font_size"
+	            android:title="@string/EPr_fontSize_title"
+	            android:summary="@string/EPr_fontSize_desc" />
+	        
+	        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	            android:key="@string/p_fullTaskTitle"
+	            android:title="@string/EPr_fullTask_title"
+	            android:defaultValue="false" />
+	        
+	        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	            android:key="@string/p_showNotes"
+	            android:title="@string/EPr_showNotes_title"
+	            android:defaultValue="false" />
+	        
+	        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	            android:key="@string/p_allowCompressedTaskRows"
+	            android:title="@string/EPr_compressTaskRows_title"
+	            android:summary="@string/EPr_compressTaskRows_desc"
+	            android:defaultValue="false" />
+	
+	        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	            android:key="@string/p_useLegacyImportanceStyle"
+	            android:title="@string/EPr_userLegacyImportance_title"
+	            android:summary="@string/EPr_userLegacyImportance_desc"
+	            android:defaultValue="false"/>
+        
+        </PreferenceScreen>
+        
+        <PreferenceScreen android:title="" android:key="@string/p_beastMode"/>
+
         <com.todoroo.astrid.ui.MultilineListPreference
             android:key="@string/p_theme"
             android:entries="@array/EPr_themes"
             android:entryValues="@array/EPr_theme_settings"
             android:title="@string/EPr_theme_title" />
+
+        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+            android:key="@string/p_showSmartConfirmation_key"
+            android:title="@string/EPr_showSmartConfirmation_title"
+            android:defaultValue="true"/>
+
+        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	        android:key="@string/p_autoIdea"
+	        android:title="@string/EPr_ideaAuto_title"
+	        android:defaultValue="true" />
+             
     </PreferenceCategory>
+
 
     <PreferenceCategory
         android:title="@string/EPr_powerpack_header">
+        
         <PreferenceScreen
             android:title="@string/EPr_voice_header">
             
@@ -38,22 +74,26 @@
                 android:key="@string/p_voiceInputEnabled"
                 android:title="@string/EPr_voiceInputEnabled_title"
                 android:defaultValue="true" />
+                
             <com.todoroo.astrid.ui.MultilineCheckboxPreference
                 android:key="@string/p_voiceInputCreatesTask"
                 android:title="@string/EPr_voiceInputCreatesTask_title"
                 android:dependency="@string/p_voiceInputEnabled"
                 android:defaultValue="false" />
+                
             <com.todoroo.astrid.ui.MultilineCheckboxPreference
                 android:key="@string/p_voiceRemindersEnabled"
                 android:title="@string/EPr_voiceRemindersEnabled_title"
                 android:defaultValue="false" />
             
         </PreferenceScreen>
+
+        <com.todoroo.astrid.ui.MultilineCheckboxPreference
+	        android:key="@string/p_statistics"
+	        android:title="@string/EPr_statistics_title"
+	        android:defaultValue="true" />   
+          
     </PreferenceCategory>
 
-    <com.todoroo.astrid.ui.MultilineCheckboxPreference
-        android:key="@string/p_statistics"
-        android:title="@string/EPr_statistics_title"
-        android:defaultValue="true" />   
 
 </PreferenceScreen>

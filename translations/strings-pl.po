@@ -9,8 +9,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2011-11-17 05:25+0000\n"
+"X-Generator: Launchpad (build 14291)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,9 +18,9 @@ msgid "Share"
 msgstr "Udostęp"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
-msgstr "Nazwa Kontaktu"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
+msgstr "Kontakt lub email"
 
 #. task sharing dialog: shared with hint
 #: translations/strings.xml:14( name="actfm_person_or_tag_hint")
@@ -34,15 +34,15 @@ msgstr "Zapisano na serwerze"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Zapis nieudany"
+msgid "Save Failed: %s"
+msgstr "Zapisywanie nie powiodło się: %s"
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
 msgid "Sorry, this operation is not yet supported for shared tags."
 msgstr ""
-"Niestety, ale ta operacja nie jest jeszcze obsługiwana przez udostepnione "
-"tagi."
+"Niestety, ale ta operacja nie jest jeszcze obsługiwana dla udostępnionych "
+"tagów."
 
 #. menu item to take a picture
 #: translations/strings.xml:26( name="actfm_picture_camera")
@@ -52,7 +52,12 @@ msgstr "Zrób zdjęcie"
 #. menu item to select from gallery
 #: translations/strings.xml:29( name="actfm_picture_gallery")
 msgid "Pick from Gallery"
-msgstr "Wynierz z galerii"
+msgstr "Wybierz z galerii"
+
+#. menu item to clear picture selection
+#: translations/strings.xml:32( name="actfm_picture_clear")
+msgid "Clear Picture"
+msgstr "Usuń obrazek"
 
 #. filter list activity: refresh tags
 #: translations/strings.xml:32( name="actfm_FLA_menu_refresh")
@@ -84,6 +89,16 @@ msgstr "Aktywność"
 msgid "List Settings"
 msgstr "Ustawienia listy"
 
+#. Tag View: filtered by assigned to user
+#: translations/strings.xml:56( name="actfm_TVA_filtered_by_assign")
+msgid "%s's tasks. Tap for all."
+msgstr "%s zadań. Dotknij dla wszystkich."
+
+#. Tag View: list is private, no members
+#: translations/strings.xml:59( name="actfm_TVA_no_members_alert")
+msgid "Private: tap to share or edit"
+msgstr "Prywatna: puknij by udostępnić/edytować"
+
 #. Tag View Menu: refresh
 #: translations/strings.xml:53( name="actfm_TVA_menu_refresh")
 msgid "Refresh"
@@ -105,8 +120,8 @@ msgid "none"
 msgstr "brak"
 
 #. Tag Settings: list collaborators label
-#: translations/strings.xml:65( name="actfm_TVA_members_label")
-msgid "Collaborators:"
+#: translations/strings.xml:74( name="actfm_TVA_members_label")
+msgid "Shared With:"
 msgstr "Współpracownicy:"
 
 #. Tag Settings: tag picture
@@ -126,7 +141,7 @@ msgid ""
 "instantly see when people get stuff done!"
 msgstr ""
 "Użyj Astrid by udostępnić listy zakupów, plany imprez, lub projektów i od "
-"razu zobaczyć, kiedy inni stają się rzeczy zrobić!"
+"razu zobaczyć, kiedy inni skończą robotę!"
 
 #. task sharing dialog: window title
 #: translations/strings.xml:79( name="actfm_EPA_title")
@@ -139,14 +154,19 @@ msgid "Save &amp; Share"
 msgstr "Zapisz i udostępnij"
 
 #. task sharing dialog: assigned label
-#: translations/strings.xml:85( name="actfm_EPA_assign_label")
-msgid "Assigned to:"
-msgstr "Przypisany do:"
+#: translations/strings.xml:94( name="actfm_EPA_assign_label") translations/strings.xml:703( name="TEA_control_who")
+msgid "Who"
+msgstr "Kto"
 
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")
 msgid "Me"
 msgstr "Ja"
+
+#. task sharing dialog: anyone
+#: translations/strings.xml:100( name="actfm_EPA_unassigned")
+msgid "Anyone"
+msgstr "Ktokolwiek"
 
 #. task sharing dialog: custom email assignment
 #: translations/strings.xml:91( name="actfm_EPA_assign_custom")
@@ -154,14 +174,29 @@ msgid "Custom..."
 msgstr "Inny..."
 
 #. task sharing dialog: shared with label
-#: translations/strings.xml:94( name="actfm_EPA_share_with")
-msgid "Add Collaborators:"
+#: translations/strings.xml:106( name="actfm_EPA_share_with")
+msgid "Share with:"
 msgstr "Dodaj współpracowników:"
+
+#. Toast when assigning a task
+#: translations/strings.xml:109( name="actfm_EPA_assigned_toast")
+msgid "Sent to %1$s (you can see it in the list between you and %2$s)."
+msgstr "Wyślij do %1$s (możesz to zobaczyć w liście między Tobą i %2$s)."
+
+#. task sharing dialog: shared with label
+#: translations/strings.xml:112( name="actfm_EPA_collaborators_header")
+msgid "Share with Friends"
+msgstr "Podziel się z przyjaciółmi"
 
 #. task sharing dialog: collaborator list name (%s => name of list)
 #: translations/strings.xml:97( name="actfm_EPA_list") translations/strings.xml:1912( name="tag_FEx_name")
 msgid "List: %s"
 msgstr "Lista: %s"
+
+#. task sharing dialog: assigned hint
+#: translations/strings.xml:118( name="actfm_EPA_assigned_hint")
+msgid "Contact Name"
+msgstr "Nazwa kontaktu"
 
 #. task sharing dialog: message label text
 #: translations/strings.xml:103( name="actfm_EPA_message_text")
@@ -171,17 +206,17 @@ msgstr "Widomość zaproszenia:"
 #. task sharing dialog: message body
 #: translations/strings.xml:106( name="actfm_EPA_message_body")
 msgid "Help me get this done!"
-msgstr "Pomoc mi to zrobić!"
+msgstr "Pomóż mi to zrobić!"
 
 #. task sharing dialog: message hint
 #: translations/strings.xml:109( name="actfm_EPA_tag_label")
 msgid "Create a shared tag?"
-msgstr "Utwórz tag udostępnienia?"
+msgstr "Utworzyć współdzielony tag?"
 
 #. task sharing dialog: message hint
 #: translations/strings.xml:112( name="actfm_EPA_tag_hint")
 msgid "(i.e. Silly Hats Club)"
-msgstr "(np. Klub czapek martina)"
+msgstr "(np. klub głupich czapek)"
 
 #. task sharing dialog: share with Facebook
 #: translations/strings.xml:115( name="actfm_EPA_facebook")
@@ -196,7 +231,7 @@ msgstr "Twitter"
 #. task sharing dialog: # of e-mails sent (%s => # people plural string)
 #: translations/strings.xml:121( name="actfm_EPA_emailed_toast")
 msgid "Task shared with %s"
-msgstr "Wspólne zadania z %s"
+msgstr "Zadanie współdzielone z %s"
 
 #. task sharing dialog: edit people settings saved
 #: translations/strings.xml:124( name="actfm_EPA_saved_toast")
@@ -206,17 +241,34 @@ msgstr "Zapisane ustawienia osób"
 #. task sharing dialog: invalid email (%s => email)
 #: translations/strings.xml:127( name="actfm_EPA_invalid_email")
 msgid "Invalid E-mail: %s"
-msgstr "Nieparawidłowy email: %s"
+msgstr "Nieprawidłowy e-mail: %s"
 
 #. task sharing dialog: tag not found (%s => tag)
 #: translations/strings.xml:130( name="actfm_EPA_invalid_tag")
 msgid "List Not Found: %s"
 msgstr "Nie znaleziono listy: %s"
 
+#. task sharing login prompt
+#: translations/strings.xml:151( name="actfm_EPA_login_to_share")
+msgid ""
+"You need to be logged in to Astrid.com to share tasks! Please log in or make "
+"this a private task."
+msgstr ""
+"Musisz być zalogowany w Astrid.com by udostępniać zadania! Zaloguj się lub "
+"uczyń to zadanie prywatnym."
+
+#: translations/strings.xml:153( name="actfm_EPA_login_button")
+msgid "Log in"
+msgstr "Zaloguj się"
+
+#: translations/strings.xml:155( name="actfm_EPA_dont_share_button")
+msgid "Make private"
+msgstr "Zaznacz jako prywatne"
+
 #. share login: Title
 #: translations/strings.xml:135( name="actfm_ALA_title")
 msgid "Welcome to Astrid.com!"
-msgstr "Witamy w Astrid.com!"
+msgstr "Witaj w Astrid.com!"
 
 #. share login: Sharing Description
 #: translations/strings.xml:138( name="actfm_ALA_body")
@@ -228,19 +280,19 @@ msgstr ""
 "innym."
 
 #. share login: Sharing Login FB Prompt
-#: translations/strings.xml:142( name="actfm_ALA_fb_login")
-msgid "Sign in with Facebook"
-msgstr "Zaloguj się przez Facebooka"
+#: translations/strings.xml:167( name="actfm_ALA_fb_login")
+msgid "Login with Facebook"
+msgstr "Zaloguj przez Facebook"
 
 #. share login: Sharing Login GG Prompt
-#: translations/strings.xml:145( name="actfm_ALA_gg_login")
-msgid "Sign in with Google"
-msgstr "Zaloguj się przez Google"
+#: translations/strings.xml:170( name="actfm_ALA_gg_login")
+msgid "Login with Google"
+msgstr "Zaloguj przez Google"
 
 #. share login: Sharing Footer Password Label
-#: translations/strings.xml:148( name="actfm_ALA_pw_login")
-msgid "Don't have a Google or Facebook Account?"
-msgstr "Nie masz jeszcze konta Google czy Facebook?"
+#: translations/strings.xml:173( name="actfm_ALA_pw_login")
+msgid "Don't use Google or Facebook?"
+msgstr "Nie używasz Google ani Facebooka?"
 
 #. share login: Sharing Password Link
 #: translations/strings.xml:151( name="actfm_ALA_pw_link")
@@ -285,7 +337,7 @@ msgstr "Utwórz nowe konto"
 #. share login: Login Title
 #: translations/strings.xml:175( name="actfm_ALA_login_title")
 msgid "Login to Astrid.com"
-msgstr "Zalogój sie do Astrid.com"
+msgstr "Zaloguj się do Astrid.com"
 
 #. share login: OAUTH Login Prompt
 #: translations/strings.xml:178( name="actfm_OLA_prompt")
@@ -295,22 +347,34 @@ msgstr "Proszę połączyć się z Google:"
 #. share login: Sharing notice
 #: translations/strings.xml:181( name="actfm_ALA_notice")
 msgid "Astrid won't send messages e-mails without permission."
-msgstr "Astrid nie wysyła wiadomości email bez zezwolenia."
+msgstr "Astrid nie wysyła wiadomości e-mail bez zezwolenia."
 
 #. Preferences Title: Act.fm
 #: translations/strings.xml:186( name="actfm_APr_header")
 msgid "Astrid.com (Beta!)"
 msgstr "Astrid.com (Beta!)"
 
+#: translations/strings.xml:213( name="actfm_https_title")
+msgid "Use HTTPS"
+msgstr "Użycie HTTPS"
+
+#: translations/strings.xml:214( name="actfm_https_enabled")
+msgid "HTTPS enabled (slower)"
+msgstr "HTTPS włączone (wolniej)"
+
+#: translations/strings.xml:215( name="actfm_https_disabled")
+msgid "HTTPS disabled (faster)"
+msgstr "HTTPS wyłączone (szybciej)"
+
 #. title for notification tray after synchronizing
 #: translations/strings.xml:189( name="actfm_notification_title")
 msgid "Astrid.com Sync"
-msgstr "Synchronizuj"
+msgstr "Synchronizacja Astrid.com"
 
 #. text for notification when comments are received
 #: translations/strings.xml:192( name="actfm_notification_comments")
 msgid "New comments received / click for more details"
-msgstr "Nowe komentarze otrzymano / kliknij po więcej informacji"
+msgstr "Otrzymano nowe komentarze / kliknij po więcej informacji"
 
 #. Task Edit Activity: Container Label
 #: translations/strings.xml:203( name="alarm_ACS_label") translations/strings.xml:543( name="TEA_tab_alarms")
@@ -338,29 +402,29 @@ msgid "Status"
 msgstr "Stan"
 
 #. Backup Status: last backup was a success (%s -> last date). Keep it short!
-#: translations/strings.xml:229( name="backup_status_success")
-msgid "Latest: %s"
-msgstr "Ostatnia: %s"
+#: translations/strings.xml:258( name="backup_status_success")
+msgid "Latest backup:\\n%s"
+msgstr "Ostatnia kopia zapasowa:\\n%s"
 
 #. Backup Status: last error failed. Keep it short!
 #: translations/strings.xml:231( name="backup_status_failed")
 msgid "Last Backup Failed"
-msgstr "Ostatnie niepowodzenie kopii zapasowej"
+msgstr "Błąd zapisu ostatniej kopii"
 
 #. Backup Status: error subtitle
 #: translations/strings.xml:233( name="backup_status_failed_subtitle")
 msgid "(tap to show error)"
-msgstr "(dotknij, aby zobaczyć błąd)"
+msgstr "(puknij, aby zobaczyć błąd)"
 
 #. Backup Status: never backed up
 #: translations/strings.xml:235( name="backup_status_never")
 msgid "Never Backed Up!"
-msgstr "Kopia zapasowa nie była wykonywana!"
+msgstr "Kopia zapasowa nigdy nie wykonana!"
 
 #. Backup Options Group Label
 #: translations/strings.xml:238( name="backup_BPr_group_options") translations/strings.xml:2163( name="sync_SPr_group_options")
 msgid "Options"
-msgstr "Ustawienia"
+msgstr "Opcje"
 
 #. Preference: Automatic Backup Title
 #: translations/strings.xml:241( name="backup_BPr_auto_title")
@@ -375,7 +439,7 @@ msgstr "Automatyczna kopia zapasowa WYŁĄCZONA"
 #. Preference: Automatic Backup Description (when enabled)
 #: translations/strings.xml:245( name="backup_BPr_auto_enabled")
 msgid "Backup will occur daily"
-msgstr "Kopia zapasowa będzie wykonywana raz dziennie"
+msgstr "Kopia zapasowa będzie wykonywana codziennie"
 
 #. Preference screen restoring Tasks Help
 #: translations/strings.xml:248( name="backup_BPr_how_to_restore")
@@ -399,7 +463,7 @@ msgstr "Zarządzaj kopiami zapasowymi"
 #. backup activity title
 #: translations/strings.xml:258( name="backup_BAc_title")
 msgid "Manage Your Backups"
-msgstr "Zarządzaj kopiami zapasowymi"
+msgstr "Zarządzaj swoimi kopiami zapasowymi"
 
 #. backup activity import button
 #: translations/strings.xml:261( name="backup_BAc_import")
@@ -414,11 +478,11 @@ msgstr "Eksportuj zadania"
 #. Message displayed when error occurs
 #: translations/strings.xml:269( name="backup_TXI_error")
 msgid "Import Error"
-msgstr "Błąd podczas importowania"
+msgstr "Błąd importu"
 
 #: translations/strings.xml:271( name="export_toast")
 msgid "Backed Up %1$s to %2$s."
-msgstr "Z kopii zapasowej %1$s do %2$s."
+msgstr "Zapisano %1$s do %2$s."
 
 #: translations/strings.xml:273( name="export_toast_no_tasks")
 msgid "No Tasks to Export."
@@ -600,7 +664,7 @@ msgstr "Dodatki"
 #. Menu: Adjust Sort and Hidden Task Settings
 #: translations/strings.xml:400( name="TLA_menu_sort")
 msgid "Sort &amp; Hidden"
-msgstr "Sortuj &amp; Ukryte"
+msgstr "Sortowanie i ukryte"
 
 #. Menu: Sync Now
 #: translations/strings.xml:403( name="TLA_menu_sync")
@@ -612,15 +676,15 @@ msgstr "Synchronizuj teraz!"
 msgid "Settings"
 msgstr "Ustawienia"
 
-#. Menu: Help
-#: translations/strings.xml:409( name="TLA_menu_help") translations/strings.xml:511( name="FLA_menu_help")
-msgid "Help"
-msgstr "Pomoc"
+#. Menu: Support
+#: translations/strings.xml:452( name="TLA_menu_support")
+msgid "Support"
+msgstr "Wsparcie"
 
 #. Search Label
 #: translations/strings.xml:412( name="TLA_search_label")
 msgid "Search This List"
-msgstr "Przeszukaj tą listę"
+msgstr "Przeszukaj tę listę"
 
 #. Window title for displaying Custom Filter
 #: translations/strings.xml:415( name="TLA_custom")
@@ -628,14 +692,50 @@ msgid "Custom"
 msgstr "Własny filtr"
 
 #. Quick Add Edit Box Hint
-#: translations/strings.xml:418( name="TLA_quick_add_hint")
-msgid "Add to this list..."
-msgstr "Dodaj do listy..."
+#: translations/strings.xml:461( name="TLA_quick_add_hint")
+msgid "Add a task"
+msgstr "Dodaj zadanie"
+
+#. Quick Add Edit Box Hint for assigning
+#: translations/strings.xml:464( name="TLA_quick_add_hint_assign")
+msgid "Tap to assign %s a task"
+msgstr "Puknij by przypisać %s zadanie"
 
 #. Notification Volumne notification
 #: translations/strings.xml:421( name="TLA_notification_volume_low")
 msgid "Notifications are muted. You won't be able to hear Astrid!"
 msgstr "Powiadomienia są wyciszone. Nie będziesz w stanie usłyszeć Astrid!"
+
+#. Notifications disabled warning
+#: translations/strings.xml:470( name="TLA_notification_disabled")
+msgid "Astrid reminders are disabled! You will not receive any reminders"
+msgstr "Powiadomienia są wyłączone! Nie otrzymasz żadnych powiadomień"
+
+#: translations/strings.xml:473(item)
+msgid "Active"
+msgstr "Aktywne"
+
+#. today
+#: translations/strings.xml:474(item) translations/strings.xml:682(item) translations/strings.xml:942(item) translations/strings.xml:1048(item) translations/strings.xml:2347( name="today")
+msgid "Today"
+msgstr "Dzisiaj"
+
+#: translations/strings.xml:475(item)
+msgid "Soon"
+msgstr "Wkrótce"
+
+#: translations/strings.xml:476(item)
+msgid "Late"
+msgstr "Spóźnione"
+
+#. general dialog done
+#: translations/strings.xml:477(item) translations/strings.xml:2382( name="DLG_done")
+msgid "Done"
+msgstr "Ukończone"
+
+#: translations/strings.xml:478(item)
+msgid "Hidden"
+msgstr "Ukryte"
 
 #. Format string to indicate task is hidden (%s => task name)
 #: translations/strings.xml:426( name="TAd_hiddenFormat")
@@ -680,7 +780,7 @@ msgstr "Przywrócone zadanie"
 #. Context Item: purge task
 #: translations/strings.xml:453( name="TAd_contextPurgeTask")
 msgid "Purge Task"
-msgstr "Usuń zadanie na trwałe"
+msgstr "Trwale usuń zadanie"
 
 #. Sort Selection: dialog title
 #: translations/strings.xml:458( name="SSD_title")
@@ -740,7 +840,7 @@ msgstr "Odwrócone sortowanie"
 #. Sort Button: sort temporarily
 #: translations/strings.xml:491( name="SSD_save_temp")
 msgid "Just Once"
-msgstr "Tylko jeden raz"
+msgstr "Tylko raz"
 
 #. Sort Button: sort permanently
 #: translations/strings.xml:494( name="SSD_save_always")
@@ -748,9 +848,9 @@ msgid "Always"
 msgstr "Zawsze"
 
 #. Filter List Activity Title
-#: translations/strings.xml:499( name="FLA_title")
-msgid "Astrid: Filters"
-msgstr "Astrid: Filtry"
+#: translations/strings.xml:557( name="FLA_title") translations/strings.xml:707( name="TEA_control_lists") translations/strings.xml:2053( name="rmilk_FEx_list") translations/strings.xml:2109( name="TEA_tags_label") translations/strings.xml:2123( name="tag_TLA_menu") translations/strings.xml:2145( name="tag_FEx_header")
+msgid "Lists"
+msgstr "Listy"
 
 #. Displayed when loading filters
 #: translations/strings.xml:502( name="FLA_loading")
@@ -766,6 +866,11 @@ msgstr "Utwórz skrót na pulpicie"
 #: translations/strings.xml:508( name="FLA_menu_search")
 msgid "Search Tasks..."
 msgstr "Szukaj zadań..."
+
+#. Menu: Help
+#: translations/strings.xml:569( name="FLA_menu_help") translations/strings.xml:869( name="p_help")
+msgid "Help"
+msgstr "Pomoc"
 
 #. Create Shortcut Dialog Title
 #: translations/strings.xml:514( name="FLA_shortcut_dialog_title")
@@ -792,18 +897,28 @@ msgstr "Pasujących do: %s"
 msgid "Created Shortcut: %s"
 msgstr "Utworzono skrót: %s"
 
+#. Menu: new filter
+#: translations/strings.xml:587( name="FLA_new_filter")
+msgid "New Filter"
+msgstr "Nowy filtr"
+
+#. Button: new list
+#: translations/strings.xml:590( name="FLA_new_list") translations/strings.xml:2131( name="tag_new_list")
+msgid "New List"
+msgstr "Nowa lista"
+
 #. Title when editing a task (%s => task title)
 #: translations/strings.xml:531( name="TEA_view_title")
 msgid "Astrid: Editing '%s'"
 msgstr "Astrid: Edytowanie '%s'"
 
 #. Title when creating a new task
-#: translations/strings.xml:534( name="TEA_view_titleNew")
-msgid "Astrid: New Task"
-msgstr "Astrid: Nowe zadanie"
+#: translations/strings.xml:598( name="TEA_view_titleNew")
+msgid "New Task"
+msgstr "Nowe zadanie"
 
 #. First Tab - basic task details
-#: translations/strings.xml:537( name="TEA_tab_basic")
+#: translations/strings.xml:601( name="TEA_tab_basic")
 msgid "Basic"
 msgstr "Podstawowe"
 
@@ -830,12 +945,12 @@ msgstr "Skala ważności"
 #. Task urgency label
 #: translations/strings.xml:558( name="TEA_urgency_label")
 msgid "Deadline"
-msgstr "Ostateczny czas ukończenia"
+msgstr "Termin ukończenia"
 
 #. Task urgency specific time checkbox
-#: translations/strings.xml:561( name="TEA_urgency_specific_time")
+#: translations/strings.xml:628( name="TEA_urgency_specific_time")
 msgid "At specific time?"
-msgstr "Konkretny termin?"
+msgstr "Dokładna godzina?"
 
 #. Task urgency specific time title when specific time false
 #: translations/strings.xml:564( name="TEA_urgency_none")
@@ -843,9 +958,14 @@ msgid "None"
 msgstr "Brak"
 
 #. Task hide until label
-#: translations/strings.xml:567( name="TEA_hideUntil_label")
-msgid "Hide Until"
-msgstr "Ukryj dopóki"
+#: translations/strings.xml:634( name="TEA_hideUntil_label")
+msgid "Show Task"
+msgstr "Pokaż zadanie"
+
+#. Task hide until toast
+#: translations/strings.xml:637( name="TEA_hideUntil_message")
+msgid "Task will be hidden until %s"
+msgstr "Zadanie będzie ukryte do %s"
 
 #. Task note hint
 #: translations/strings.xml:576( name="TEA_notes_hint")
@@ -892,19 +1012,19 @@ msgstr "Edytowanie zadania zostało anulowane"
 msgid "Task Deleted!"
 msgstr "Zadanie usunięte!"
 
+#. Toast: tasks need titles
+#: translations/strings.xml:676( name="TEA_task_no_title")
+msgid "Oops! Tasks require titles to be saved"
+msgstr "Ups! Zadania wymagają tytułu by je zapisać"
+
 #. urgency: labels for edit page. item #4 -> auto filled
-#: translations/strings.xml:607(item) translations/strings.xml:718(item)
-msgid "No Deadline"
+#: translations/strings.xml:680(item)
+msgid "No deadline"
 msgstr "Bez nieprzekraczalnego terminu"
 
 #: translations/strings.xml:608(item)
 msgid "Specific Day"
 msgstr "Konkretny dzień"
-
-#. today
-#: translations/strings.xml:609(item) translations/strings.xml:719(item) translations/strings.xml:899(item) translations/strings.xml:2082( name="today")
-msgid "Today"
-msgstr "Dzisiaj"
 
 #. tomorrow
 #: translations/strings.xml:610(item) translations/strings.xml:720(item) translations/strings.xml:900(item) translations/strings.xml:2085( name="tomorrow")
@@ -927,14 +1047,13 @@ msgstr "W ciągu dwóch tygodni"
 msgid "Next Month"
 msgstr "Przyszły miesiąc"
 
-#. hideUntil: labels for edit page.
-#: translations/strings.xml:619(item) translations/strings.xml:727(item)
-msgid "Don't hide"
-msgstr "Nie ukrywaj"
+#: translations/strings.xml:690( name="TEA_no_time")
+msgid "No time"
+msgstr "Bez godziny"
 
-#: translations/strings.xml:620(item) translations/strings.xml:728(item)
-msgid "Task is due"
-msgstr "Zadanie jest wymagane"
+#: translations/strings.xml:695(item)
+msgid "At due date"
+msgstr "W terminie"
 
 #: translations/strings.xml:621(item) translations/strings.xml:729(item)
 msgid "Day before due"
@@ -948,6 +1067,33 @@ msgstr "Tydzień przed wymaganiem"
 msgid "Specific Day/Time"
 msgstr "Konkretny dzień/godzina"
 
+#. Task edit control set descriptors
+#: translations/strings.xml:702( name="TEA_control_title")
+msgid "Task Title"
+msgstr "Tytuł zadania"
+
+#: translations/strings.xml:705( name="TEA_control_more_section")
+msgid "----More Section----"
+msgstr "---Sekcja \"Więcej\"---"
+
+#. Task Edit: Reminder group label
+#: translations/strings.xml:709( name="TEA_control_reminders") translations/strings.xml:1660( name="TEA_reminders_group_label")
+msgid "Reminders"
+msgstr "Przypomnienia"
+
+#. Title for TEA
+#: translations/strings.xml:710( name="TEA_control_timer") translations/strings.xml:2220( name="TEA_timer_controls")
+msgid "Timer Controls"
+msgstr "Sterowanie zegara"
+
+#: translations/strings.xml:711( name="TEA_control_share")
+msgid "Share With Friends"
+msgstr "Współdziel ze znajomymi"
+
+#: translations/strings.xml:713( name="hide_until_prompt")
+msgid "Show in my list"
+msgstr "Pokaż na mojej liście"
+
 #. Add Ons tab when no add-ons found
 #: translations/strings.xml:627( name="TEA_addons_text")
 msgid "Looking for more features?"
@@ -957,6 +1103,15 @@ msgstr "Szukasz więcej funkcji?"
 #: translations/strings.xml:630( name="TEA_addons_button")
 msgid "Get the Power Pack!"
 msgstr "Pobierz Power Pack!"
+
+#. When controls dialog
+#: translations/strings.xml:725( name="TEA_when_dialog_title")
+msgid "When is this due?"
+msgstr "Na kiedy ma być zrobione?"
+
+#: translations/strings.xml:727( name="TEA_date_and_time")
+msgid "Date/Time"
+msgstr "Data/Czas"
 
 #. Introduction Window title
 #: translations/strings.xml:635( name="InA_title")
@@ -1013,10 +1168,23 @@ msgstr "Rozmiar czcionki głównej listy zadań"
 msgid "Show Notes In Task"
 msgstr "Pokaż notatki w zadaniu"
 
+#. Preference: Beast mode (auto-expand edit page)
+#: translations/strings.xml:770( name="EPr_beastMode_title")
+msgid "Beast Mode"
+msgstr "Tryb \"Beast\""
+
+#: translations/strings.xml:771( name="EPr_beastMode_desc")
+msgid "Customize the layout of the Task Edit Page"
+msgstr "Dostosuj układ strony edycji zadania"
+
+#: translations/strings.xml:772( name="EPr_beastMode_reset")
+msgid "Reset to defaults"
+msgstr "Przywróć domyślne"
+
 #. Preference: Task List Show Notes Description (disabled)
-#: translations/strings.xml:672( name="EPr_showNotes_desc_disabled")
-msgid "Notes will be displayed in quick action bar"
-msgstr "Notatki będą wyświetlane na pasku szybkiego działania"
+#: translations/strings.xml:775( name="EPr_showNotes_desc_disabled")
+msgid "Notes will be accessible from the Task Edit Page"
+msgstr "Notatki będą dostępne ze strony edycji zadania"
 
 #. Preference: Task List Show Notes Description (enabled)
 #: translations/strings.xml:674( name="EPr_showNotes_desc_enabled")
@@ -2711,10 +2879,10 @@ msgstr "Potrzebna synchronizacja z RTM"
 msgid "Remember the Milk"
 msgstr "Remember the Milk"
 
-#. filter category for RTM lists
-#: translations/strings.xml:1808( name="rmilk_FEx_list") translations/strings.xml:1875( name="tag_TLA_menu") translations/strings.xml:1897( name="tag_FEx_header")
-msgid "Lists"
-msgstr "Listy"
+
+
+
+
 
 #. RTM list filter title (%s => list)
 #: translations/strings.xml:1811( name="rmilk_FEx_list_title")
@@ -2784,10 +2952,10 @@ msgstr "Wybierz listę"
 msgid "Show List"
 msgstr "Pokaż listę"
 
-#. Dialog: new list
-#: translations/strings.xml:1883( name="tag_new_list")
-msgid "New List"
-msgstr "Nowa lista"
+
+
+
+
 
 #. Dialog: list saved
 #: translations/strings.xml:1886( name="tag_list_saved")
@@ -3144,10 +3312,10 @@ msgstr "Nie"
 msgid "Close"
 msgstr "Zamknij"
 
-#. general dialog done
-#: translations/strings.xml:2117( name="DLG_done")
-msgid "Done"
-msgstr "Gotowe"
+
+
+
+
 
 #. error dialog (%s => error message)
 #: translations/strings.xml:2120( name="DLG_error")

@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 
 import android.text.TextUtils;
 
+import com.timsu.astrid.R;
 import com.todoroo.andlib.data.Property.CountProperty;
 import com.todoroo.andlib.data.Property.LongProperty;
 import com.todoroo.andlib.data.Property.StringProperty;
@@ -60,6 +61,13 @@ public final class TagService {
     // --- singleton
 
     private static TagService instance = null;
+
+    private static int[] default_tag_images = new int[] {
+        R.drawable.default_list_0,
+        R.drawable.default_list_1,
+        R.drawable.default_list_2,
+        R.drawable.default_list_3
+    };
 
     public static synchronized TagService getInstance() {
         if(instance == null)
@@ -124,10 +132,29 @@ public final class TagService {
          * @return
          */
         public QueryTemplate queryTemplate(Criterion criterion) {
-            return new QueryTemplate().join(Join.inner(Metadata.TABLE,
-                    Task.ID.eq(Metadata.TASK))).where(tagEqIgnoreCase(tag, criterion));
+            return new QueryTemplate().join(Join.inner(Metadata.TABLE.as("mtags"),
+                    Criterion.and(Task.ID.eq(Field.field("mtags." + Metadata.TASK.name)),
+                            Field.field("mtags." + Metadata.KEY.name).eq(KEY),
+                            Field.field("mtags." + TAG.name).eqCaseInsensitive(tag)))).where(criterion);
         }
 
+
+        /**
+         * Return SQL selector query for getting tasks with a given tagData
+         *
+         * @param tagData
+         * @return
+         */
+        public static QueryTemplate queryTemplate(Criterion criterion, TagData tagData) {
+            return new QueryTemplate().join(Join.inner(Metadata.TABLE,
+                    Task.ID.eq(Metadata.TASK))).where(tagEqIgnoreCase(tagData.getValue(TagData.NAME), criterion));
+        }
+
+    }
+
+    public static Criterion memberOfTagData(long tagDataRemoteId) {
+        return Task.ID.in(Query.select(Metadata.TASK).from(Metadata.TABLE).where(
+                Criterion.and(Metadata.KEY.eq(KEY), REMOTE_ID.eq(tagDataRemoteId))));
     }
 
     public static Criterion tagEq(String tag, Criterion additionalCriterion) {
@@ -368,4 +395,14 @@ public final class TagService {
         Flags.set(Flags.REFRESH);
     }
 
+    public static int getDefaultImageIDForTag(long remoteID) {
+        if (remoteID <= 0) {
+            int random = (int)(Math.random()*4);
+            return default_tag_images[random];
+        }
+        return default_tag_images[((int)remoteID)%4];
+    }
+    public static int getDefaultImageIDForTag(String title) {
+        return getDefaultImageIDForTag(Math.abs(title.hashCode()));
+    }
 }

@@ -54,13 +54,15 @@
 <!-- extension targets. Uncomment the ones where you want to do custom work
      in between standard targets -->
 
-    <target name="-set-mode-check" depends="clean">                                                                                                   
+    <target name="-set-mode-check" depends="">                                                                                                   
         <fail if="build.is.mode.set"                                                                                                  
               message="Cannot run two different modes at the same time. If you are running more than one debug/release/instrument type targets, call them from different Ant calls." />                                                                                  
     </target>  
 
     <target name="-pre-build" depends="get-version, copy-sources, updatekeys, updatekeys-release, disable-market">
       <mkdir dir="gen" />
+      <property name="proguard.jar" location="antlib/proguard.jar" />
+      <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.jar}" />
     </target>
 
     <target name="copy-sources">
@@ -114,9 +116,23 @@
       <replaceregexp file="${source.dir}/com/todoroo/astrid/actfm/sync/ActFmInvoker.java"
                      match="APP_SECRET = .*"
                      replace="APP_SECRET = &quot;${apikey.actfm.secret}&quot;;" />
-      <replaceregexp file="${source.dir}/com/todoroo/astrid/gtasks/api/GtasksService.java"
+    	
+      <replaceregexp file="${source.dir}/com/todoroo/astrid/taskrabbit/TaskRabbitActivity.java"
+                     match="TASK_RABBIT_CLIENT_ID = .*"
+                     replace="TASK_RABBIT_CLIENT_ID = &quot;${apikey.taskrabbit.clientid}&quot;;" />
+      <replaceregexp file="${source.dir}/com/todoroo/astrid/taskrabbit/TaskRabbitActivity.java"
+                     match="TASK_RABBIT_CLIENT_APPLICATION_ID = .*"
+                     replace="TASK_RABBIT_CLIENT_APPLICATION_ID = &quot;${apikey.taskrabbit.appid}&quot;;" />
+      <replaceregexp file="${source.dir}/com/todoroo/astrid/taskrabbit/TaskRabbitActivity.java"
+                     match="TASK_RABBIT_URL = .*"
+                     replace="TASK_RABBIT_URL = &quot;${apikey.taskrabbit.url}&quot;;" />
+    	
+      <replaceregexp file="${source.dir}/com/todoroo/astrid/gtasks/api/GtasksInvoker.java"
                      match="API_KEY = .*"
                      replace="API_KEY = &quot;${apikey.gtasks}&quot;;" />
+      <replaceregexp file="${source.dir}/com/todoroo/astrid/utility/Constants.java"
+                     match="AWS_SECRET_KEY_ID = .*"
+                     replace="AWS_SECRET_KEY_ID = &quot;${apikey.amazon.secret}&quot;;" />
     </target>
 
     <!-- update api keys that require release signing -->
@@ -165,6 +181,22 @@
       <replaceregexp file="AndroidManifest.xml"
                      match="(android:versionName=&quot;[^&quot; ]*)[^&quot;]*"
                      replace="\1${custom.version.name}" />
+      <antcall target="release" />
+
+      <move file="AndroidManifest_old.xml" tofile="AndroidManifest.xml" />
+    </target>
+
+    <target name="release-jenkins">
+      <property environment="env" />
+      <copy file="AndroidManifest.xml" tofile="AndroidManifest_old.xml" />
+      <propertyregex property="env.git_hash"
+                     input="${env.GIT_COMMIT}"
+                     regexp="(.{7})"
+                     select="\1"
+                     casesensitive="false" />
+      <replaceregexp file="AndroidManifest.xml"
+                     match="(android:versionName=&quot;[^&quot; ]*)[^&quot;]*"
+                     replace="\1-b${env.BUILD_NUMBER}-${env.git_hash}" />
       <antcall target="release" />
 
       <move file="AndroidManifest_old.xml" tofile="AndroidManifest.xml" />

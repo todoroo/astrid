@@ -27,7 +27,6 @@ import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.notes.NoteMetadata;
 import com.todoroo.astrid.service.MetadataService;
-import com.todoroo.astrid.service.StartupService;
 import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.tags.TagService;
 
@@ -65,7 +64,7 @@ public final class ActFmDataService {
      */
     public void clearMetadata() {
         ContentValues values = new ContentValues();
-        values.put(Task.REMOTE_ID.name, 0);
+        values.putNull(Task.REMOTE_ID.name);
         taskDao.updateMultiple(values, Criterion.all);
     }
 
@@ -76,8 +75,7 @@ public final class ActFmDataService {
      */
     public TodorooCursor<Task> getLocallyCreated(Property<?>[] properties) {
         return taskDao.query(Query.select(properties).where(Criterion.and(TaskCriteria.isActive(),
-                Task.ID.gt(StartupService.INTRO_TASK_SIZE),
-                Task.REMOTE_ID.eq(0))));
+                Task.REMOTE_ID.isNull())));
     }
 
     /**
@@ -91,7 +89,7 @@ public final class ActFmDataService {
             return taskDao.query(Query.select(properties).where(Criterion.none));
         return
             taskDao.query(Query.select(properties).
-                    where(Criterion.and(Task.REMOTE_ID.gt(0),
+                    where(Criterion.and(Task.REMOTE_ID.isNotNull(),
                             Task.MODIFICATION_DATE.gt(lastSyncDate),
                             Task.MODIFICATION_DATE.gt(Task.LAST_SYNC))).groupBy(Task.ID));
     }

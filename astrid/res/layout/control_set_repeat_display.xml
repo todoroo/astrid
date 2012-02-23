@@ -13,9 +13,10 @@
       android:gravity="center_vertical">
       <ImageView 
         style="@style/EditRowImage"
+        android:id="@+id/repeat_image_icon"
         android:src="@drawable/icn_edit_repeats"/>
 	  <TextView
-	      android:id="@+id/repeat_display"
+	      android:id="@+id/display_row_edit"
 	      android:layout_width="fill_parent"
 	      android:layout_height="wrap_content"
 	      android:layout_weight="1"

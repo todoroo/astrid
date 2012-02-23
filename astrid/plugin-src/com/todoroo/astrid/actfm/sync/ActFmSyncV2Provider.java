@@ -4,27 +4,30 @@
 package com.todoroo.astrid.actfm.sync;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONException;
 
+import com.timsu.astrid.C2DMReceiver;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
-import com.todoroo.andlib.service.DependencyInjectionService;
-import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
+import com.todoroo.astrid.data.RemoteModel;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.AstridDependencyInjector;
-import com.todoroo.astrid.service.StartupService;
-import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
-import com.todoroo.astrid.service.SyncV2Service.SyncV2Provider;
+import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.service.TaskService;
+import com.todoroo.astrid.sync.SyncResultCallback;
+import com.todoroo.astrid.sync.SyncV2Provider;
 import com.todoroo.astrid.tags.TagService;
 
 /**
@@ -33,25 +36,62 @@ import com.todoroo.astrid.tags.TagService;
  */
 public class ActFmSyncV2Provider extends SyncV2Provider {
 
+    private static final int NUM_THREADS = 20;
+
     @Autowired ActFmPreferenceService actFmPreferenceService;
 
     @Autowired ActFmSyncService actFmSyncService;
 
-    @Autowired ExceptionService exceptionService;
-
     @Autowired TaskService taskService;
+
+    @Autowired TagDataService tagDataService;
+
+    private final PushQueuedArgs<Task> taskPusher = new PushQueuedArgs<Task>() {
+        @Override
+        public Task getRemoteModelInstance(TodorooCursor<Task> cursor) {
+            return new Task(cursor);
+        }
+
+        @Override
+        public void pushRemoteModel(Task model) {
+            actFmSyncService.pushTaskOnSave(model, model.getMergedValues());
+        }
+
+    };
+
+    private final PushQueuedArgs<TagData> tagPusher = new PushQueuedArgs<TagData>() {
+
+        @Override
+        public void pushRemoteModel(TagData model) {
+            actFmSyncService.pushTagDataOnSave(model, model.getMergedValues());
+        }
+
+        @Override
+        public TagData getRemoteModelInstance(
+                TodorooCursor<TagData> cursor) {
+            return new TagData(cursor);
+        }
+    };
 
     static {
         AstridDependencyInjector.initialize();
     }
 
-    public ActFmSyncV2Provider() {
-        DependencyInjectionService.getInstance().inject(this);
-    }
-
     @Override
     public String getName() {
         return ContextManager.getString(R.string.actfm_APr_header);
+    }
+
+    @Override
+    public ActFmPreferenceService getUtilities() {
+        return actFmPreferenceService;
+    }
+
+    @Override
+    public void signOut() {
+        actFmPreferenceService.setToken(null);
+        actFmPreferenceService.clearLastSyncDate();
+        C2DMReceiver.unregister();
     }
 
     @Override
@@ -76,8 +116,6 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
 
         startTaskFetcher(manual, callback, finisher);
 
-        pushQueued(callback, finisher);
-
         callback.incrementProgress(50);
     }
 
@@ -89,16 +127,19 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
             public void run() {
                 int time = Preferences.getInt(LAST_TAG_FETCH_TIME, 0);
                 try {
+                    pushQueuedTags(callback, finisher, time);
                     time = actFmSyncService.fetchTags(time);
                     Preferences.setInt(LAST_TAG_FETCH_TIME, time);
                 } catch (JSONException e) {
-                    exceptionService.reportError("actfm-sync", e); //$NON-NLS-1$
+                    handler.handleException("actfm-sync", e); //$NON-NLS-1$
                 } catch (IOException e) {
-                    exceptionService.reportError("actfm-sync", e); //$NON-NLS-1$
+                    handler.handleException("actfm-sync", e); //$NON-NLS-1$
                 } finally {
                     callback.incrementProgress(20);
-                    if(finisher.decrementAndGet() == 0)
+                    if(finisher.decrementAndGet() == 0) {
+                        actFmPreferenceService.recordSuccessfulSync();
                         callback.finished();
+                    }
                 }
             }
         }).start();
@@ -107,49 +148,84 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
     /** @return runnable to fetch changes to tags */
     private void startTaskFetcher(final boolean manual, final SyncResultCallback callback,
             final AtomicInteger finisher) {
-        actFmSyncService.fetchActiveTasks(manual, new Runnable() {
+        actFmSyncService.fetchActiveTasks(manual, handler, new Runnable() {
             @Override
             public void run() {
+                pushQueuedTasks(callback, finisher);
+
                 callback.incrementProgress(30);
-                if(finisher.decrementAndGet() == 0)
+                if(finisher.decrementAndGet() == 0) {
+                    actFmPreferenceService.recordSuccessfulSync();
                     callback.finished();
+                }
             }
         });
     }
 
-    private void pushQueued(final SyncResultCallback callback,
-            final AtomicInteger finisher) {
-        TodorooCursor<Task> cursor = taskService.query(Query.select(Task.PROPERTIES).
-                where(Criterion.or(
-                        Criterion.and(TaskCriteria.isActive(),
-                                Task.ID.gt(StartupService.INTRO_TASK_SIZE),
-                                Task.REMOTE_ID.eq(0)),
-                        Criterion.and(Task.REMOTE_ID.gt(0),
-                                Task.MODIFICATION_DATE.gt(Task.LAST_SYNC)))));
+    private static interface PushQueuedArgs<T extends RemoteModel> {
+        public T getRemoteModelInstance(TodorooCursor<T> cursor);
+        public void pushRemoteModel(T model);
+    }
 
+    private <T extends RemoteModel> void pushQueued(final SyncResultCallback callback, final AtomicInteger finisher,
+            TodorooCursor<T> cursor, boolean awaitTermination, final PushQueuedArgs<T> pusher) {
         try {
             callback.incrementMax(cursor.getCount() * 20);
             finisher.addAndGet(cursor.getCount());
 
+            ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
             for(int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToNext();
-                final Task task = new Task(cursor);
+                final T model = pusher.getRemoteModelInstance(cursor);
 
-                new Thread(new Runnable() {
+                executor.submit(new Runnable() {
                     public void run() {
                         try {
-                            actFmSyncService.pushTaskOnSave(task, task.getMergedValues());
+                            pusher.pushRemoteModel(model);
                         } finally {
                             callback.incrementProgress(20);
-                            if(finisher.decrementAndGet() == 0)
+                            if(finisher.decrementAndGet() == 0) {
+                                actFmPreferenceService.recordSuccessfulSync();
                                 callback.finished();
+                            }
                         }
                     }
-                }).start();
+                });
             }
+            executor.shutdown();
+            if (awaitTermination)
+                try {
+                    executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
         } finally {
             cursor.close();
         }
+    }
+
+    private void pushQueuedTasks(final SyncResultCallback callback,
+            final AtomicInteger finisher) {
+        TodorooCursor<Task> taskCursor = taskService.query(Query.select(Task.PROPERTIES).
+                where(Criterion.or(
+                        Criterion.and(TaskCriteria.isActive(),
+                                Task.REMOTE_ID.isNull()),
+                                Criterion.and(Task.REMOTE_ID.isNotNull(),
+                                        Task.MODIFICATION_DATE.gt(Task.LAST_SYNC)))));
+
+        pushQueued(callback, finisher, taskCursor, false, taskPusher);
+    }
+
+    private void pushQueuedTags(final SyncResultCallback callback,
+            final AtomicInteger finisher, int lastTagSyncTime) {
+        TodorooCursor<TagData> tagDataCursor = tagDataService.query(Query.select(TagData.PROPERTIES)
+                .where(Criterion.or(
+                        TagData.REMOTE_ID.eq(0),
+                        Criterion.and(TagData.REMOTE_ID.gt(0),
+                                TagData.MODIFICATION_DATE.gt(lastTagSyncTime)))));
+
+        pushQueued(callback, finisher, tagDataCursor, true, tagPusher);
+
     }
 
     // --- synchronize list
@@ -163,9 +239,6 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
 
         TagData tagData = (TagData) list;
         final boolean noRemoteId = tagData.getValue(TagData.REMOTE_ID) == 0;
-
-        if(noRemoteId && !manual)
-            return;
 
         callback.started();
         callback.incrementMax(100);
@@ -214,7 +287,7 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
         }).start();
     }
 
-    private void fetchUpdatesForTag(TagData tagData, boolean manual, final SyncResultCallback callback,
+    private void fetchUpdatesForTag(final TagData tagData, boolean manual, final SyncResultCallback callback,
             final AtomicInteger finisher) {
         actFmSyncService.fetchUpdatesForTag(tagData, manual, new Runnable() {
             @Override
@@ -226,7 +299,7 @@ public class ActFmSyncV2Provider extends SyncV2Provider {
         });
     }
 
-    private void fetchTasksForTag(TagData tagData, boolean manual, final SyncResultCallback callback,
+    private void fetchTasksForTag(final TagData tagData, boolean manual, final SyncResultCallback callback,
             final AtomicInteger finisher) {
         actFmSyncService.fetchTasksForTag(tagData, manual, new Runnable() {
             @Override

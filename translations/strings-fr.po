@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-07-14 18:38-0700\n"
-"PO-Revision-Date: 2011-11-04 15:18+0000\n"
-"Last-Translator: Pierre Slamich <pierre.slamich@gmail.com>\n"
+"PO-Revision-Date: 2011-12-22 20:29+0000\n"
+"Last-Translator: SarahSlean <yoda4@hotmail.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2011-12-23 07:38+0000\n"
+"X-Generator: Launchpad (build 14560)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,14 +18,14 @@ msgid "Share"
 msgstr "Partager"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
 msgstr "Nom de contact"
 
 #. task sharing dialog: shared with hint
 #: translations/strings.xml:14( name="actfm_person_or_tag_hint")
 msgid "Contact or Shared List"
-msgstr ""
+msgstr "Liste de contacts ou partagée"
 
 #. toast on transmit success
 #: translations/strings.xml:17( name="actfm_toast_success")
@@ -34,13 +34,14 @@ msgstr "Enregistré sur le serveur"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Sauvegarde échouée"
+msgid "Save Failed: %s"
+msgstr "Sauvegarde échouée: %s"
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
 msgid "Sorry, this operation is not yet supported for shared tags."
 msgstr ""
+"Désolé, cette opération n'est pas encore supporté pour les balises communes."
 
 #. menu item to take a picture
 #: translations/strings.xml:26( name="actfm_picture_camera")
@@ -103,19 +104,19 @@ msgid "none"
 msgstr "Aucun"
 
 #. Tag Settings: list collaborators label
-#: translations/strings.xml:65( name="actfm_TVA_members_label")
-msgid "Collaborators:"
+#: translations/strings.xml:74( name="actfm_TVA_members_label")
+msgid "Shared With:"
 msgstr "Collaborateurs"
 
 #. Tag Settings: tag picture
 #: translations/strings.xml:68( name="actfm_TVA_tag_picture")
 msgid "List Picture"
-msgstr ""
+msgstr "Liste des Images"
 
 #. Tag Settings: silence notifications label
 #: translations/strings.xml:71( name="actfm_TVA_silence_label")
 msgid "Silence Notifications"
-msgstr ""
+msgstr "Notifications silence"
 
 #. task sharing dialog: intro
 #: translations/strings.xml:76( name="actfm_EPA_intro")
@@ -138,14 +139,19 @@ msgid "Save &amp; Share"
 msgstr "Enregistrer &amp; Partager"
 
 #. task sharing dialog: assigned label
-#: translations/strings.xml:85( name="actfm_EPA_assign_label")
-msgid "Assigned to:"
-msgstr "Assignée à:"
+#: translations/strings.xml:94( name="actfm_EPA_assign_label") translations/strings.xml:703( name="TEA_control_who")
+msgid "Who"
+msgstr "Qui"
 
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")
 msgid "Me"
 msgstr "Moi"
+
+#. task sharing dialog: anyone
+#: translations/strings.xml:100( name="actfm_EPA_unassigned")
+msgid "Anyone"
+msgstr "N'importe qui"
 
 #. task sharing dialog: custom email assignment
 #: translations/strings.xml:91( name="actfm_EPA_assign_custom")
@@ -175,7 +181,7 @@ msgstr "Aidez moi à terminer ce truc !"
 #. task sharing dialog: message hint
 #: translations/strings.xml:109( name="actfm_EPA_tag_label")
 msgid "Create a shared tag?"
-msgstr ""
+msgstr "Cet étudiant n'a pas d'informations de contact."
 
 #. task sharing dialog: message hint
 #: translations/strings.xml:112( name="actfm_EPA_tag_hint")
@@ -2200,12 +2206,12 @@ msgstr ""
 #. Reminder Preference: Max Volume for Multiple-Ring reminders Description (true)
 #: translations/strings.xml:1534( name="rmd_EPr_multiple_maxvolume_desc_true")
 msgid "Astrid will max out the volume for multiple-ring reminders"
-msgstr ""
+msgstr "Astrid va maximiser le volume de multiples anneaux rappels"
 
 #. Reminder Preference: Max Volume for Multiple-Ring reminders Description (false)
 #: translations/strings.xml:1536( name="rmd_EPr_multiple_maxvolume_desc_false")
 msgid "Astrid will use the system-setting for the volume"
-msgstr ""
+msgstr "Astrid pourra utiliser le système de fixation pour le volume"
 
 #. Reminder Preference: Vibrate Title
 #: translations/strings.xml:1539( name="rmd_EPr_vibrate_title")
@@ -2235,7 +2241,7 @@ msgstr "Astrid s'affichera afin de vous encourager lors des rappels"
 #. Reminder Preference: Nagging Description (false)
 #: translations/strings.xml:1550( name="rmd_EPr_nagging_desc_false")
 msgid "Astrid will not give you any encouragement messages"
-msgstr ""
+msgstr "Astrid ne vous donnera pas les messages d'encouragements"
 
 #. Reminder Preference: Snooze Dialog Title
 #: translations/strings.xml:1553( name="rmd_EPr_snooze_dialog_title")

@@ -37,7 +37,7 @@ public class Database extends AbstractDatabase {
      * Database version number. This variable must be updated when database
      * tables are updated, as it determines whether a database needs updating.
      */
-    public static final int VERSION = 18;
+    public static final int VERSION = 22;
 
     /**
      * Database name (must be unique)
@@ -94,39 +94,60 @@ public class Database extends AbstractDatabase {
     protected synchronized void onCreateTables() {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE INDEX IF NOT EXISTS md_tid ON ").
-            append(Metadata.TABLE).append('(').
-                append(Metadata.TASK.name).
-            append(')');
+        append(Metadata.TABLE).append('(').
+        append(Metadata.TASK.name).
+        append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
 
         sql.append("CREATE INDEX IF NOT EXISTS md_tkid ON ").
-            append(Metadata.TABLE).append('(').
-                append(Metadata.TASK.name).append(',').
-                append(Metadata.KEY.name).
-            append(')');
+        append(Metadata.TABLE).append('(').
+        append(Metadata.TASK.name).append(',').
+        append(Metadata.KEY.name).
+        append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
 
         sql.append("CREATE INDEX IF NOT EXISTS so_id ON ").
-            append(StoreObject.TABLE).append('(').
-                append(StoreObject.TYPE.name).append(',').
-                append(StoreObject.ITEM.name).
-            append(')');
+        append(StoreObject.TABLE).append('(').
+        append(StoreObject.TYPE.name).append(',').
+        append(StoreObject.ITEM.name).
+        append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
 
         sql.append("CREATE INDEX IF NOT EXISTS up_tid ON ").
-            append(Update.TABLE).append('(').
-                append(Update.TASK.name).
-            append(')');
+        append(Update.TABLE).append('(').
+        append(Update.TASK.name).
+        append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
 
         sql.append("CREATE INDEX IF NOT EXISTS up_pid ON ").
-            append(Update.TABLE).append('(').
-                append(Update.TAGS.name).
-            append(')');
+        append(Update.TABLE).append('(').
+        append(Update.TAGS.name).
+        append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
+        sql.append("CREATE INDEX IF NOT EXISTS up_tkid ON ").
+        append(Update.TABLE).append('(').
+        append(Update.TASK_LOCAL.name).
+        append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
+        sql.append("CREATE INDEX IF NOT EXISTS up_tgl ON ").
+        append(Update.TABLE).append('(').
+        append(Update.TAGS_LOCAL.name).
+        append(')');
+        database.execSQL(sql.toString());
+        sql.setLength(0);
+
+        sql.append("CREATE UNIQUE INDEX IF NOT EXISTS t_rid ON ").
+        append(Task.TABLE).append('(').
+        append(Task.REMOTE_ID.name).
+        append(')');
         database.execSQL(sql.toString());
         sql.setLength(0);
     }
@@ -138,7 +159,7 @@ public class Database extends AbstractDatabase {
         switch(oldVersion) {
         case 1: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
-                Task.RECURRENCE.accept(visitor, null));
+                    Task.RECURRENCE.accept(visitor, null));
         }
         case 2: {
             for(Property<?> property : new Property<?>[] { Metadata.VALUE2,
@@ -153,19 +174,19 @@ public class Database extends AbstractDatabase {
         }
         case 4: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
-                Task.DETAILS.accept(visitor, null));
+                    Task.DETAILS.accept(visitor, null));
         }
         case 5: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
-                Task.REMINDER_SNOOZE.accept(visitor, null));
+                    Task.REMINDER_SNOOZE.accept(visitor, null));
         }
         case 6: {
             database.execSQL("ALTER TABLE " + Task.TABLE.name + " ADD " +
-                Task.DETAILS_DATE.accept(visitor, null));
+                    Task.DETAILS_DATE.accept(visitor, null));
         }
         case 7: {
             database.execSQL("ALTER TABLE " + Metadata.TABLE.name + " ADD " +
-                Metadata.CREATION_DATE.accept(visitor, null));
+                    Metadata.CREATION_DATE.accept(visitor, null));
         }
         case 8: {
             // not needed anymore
@@ -232,6 +253,55 @@ public class Database extends AbstractDatabase {
         } catch (SQLiteException e) {
             Log.e("astrid", "db-upgrade-" + oldVersion + "-" + newVersion, e);
         }
+        case 18: try {
+            database.execSQL("ALTER TABLE " + Metadata.TABLE.name + " ADD " +
+                    Metadata.VALUE6.accept(visitor, null));
+            database.execSQL("ALTER TABLE " + Metadata.TABLE.name + " ADD " +
+                    Metadata.VALUE7.accept(visitor, null));
+        } catch (SQLiteException e) {
+            Log.e("astrid", "db-upgrade-" + oldVersion + "-" + newVersion, e);
+        }
+        case 19: try {
+            for(Property<?> property : new Property<?>[] { Update.TASK_LOCAL, Update.TAGS_LOCAL })
+                database.execSQL("ALTER TABLE " + Update.TABLE.name + " ADD " +
+                        property.accept(visitor, null));
+            database.execSQL("CREATE INDEX IF NOT EXISTS up_tid ON " +
+                    Update.TABLE + "(" + Update.TASK_LOCAL.name + ")");
+            database.execSQL("CREATE INDEX IF NOT EXISTS up_tid ON " +
+                    Update.TABLE + "(" + Update.TAGS_LOCAL.name + ")");
+
+        } catch (SQLiteException e) {
+            Log.e("astrid", "db-upgrade-" + oldVersion + "-" + newVersion, e);
+        }
+        case 20: try {
+            String tasks = Task.TABLE.name;
+            String id = Task.ID.name;
+            String remoteId = Task.REMOTE_ID.name;
+
+            // Delete any items that have duplicate remote ids
+            String deleteDuplicates = String.format("DELETE FROM %s WHERE %s IN (SELECT %s.%s FROM %s, %s AS t2 WHERE %s.%s < t2.%s AND %s.%s = t2.%s AND %s.%s > 0 GROUP BY %s.%s)",
+                    tasks, id, tasks, id, tasks, tasks, tasks, id, id, tasks, remoteId, remoteId, tasks, remoteId, tasks, id);
+
+            // Change all items with remote id = 0 to be remote id = NULL
+            String changeZeroes = String.format("UPDATE %s SET %s = NULL WHERE %s = 0", tasks, remoteId, remoteId);
+
+            database.execSQL(deleteDuplicates);
+            database.execSQL(changeZeroes);
+
+            onCreateTables();
+
+        } catch (SQLiteException e) {
+            Log.e("astrid", "db-upgrade-" + oldVersion + "-" + newVersion, e);
+        }
+        case 21: try {
+            for(Property<?> property : new Property<?>[] { Update.OTHER_USER_ID, Update.OTHER_USER })
+                database.execSQL("ALTER TABLE " + Update.TABLE.name + " ADD " +
+                        property.accept(visitor, null));
+
+        }
+        catch (SQLiteException e) {
+            Log.e("astrid", "db-upgrade-" + oldVersion + "-" + newVersion, e);
+        }
 
         return true;
         }
@@ -250,7 +320,7 @@ public class Database extends AbstractDatabase {
             String tableName, Property<?>[] properties) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append('(').
-            append(AbstractModel.ID_PROPERTY).append(" INTEGER PRIMARY KEY AUTOINCREMENT");
+        append(AbstractModel.ID_PROPERTY).append(" INTEGER PRIMARY KEY AUTOINCREMENT");
         for(Property<?> property : properties) {
             if(AbstractModel.ID_PROPERTY.name.equals(property.name))
                 continue;

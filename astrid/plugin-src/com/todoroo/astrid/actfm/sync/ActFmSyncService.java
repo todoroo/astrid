@@ -47,18 +47,22 @@ import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.dao.MetadataDao;
 import com.todoroo.astrid.dao.TagDataDao;
 import com.todoroo.astrid.dao.TaskDao;
+import com.todoroo.astrid.dao.TaskDao.TaskCriteria;
 import com.todoroo.astrid.dao.UpdateDao;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.MetadataApiDao.MetadataCriteria;
 import com.todoroo.astrid.data.RemoteModel;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.data.TaskApiDao;
 import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.helper.ImageDiskCache;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
 import com.todoroo.astrid.service.TagDataService;
 import com.todoroo.astrid.service.TaskService;
+import com.todoroo.astrid.sync.SyncV2Provider.SyncExceptionHandler;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.utility.Flags;
 
@@ -121,7 +125,8 @@ public final class ActFmSyncService {
                 if (actFmPreferenceService.isOngoing() && model.getTransitory("task-edit-save") == null)
                     return;
                 final ContentValues setValues = model.getSetValues();
-                if(setValues == null || !checkForToken() || setValues.containsKey(RemoteModel.REMOTE_ID_PROPERTY_NAME))
+                if(setValues == null || !checkForToken() ||
+                        setValues.containsKey(RemoteModel.REMOTE_ID_PROPERTY_NAME))
                     return;
                 if(completedRepeatingTask(model))
                     return;
@@ -265,7 +270,17 @@ public final class ActFmSyncService {
             else
                 result = actFmInvoker.post("comment_add", picture, params.toArray(new Object[params.size()]));
             update.setValue(Update.REMOTE_ID, result.optLong("id"));
-            update.setValue(Update.PICTURE, result.optString("picture"));
+            ImageDiskCache imageCache = ImageDiskCache.getInstance();
+            //TODO figure out a way to replace local image files with the url
+            String commentPicture = result.optString("picture");
+            if (!TextUtils.isEmpty(commentPicture)) {
+                String cachedPicture = update.getValue(Update.PICTURE);
+                if (!TextUtils.isEmpty(cachedPicture) && imageCache.contains(cachedPicture)) {
+                    imageCache.move(update.getValue(Update.PICTURE), commentPicture);
+                }
+                update.setValue(Update.PICTURE, result.optString("picture"));
+            }
+
             updateDao.saveExisting(update);
         } catch (IOException e) {
             if (notPermanentError(e))
@@ -282,15 +297,27 @@ public final class ActFmSyncService {
      * Synchronize with server when data changes
      */
     public void pushTaskOnSave(Task task, ContentValues values) {
-        long remoteId;
-        if(task.containsValue(Task.REMOTE_ID)) {
+        Task taskForRemote = taskService.fetchById(task.getId(), Task.REMOTE_ID, Task.CREATION_DATE);
+
+        long remoteId = 0;
+        if(task.containsNonNullValue(Task.REMOTE_ID)) {
             remoteId = task.getValue(Task.REMOTE_ID);
         } else {
-            Task taskForRemote = taskService.fetchById(task.getId(), Task.REMOTE_ID);
             if(taskForRemote == null)
                 return;
-            remoteId = taskForRemote.getValue(Task.REMOTE_ID);
+            if(taskForRemote.containsNonNullValue(Task.REMOTE_ID))
+                remoteId = taskForRemote.getValue(Task.REMOTE_ID);
         }
+
+        long creationDate;
+        if (task.containsValue(Task.CREATION_DATE)) {
+            creationDate = task.getValue(Task.CREATION_DATE);
+        } else {
+            if (taskForRemote == null)
+                return;
+            creationDate = taskForRemote.getValue(Task.CREATION_DATE);
+        }
+
         boolean newlyCreated = remoteId == 0;
 
         ArrayList<Object> params = new ArrayList<Object>();
@@ -305,6 +332,8 @@ public final class ActFmSyncService {
                 if(task.getValue(Task.TITLE).equals(title))
                     return;
             }
+            if(TaskApiDao.insignificantChange(values))
+                return;
             values = task.getMergedValues();
         }
 
@@ -341,8 +370,11 @@ public final class ActFmSyncService {
             if(task.getValue(Task.USER_ID) == Task.USER_ID_EMAIL) {
                 try {
                     JSONObject user = new JSONObject(task.getValue(Task.USER));
-                    params.add("user_email");
-                    params.add(user.get("email"));
+                    String userEmail = user.optString("email");
+                    if (!TextUtils.isEmpty(userEmail)) {
+                        params.add("user_email");
+                        params.add(userEmail);
+                    }
                 } catch (JSONException e) {
                     Log.e("Error parsing user", task.getValue(Task.USER), e);
                 }
@@ -382,6 +414,8 @@ public final class ActFmSyncService {
 
         if(params.size() == 0 || !checkForToken())
             return;
+
+        params.add("created_at"); params.add(creationDate);
 
         if(!newlyCreated) {
             params.add("id"); params.add(remoteId);
@@ -575,7 +609,7 @@ public final class ActFmSyncService {
      * Fetch tagData listing asynchronously
      */
     public void fetchTagDataDashboard(boolean manual, final Runnable done) {
-        invokeFetchList("goal", manual, new ListItemProcessor<TagData>() {
+        invokeFetchList("goal", manual, null, new ListItemProcessor<TagData>() {
             @Override
             protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
                 TagData remote = new TagData();
@@ -595,6 +629,12 @@ public final class ActFmSyncService {
                                 Order.asc(TagData.REMOTE_ID)));
                 return cursorToMap(cursor, taskDao, TagData.REMOTE_ID, TagData.ID);
             }
+
+            @Override
+            protected Class<TagData> typeClass() {
+                return TagData.class;
+            }
+
         }, done, "goals");
     }
 
@@ -637,7 +677,7 @@ public final class ActFmSyncService {
         if(task.getValue(TagData.REMOTE_ID) == 0)
             return;
         result = actFmInvoker.invoke("task_show", "id", task.getValue(Task.REMOTE_ID),
-                    "token", token);
+                "token", token);
 
         ArrayList<Metadata> metadata = new ArrayList<Metadata>();
         JsonHelper.taskFromJson(result, task, metadata);
@@ -678,13 +718,14 @@ public final class ActFmSyncService {
      * @param manual
      * @param done
      */
-    public void fetchActiveTasks(final boolean manual, Runnable done) {
-        invokeFetchList("task", manual, new ListItemProcessor<Task>() {
+    public void fetchActiveTasks(final boolean manual, SyncExceptionHandler handler, Runnable done) {
+        invokeFetchList("task", manual, handler, new ListItemProcessor<Task>() {
             @Override
             protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
                 Task remote = new Task();
 
                 ArrayList<Metadata> metadata = new ArrayList<Metadata>();
+                HashSet<Long> ids = new HashSet<Long>(list.length());
                 for(int i = 0; i < list.length(); i++) {
                     JSONObject item = list.getJSONObject(i);
                     readIds(locals, item, remote);
@@ -703,8 +744,16 @@ public final class ActFmSyncService {
 
                     Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
                     taskService.save(remote);
+                    ids.add(remote.getId());
                     metadataService.synchronizeMetadata(remote.getId(), metadata, MetadataCriteria.withKey(TagService.KEY));
                     remote.clear();
+                }
+
+                if(manual) {
+                    Long[] localIds = ids.toArray(new Long[ids.size()]);
+                    taskService.deleteWhere(Criterion.and(TaskCriteria.activeAndVisible(),
+                            Task.REMOTE_ID.isNotNull(),
+                            Criterion.not(Task.ID.in(localIds))));
                 }
             }
 
@@ -714,6 +763,11 @@ public final class ActFmSyncService {
                         Task.REMOTE_ID).where(Task.REMOTE_ID.in(remoteIds)).orderBy(
                                 Order.asc(Task.REMOTE_ID)));
                 return cursorToMap(cursor, taskDao, Task.REMOTE_ID, Task.ID);
+            }
+
+            @Override
+            protected Class<Task> typeClass() {
+                return Task.class;
             }
         }, done, "active_tasks");
     }
@@ -725,12 +779,13 @@ public final class ActFmSyncService {
      * @param done
      */
     public void fetchTasksForTag(final TagData tagData, final boolean manual, Runnable done) {
-        invokeFetchList("task", manual, new ListItemProcessor<Task>() {
+        invokeFetchList("task", manual, null, new ListItemProcessor<Task>() {
             @Override
             protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
                 Task remote = new Task();
 
                 ArrayList<Metadata> metadata = new ArrayList<Metadata>();
+                HashSet<Long> ids = new HashSet<Long>(list.length());
                 for(int i = 0; i < list.length(); i++) {
 
                     JSONObject item = list.getJSONObject(i);
@@ -744,16 +799,20 @@ public final class ActFmSyncService {
                             StatisticsService.reportEvent(StatisticsConstants.ACTFM_TASK_COMPLETED);
                     }
 
-
                     Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
                     taskService.save(remote);
+                    ids.add(remote.getId());
                     metadataService.synchronizeMetadata(remote.getId(), metadata, MetadataCriteria.withKey(TagService.KEY));
                     remote.clear();
                 }
 
                 if(manual) {
-                    for(Long localId : locals.values())
-                        taskDao.delete(localId);
+                    Long[] localIds = ids.toArray(new Long[ids.size()]);
+                    taskService.deleteWhere(Criterion.and(
+                            TagService.memberOfTagData(tagData.getValue(TagData.REMOTE_ID)),
+                            TaskCriteria.activeAndVisible(),
+                            Task.REMOTE_ID.isNotNull(),
+                            Criterion.not(Task.ID.in(localIds))));
                 }
             }
 
@@ -764,8 +823,15 @@ public final class ActFmSyncService {
                                 Order.asc(Task.REMOTE_ID)));
                 return cursorToMap(cursor, taskDao, Task.REMOTE_ID, Task.ID);
             }
+
+            @Override
+            protected Class<Task> typeClass() {
+                return Task.class;
+            }
         }, done, "tasks:" + tagData.getId(), "tag_id", tagData.getValue(TagData.REMOTE_ID));
     }
+
+
 
     /**
      * Fetch updates for the given tagData asynchronously
@@ -774,32 +840,10 @@ public final class ActFmSyncService {
      * @param done
      */
     public void fetchUpdatesForTag(final TagData tagData, final boolean manual, Runnable done) {
-        invokeFetchList("activity", manual, new ListItemProcessor<Update>() {
-            @Override
-            protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
-                Update remote = new Update();
-                for(int i = 0; i < list.length(); i++) {
-                    JSONObject item = list.getJSONObject(i);
-                    readIds(locals, item, remote);
-                    JsonHelper.updateFromJson(item, remote);
+        invokeFetchList("activity", manual, null, new UpdateListItemProcessor(), done,
+                "updates:" + tagData.getId(), "tag_id", tagData.getValue(TagData.REMOTE_ID));
 
-                    Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
-                    if(remote.getId() == AbstractModel.NO_ID)
-                        updateDao.createNew(remote);
-                    else
-                        updateDao.saveExisting(remote);
-                    remote.clear();
-                }
-            }
-
-            @Override
-            protected HashMap<Long, Long> getLocalModels() {
-                TodorooCursor<Update> cursor = updateDao.query(Query.select(Update.ID,
-                        Update.REMOTE_ID).where(Update.REMOTE_ID.in(remoteIds)).orderBy(
-                                Order.asc(Update.REMOTE_ID)));
-                return cursorToMap(cursor, updateDao, Update.REMOTE_ID, Update.ID);
-            }
-        }, done, "updates:" + tagData.getId(), "tag_id", tagData.getValue(TagData.REMOTE_ID));
+        pushQueuedUpdates(tagData);
     }
 
     /**
@@ -809,32 +853,116 @@ public final class ActFmSyncService {
      * @param runnable
      */
     public void fetchUpdatesForTask(final Task task, boolean manual, Runnable done) {
-        invokeFetchList("activity", manual, new ListItemProcessor<Update>() {
-            @Override
-            protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
-                Update remote = new Update();
-                for(int i = 0; i < list.length(); i++) {
-                    JSONObject item = list.getJSONObject(i);
-                    readIds(locals, item, remote);
-                    JsonHelper.updateFromJson(item, remote);
+        invokeFetchList("activity", manual, null, new UpdateListItemProcessor(), done,
+                "comments:" + task.getId(), "task_id", task.getValue(Task.REMOTE_ID));
 
-                    Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
-                    if(remote.getId() == AbstractModel.NO_ID)
-                        updateDao.createNew(remote);
-                    else
-                        updateDao.saveExisting(remote);
-                    remote.clear();
-                }
-            }
+        pushQueuedUpdates(task);
+    }
 
-            @Override
-            protected HashMap<Long, Long> getLocalModels() {
-                TodorooCursor<Update> cursor = updateDao.query(Query.select(Update.ID,
-                        Update.REMOTE_ID).where(Update.REMOTE_ID.in(remoteIds)).orderBy(
-                                Order.asc(Update.REMOTE_ID)));
-                return cursorToMap(cursor, updateDao, Update.REMOTE_ID, Update.ID);
+    /**
+     * Fetch updates for the current user asynchronously
+     * @param manual
+     * @param done
+     */
+    public void fetchPersonalUpdates(boolean manual, Runnable done) {
+        invokeFetchList("activity", manual, null, new UpdateListItemProcessor(), done, "personal");
+
+    }
+
+    private void pushQueuedUpdates(TagData tagData) {
+
+        Criterion criterion = null;
+        if (tagData.getValue(TagData.REMOTE_ID) < 1) {
+            criterion = Criterion.and(Update.REMOTE_ID.eq(0),
+                    Update.TAGS_LOCAL.like("%," + tagData.getId() + ",%"));
+        }
+        else {
+            criterion = Criterion.and(Update.REMOTE_ID.eq(0),
+                    Criterion.or(Update.TAGS.like("%," + tagData.getValue(TagData.REMOTE_ID) + ",%"),
+                            Update.TAGS_LOCAL.like("%," + tagData.getId() + ",%")));
+        }
+
+
+        Update template = new Update();
+        template.setValue(Update.TAGS, "," + tagData.getValue(TagData.REMOTE_ID) + ",");
+        updateDao.update(criterion, template);
+
+        TodorooCursor<Update> cursor = updateDao.query(Query.select(Update.ID, Update.PICTURE).where(criterion));
+        pushQueuedUpdates(cursor);
+    }
+
+    private void pushQueuedUpdates(Task task) {
+        Criterion criterion = null;
+        if (task.containsNonNullValue(Task.REMOTE_ID)) {
+            criterion = Criterion.and(Update.REMOTE_ID.eq(0),
+                    Criterion.or(Update.TASK.eq(task.getValue(Task.REMOTE_ID)), Update.TASK_LOCAL.eq(task.getId())));
+        } else
+            return;
+
+        Update template = new Update();
+        template.setValue(Update.TASK, task.getValue(Task.REMOTE_ID)); //$NON-NLS-1$
+        updateDao.update(criterion, template);
+
+        TodorooCursor<Update> cursor = updateDao.query(Query.select(Update.ID, Update.PICTURE).where(criterion));
+        pushQueuedUpdates(cursor);
+    }
+
+    private void pushQueuedUpdates( TodorooCursor<Update> cursor) {
+
+        try {
+            final ImageDiskCache imageCache = ImageDiskCache.getInstance();
+            for(int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToNext();
+                final Update update = new Update(cursor);
+                new Thread(new Runnable() {
+                    public void run() {
+                        Bitmap picture = null;
+                        if(imageCache != null && imageCache.contains(update.getValue(Update.PICTURE))) {
+                            try {
+                                picture = imageCache.get(update.getValue(Update.PICTURE));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        pushUpdate(update.getId(), picture);
+                    }
+                }).start();
             }
-        }, done, "comments:" + task.getId(), "task_id", task.getValue(Task.REMOTE_ID));
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private class UpdateListItemProcessor extends ListItemProcessor<Update> {
+        @Override
+        protected void mergeAndSave(JSONArray list, HashMap<Long,Long> locals) throws JSONException {
+            Update remote = new Update();
+            for(int i = 0; i < list.length(); i++) {
+                JSONObject item = list.getJSONObject(i);
+                readIds(locals, item, remote);
+                JsonHelper.updateFromJson(item, remote);
+
+                Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
+                if(remote.getId() == AbstractModel.NO_ID)
+                    updateDao.createNew(remote);
+                else
+                    updateDao.saveExisting(remote);
+                remote.clear();
+            }
+        }
+
+        @Override
+        protected HashMap<Long, Long> getLocalModels() {
+            TodorooCursor<Update> cursor = updateDao.query(Query.select(Update.ID,
+                    Update.REMOTE_ID).where(Update.REMOTE_ID.in(remoteIds)).orderBy(
+                            Order.asc(Update.REMOTE_ID)));
+            return cursorToMap(cursor, updateDao, Update.REMOTE_ID, Update.ID);
+        }
+
+        @Override
+        protected Class<Update> typeClass() {
+            return Update.class;
+        }
     }
 
     /**
@@ -852,7 +980,7 @@ public final class ActFmSyncService {
         return result.optString("picture");
     }
 
-    private MultipartEntity buildPictureData(Bitmap bitmap) {
+    public static MultipartEntity buildPictureData(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         if(bitmap.getWidth() > 512 || bitmap.getHeight() > 512) {
             float scale = Math.min(512f / bitmap.getWidth(), 512f / bitmap.getHeight());
@@ -870,7 +998,7 @@ public final class ActFmSyncService {
 
     /** invoke authenticated method against the server */
     public JSONObject invoke(String method, Object... getParameters) throws IOException,
-            ActFmServiceException {
+    ActFmServiceException {
         if(!checkForToken())
             throw new ActFmServiceException("not logged in");
         Object[] parameters = new Object[getParameters.length + 2];
@@ -888,15 +1016,18 @@ public final class ActFmSyncService {
 
         abstract protected HashMap<Long, Long> getLocalModels();
 
+        abstract protected Class<TYPE> typeClass();
+
         abstract protected void mergeAndSave(JSONArray list,
                 HashMap<Long,Long> locals) throws JSONException;
 
         public void process(JSONArray list) throws JSONException {
             readRemoteIds(list);
-            HashMap<Long, Long> locals = getLocalModels();
-            mergeAndSave(list, locals);
+            synchronized (typeClass()) {
+                HashMap<Long, Long> locals = getLocalModels();
+                mergeAndSave(list, locals);
+            }
         }
-
 
         protected void readRemoteIds(JSONArray list) throws JSONException {
             remoteIds = new Long[list.length()];
@@ -935,7 +1066,7 @@ public final class ActFmSyncService {
     }
 
     /** Call sync method */
-    private void invokeFetchList(final String model, final boolean manual,
+    private void invokeFetchList(final String model, final boolean manual, final SyncExceptionHandler handler,
             final ListItemProcessor<?> processor, final Runnable done, final String lastSyncKey,
             Object... params) {
         if(!checkForToken())
@@ -959,7 +1090,10 @@ public final class ActFmSyncService {
                     if(done != null)
                         done.run();
                 } catch (IOException e) {
-                    handleException("io-exception-list-" + model, e);
+                    if (handler != null)
+                        handler.handleException("io-exception-list-" + model, e);
+                    else
+                        handleException("io-exception-list-" + model, e);
                 } catch (JSONException e) {
                     handleException("json: " + result.toString(), e);
                 }
@@ -992,6 +1126,9 @@ public final class ActFmSyncService {
         public static void updateFromJson(JSONObject json, Update model) throws JSONException {
             model.setValue(Update.REMOTE_ID, json.getLong("id"));
             readUser(json.getJSONObject("user"), model, Update.USER_ID, Update.USER);
+            if (json.has("other_user")) {
+                readUser(json.getJSONObject("other_user"), model, Update.OTHER_USER_ID, Update.OTHER_USER);
+            }
             model.setValue(Update.ACTION, json.getString("action"));
             model.setValue(Update.ACTION_CODE, json.getString("action_code"));
             model.setValue(Update.TARGET_NAME, json.getString("target_name"));

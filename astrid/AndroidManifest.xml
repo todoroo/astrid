@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.timsu.astrid"
-          android:versionName="3.9.2.3"
-          android:versionCode="210">
+          android:versionName="4.0-beta"
+          android:versionCode="250">
           
   <!-- widgets, alarms, and services will break if Astrid is installed on SD card -->
   <!--    android:installLocation="internalOnly"> -->
+       
       
   <!-- ================================================== Used Permissions = -->
 
@@ -22,6 +23,7 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
   <!-- for analytics -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <!-- for google tasks -->
   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
   <uses-permission android:name="android.permission.USE_CREDENTIALS" />
@@ -64,19 +66,17 @@
 
   <uses-sdk android:targetSdkVersion="10"
             android:minSdkVersion="7" />
-  <supports-screens />
+  <supports-screens android:xlargeScreens="true" android:largeScreens="true"/>
   
   <application android:icon="@drawable/icon" android:label="@string/app_name"
                android:theme="@style/Theme"
-               android:name="greendroid.app.GDApplication">
-               
+               android:name="greendroid.app.GDApplication" 
+               android:hardwareAccelerated="true" 
+               android:manageSpaceActivity="com.todoroo.astrid.core.OldTaskPreferences">
+  
     <!-- ====================================================== Activities = -->
         
     <!-- Activity that displays task list -->
-    <activity android:name="com.todoroo.astrid.welcome.WelcomeLogin"
-              android:windowSoftInputMode="stateHidden"
-              android:screenOrientation="portrait">
-    </activity>
     <activity android:name="com.todoroo.astrid.activity.TaskListActivity"
               android:windowSoftInputMode="stateHidden|adjustResize">
       <intent-filter>
@@ -117,17 +117,6 @@
             <action android:name="android.intent.action.MAIN" />
         </intent-filter>
     </activity>
-    <!-- Activity that displays filter list -->
-    <activity android:name="com.todoroo.astrid.activity.FilterListActivity"
-              android:launchMode="singleTop"
-              android:finishOnTaskLaunch="true">
-      <intent-filter>
-        <action android:name="android.intent.action.SEARCH" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-      <meta-data android:name="android.app.searchable" 
-                 android:resource="@xml/filter_list_searchable" />
-    </activity>
     <!-- Activity that creates or edits tasks -->
     <activity android:name="com.todoroo.astrid.activity.TaskEditActivity"
               android:windowSoftInputMode="stateHidden">
@@ -155,10 +144,13 @@
     </activity>
 
     <!-- Start of Crittercism.com Code -->
-    <activity android:name="com.crittercism.FeedbackActivity" />
-    <activity android:name="com.crittercism.FeedbackCreateActivity" />
-    <activity android:name="com.crittercism.FeedbackDetailsActivity" />
-    <activity android:name="com.crittercism.NotificationActivity" />
+	<activity android:name="com.crittercism.NewFeedbackSpringboardActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
+	<activity android:name="com.crittercism.NewFeedbackIssueListActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
+	<activity android:name="com.crittercism.NewFeedbackQuestionListActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
+	<activity android:name="com.crittercism.NewFeedbackItemDetailsActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
+	<activity android:name="com.crittercism.NewFeedbackCreateActivity" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
+    <activity android:name="com.crittercism.NotificationActivity"/>
+
     <service android:name="com.crittercism.service.CrittercismService"
     	android:process="com.crittercism.service" android:exported="true">
     	<intent-filter>
@@ -176,6 +168,12 @@
     <!-- ======================================================= Receivers = -->
 
     <receiver android:name="com.todoroo.astrid.reminders.Notifications" />
+    
+    <receiver android:name="com.todoroo.astrid.reminders.Notifications$ShowNotificationReceiver">
+      <intent-filter> 
+        <action android:name="com.timsu.astrid.IN_APP_NOTIFY"/>
+      </intent-filter>
+    </receiver>
     
     <!-- widgets -->
     <receiver android:name="com.todoroo.astrid.widget.TasksWidget">
@@ -241,7 +239,7 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
-    <activity android:name="com.todoroo.astrid.activity.BeastModePreferenceActivity"
+    <activity android:name="com.todoroo.astrid.activity.BeastModePreferences"
               android:theme="@android:style/Theme">
     </activity>
         
@@ -287,7 +285,7 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
-    <activity android:name="com.todoroo.astrid.core.CustomFilterActivity" />
+    <activity android:name="com.todoroo.astrid.core.CustomFilterActivity" android:theme="@style/Theme.Dialog" />
     <activity android:name="com.todoroo.astrid.core.CustomFilterExposer$DeleteActivity" android:theme="@style/Theme.FullTransparent" />
     <activity android:name="com.todoroo.astrid.tags.TagFilterExposer$DeleteTagActivity" android:theme="@style/Theme.FullTransparent" />
     <activity android:name="com.todoroo.astrid.tags.TagFilterExposer$RenameTagActivity" android:theme="@style/Theme.FullTransparent" />
@@ -308,8 +306,7 @@
             
     <!-- actfm -->
     <activity android:name="com.todoroo.astrid.actfm.ActFmLoginActivity"
-              android:configChanges="keyboardHidden"
-              android:screenOrientation="portrait"/>
+              android:configChanges="keyboardHidden"/>
     <activity android:name="com.todoroo.astrid.actfm.OAuthLoginActivity" />
     <activity android:name="com.todoroo.astrid.actfm.ActFmPreferences"
               android:theme="@android:style/Theme"
@@ -329,7 +326,7 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </service>
-    <activity android:name="com.todoroo.astrid.actfm.TagViewActivity"
+    <activity android:name="com.todoroo.astrid.actfm.TagViewWrapperActivity"
               android:windowSoftInputMode="stateHidden|adjustResize"
               android:theme="@style/Theme">
         <intent-filter>
@@ -340,16 +337,10 @@
     <activity android:name="com.todoroo.astrid.actfm.TagCreateActivity"
               android:theme="@android:style/Theme.Dialog"/>
     <activity android:name="com.todoroo.astrid.actfm.TagSettingsActivity"
-              android:windowSoftInputMode="stateHidden"/>
+              android:windowSoftInputMode="stateHidden"
+              android:theme="@style/Theme.Dialog"/>
     <activity android:name="com.todoroo.astrid.actfm.TagUpdatesActivity"
               android:windowSoftInputMode="stateHidden"/>
-    <!-- <receiver android:name="com.todoroo.astrid.actfm.EditPeopleExposer">
-      <intent-filter>
-        <action android:name="com.todoroo.astrid.REQUEST_ACTIONS" />
-        <action android:name="com.todoroo.astrid.EDIT_PEOPLE" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver> -->
     <receiver android:name="com.timsu.astrid.C2DMReceiver" permission="com.google.android.c2dm.permission.SEND">
       <!-- Receive the actual message -->
       <intent-filter>
@@ -364,7 +355,7 @@
     </receiver>                
     
     <!-- gtasks -->
-    <activity android:name="com.todoroo.astrid.gtasks.GtasksListActivity"
+    <activity android:name="com.todoroo.astrid.gtasks.GtasksListFragment"
               android:windowSoftInputMode="stateHidden|adjustResize"
               android:theme="@style/Theme">
       <intent-filter>
@@ -411,12 +402,6 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </service>        
-    <receiver android:name="com.todoroo.astrid.gtasks.GtasksSyncActionExposer">
-      <intent-filter>
-        <action android:name="com.todoroo.astrid.REQUEST_SYNC_ACTIONS" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver>
     <receiver android:name="com.todoroo.astrid.gtasks.GtasksStartupReceiver">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -493,24 +478,7 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
-    <activity android:name="com.todoroo.astrid.notes.EditNoteActivity" 
-              android:theme="@style/Theme.Dialog"/>
-    <!-- <receiver android:name="com.todoroo.astrid.notes.EditNoteExposer">
-      <intent-filter>
-        <action android:name="com.todoroo.astrid.REQUEST_ACTIONS" />
-        <action android:name="com.todoroo.astrid.EDIT_NOTES" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver>       -->
-                  
-    <!-- timers -->
-    <!-- <receiver android:name="com.todoroo.astrid.timers.TimerActionExposer">
-      <intent-filter>
-        <action android:name="com.todoroo.astrid.REQUEST_ACTIONS" />
-        <action android:name="com.todoroo.astrid.TIMER_BUTTON" />
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </receiver> -->
+
     <receiver android:name="com.todoroo.astrid.timers.TimerFilterExposer">
       <intent-filter android:priority="10000">
         <action android:name="com.todoroo.astrid.REQUEST_FILTERS" />
@@ -539,9 +507,8 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
-    <activity android:name="com.todoroo.astrid.reminders.NotificationActivity"
+    <activity android:name="com.todoroo.astrid.reminders.NotificationWrapperActivity"
               android:launchMode="singleTask"
-              android:screenOrientation="portrait"
               android:finishOnTaskLaunch="true"
               android:clearTaskOnLaunch="true">
     </activity>
@@ -647,10 +614,17 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
-    <activity android:name="com.todoroo.astrid.welcome.tutorial.WelcomeWalkthrough"
+    
+    <!-- Task Rabbit -->
+    <activity android:name="com.todoroo.astrid.taskrabbit.TaskRabbitControlSet"></activity>
+    <activity android:name="com.todoroo.astrid.taskrabbit.TaskRabbitMapActivity"></activity>
+    <activity android:name="com.todoroo.astrid.taskrabbit.TaskRabbitActivity"></activity><activity android:name="com.todoroo.astrid.welcome.tutorial.WelcomeWalkthrough"
               android:windowSoftInputMode="stateHidden"
               android:screenOrientation="portrait"></activity>
     
+    <!-- Uses Library -->      
+    <uses-library android:name="com.google.android.maps" android:required="false" />   
+  
   </application>
 
 </manifest>
