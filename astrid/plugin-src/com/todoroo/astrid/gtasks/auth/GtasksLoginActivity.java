@@ -33,8 +33,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.api.client.googleapis.extensions.android2.auth.GoogleAccountManager;
@@ -44,11 +47,13 @@ import com.todoroo.andlib.service.ContextManager;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
-import com.todoroo.astrid.gtasks.GtasksBackgroundService;
+import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.gtasks.GtasksPreferenceService;
-import com.todoroo.astrid.gtasks.api.GtasksService;
+import com.todoroo.astrid.gtasks.api.GtasksInvoker;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.StatisticsService;
+import com.todoroo.astrid.service.SyncV2Service;
+import com.todoroo.astrid.sync.SyncResultCallbackAdapter;
 
 /**
  * This activity allows users to sign in or log in to Google Tasks
@@ -60,6 +65,8 @@ import com.todoroo.astrid.service.StatisticsService;
 public class GtasksLoginActivity extends ListActivity {
 
     @Autowired private GtasksPreferenceService gtasksPreferenceService;
+
+    @Autowired private SyncV2Service syncService;
 
     // --- ui initialization
 
@@ -83,8 +90,14 @@ public class GtasksLoginActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         ContextManager.setContext(this);
 
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.gtasks_login_activity);
-        setTitle(R.string.gtasks_GLA_title);
+        TextView header = new TextView(this);
+        header.setText(R.string.actfm_GAA_title);
+        header.setTextAppearance(this, R.style.TextAppearance_Medium);
+        header.setPadding(10, 0, 10, 50);
+        getListView().addHeaderView(header);
 
         accountManager = new GoogleAccountManager(this);
         Account[] accounts = accountManager.getAccounts();
@@ -96,16 +109,25 @@ public class GtasksLoginActivity extends ListActivity {
         nameArray = accountNames.toArray(new String[accountNames.size()]);
 
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nameArray));
+        findViewById(R.id.empty_button).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        final ProgressDialog pd = DialogUtilities.progressDialog(this, this.getString(R.string.gtasks_GLA_authenticating));
-        pd.show();
-        final Account a = accountManager.getAccountByName(nameArray[position]);
-        accountName = a.name;
-        getAuthToken(a, pd);
+        int offsetPosition = position - 1; // Subtract 1 because apparently android counts the header view as part of the adapter.
+        if (offsetPosition >= 0 && offsetPosition < nameArray.length) {
+            final ProgressDialog pd = DialogUtilities.progressDialog(this, this.getString(R.string.gtasks_GLA_authenticating));
+            pd.show();
+            final Account a = accountManager.getAccountByName(nameArray[offsetPosition]);
+            accountName = a.name;
+            getAuthToken(a, pd);
+        }
     }
 
     private void getAuthToken(Account a, final ProgressDialog pd) {
@@ -139,7 +161,7 @@ public class GtasksLoginActivity extends ListActivity {
                 }.start();
             }
         };
-        accountManager.manager.getAuthToken(a, GtasksService.AUTH_TOKEN_TYPE, null, this, callback, null);
+        accountManager.manager.getAuthToken(a, GtasksInvoker.AUTH_TOKEN_TYPE, null, this, callback, null);
     }
 
     private void onAuthCancel() {
@@ -157,8 +179,17 @@ public class GtasksLoginActivity extends ListActivity {
      * Perform synchronization
      */
     protected void synchronize() {
-        startService(new Intent(null, null,
-                this, GtasksBackgroundService.class));
+        new Thread() {
+            @Override
+            public void run() {
+                syncService.synchronizeActiveTasks(false, new SyncResultCallbackAdapter() {
+                    @Override
+                    public void finished() {
+                        ContextManager.getContext().sendBroadcast(new Intent(AstridApiConstants.BROADCAST_EVENT_REFRESH));
+                    }
+                });
+            }
+        }.start();
         setResult(RESULT_OK);
         finish();
     }

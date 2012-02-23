@@ -167,7 +167,7 @@ public class EditPreferences extends TodorooPreferenceActivity {
     }
 
     private void showBeastMode() {
-        Intent intent = new Intent(this, BeastModePreferenceActivity.class);
+        Intent intent = new Intent(this, BeastModePreferences.class);
         intent.setAction(AstridApiConstants.ACTION_SETTINGS);
         startActivity(intent);
     }
@@ -291,25 +291,32 @@ public class EditPreferences extends TodorooPreferenceActivity {
                 taskService.clearDetails(Criterion.all);
                 Flags.set(Flags.REFRESH);
             }
+        } else if(r.getString(R.string.p_fullTaskTitle).equals(preference.getKey())) {
+            if (value != null && (Boolean) value)
+                preference.setSummary(R.string.EPr_fullTask_desc_enabled);
+            else
+                preference.setSummary(R.string.EPr_fullTask_desc_disabled);
         } else if (r.getString(R.string.p_theme).equals(preference.getKey())) {
             if(AndroidUtilities.getSdkVersion() < 5) {
                 preference.setEnabled(false);
                 preference.setSummary(R.string.EPr_theme_desc_unsupported);
             } else {
-                int index = 0;
+                int index = 1;
                 if(value != null)
                     index = AndroidUtilities.indexOf(r.getStringArray(R.array.EPr_theme_settings), (String)value);
                 preference.setSummary(getString(R.string.EPr_theme_desc,
                         r.getStringArray(R.array.EPr_themes)[index]));
             }
         }
-        // statistics service
-        else if (r.getString(R.string.p_statistics).equals(preference.getKey())) {
-            if (value != null && !(Boolean)value)
-                preference.setSummary(R.string.EPr_statistics_desc_disabled);
-            else
-                preference.setSummary(R.string.EPr_statistics_desc_enabled);
-        }
+
+        // pp preferences
+        else if (booleanPreference(preference, value, R.string.p_statistics,
+                R.string.EPr_statistics_desc_disabled, R.string.EPr_statistics_desc_enabled))
+            ;
+        else if (booleanPreference(preference, value, R.string.p_autoIdea,
+                R.string.EPr_ideaAuto_desc_disabled, R.string.EPr_ideaAuto_desc_enabled))
+            ;
+
 
         // voice input and output
         if(!addOnService.hasPowerPack())
@@ -333,6 +340,18 @@ public class EditPreferences extends TodorooPreferenceActivity {
             else
                 preference.setSummary(R.string.EPr_voiceInputCreatesTask_desc_enabled);
         }
+    }
+
+    protected boolean booleanPreference(Preference preference, Object value,
+            int key, int disabledString, int enabledString) {
+        if(getString(key).equals(preference.getKey())) {
+            if (value != null && !(Boolean)value)
+                preference.setSummary(disabledString);
+            else
+                preference.setSummary(enabledString);
+            return true;
+        }
+        return false;
     }
 
     @Override

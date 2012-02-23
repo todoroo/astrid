@@ -23,6 +23,10 @@ public class AstridPreferences {
 
     public static final String P_FIRST_LAUNCH = "fltime";  //$NON-NLS-1$
 
+    public static final String P_LAST_POPOVER = "lpopover";  //$NON-NLS-1$
+
+    private static final long MIN_POPOVER_TIME = 3 * 1000L;
+
     /** Set preference defaults, if unset. called at startup */
     public static void setPreferenceDefaults() {
         Context context = ContextManager.getContext();
@@ -35,7 +39,7 @@ public class AstridPreferences {
         Preferences.setIfUnset(prefs, editor, r, R.string.p_default_hideUntil_key, 0);
         Preferences.setIfUnset(prefs, editor, r, R.string.p_default_reminders_key, Task.NOTIFY_AT_DEADLINE | Task.NOTIFY_AFTER_DEADLINE);
         Preferences.setIfUnset(prefs, editor, r, R.string.p_rmd_default_random_hours, 0);
-        Preferences.setIfUnset(prefs, editor, r, R.string.p_fontSize, 20);
+        Preferences.setIfUnset(prefs, editor, r, R.string.p_fontSize, 18);
         Preferences.setIfUnset(prefs, editor, r, R.string.p_showNotes, false);
 
         editor.commit();
@@ -64,6 +68,15 @@ public class AstridPreferences {
     /** CurrentVersion: the currently installed version of Astrid */
     public static void setCurrentVersion(int version) {
         Preferences.setInt(P_CURRENT_VERSION, version);
+    }
+
+    /** If true, can show a help popover. If false, another one was recently shown */
+    public static boolean canShowPopover() {
+        long last = Preferences.getLong(P_LAST_POPOVER, 0);
+        if(System.currentTimeMillis() - last < MIN_POPOVER_TIME)
+            return false;
+        Preferences.setLong(P_LAST_POPOVER, System.currentTimeMillis());
+        return true;
     }
 
 }

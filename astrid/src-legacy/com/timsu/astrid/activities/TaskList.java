@@ -24,10 +24,11 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.astrid.activity.TaskListFragment;
 import com.todoroo.astrid.activity.TaskListActivity;
 
 /**
- * Legacy task shortcut, takes users to the updated {@link TaskListActivity}.
+ * Legacy task shortcut, takes users to the updated {@link TaskListFragment}.
  * This activity is around so users with existing desktop icons will
  * be able to still launch Astrid.
  *

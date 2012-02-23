@@ -1,81 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- See the file "LICENSE" for the full license governing this code. -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent" 
-    android:layout_height="fill_parent"
-    style="@style/Content"
+    android:layout_height="wrap_content"
+    android:background="?attr/asListPopoverBg"
     android:orientation="vertical">
 
-    <!-- Header -->
-    <LinearLayout
-        android:id="@+id/lists_header"
-        android:layout_width="fill_parent" 
-        android:layout_height="43dip"
-        android:layout_weight="1"
-        android:orientation="horizontal"
+
+    <!-- List -->
+    <ListView android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="320dip"
         android:layout_alignParentTop="true"
-        style="@style/Header">
-        
-        <!-- List Label -->
-        <TextView android:id="@+id/listLabel"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:paddingLeft="43dip"
-            android:layout_weight="100"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:text="@string/FLA_title"
-            style="@style/TextAppearance.TLA_Header"/>    
-
-       	<View 
-           android:layout_width="0.5dip"
-           android:layout_height="fill_parent"
-           android:background="#ff222222"/>
-        <ImageView android:id="@+id/back"
-           android:layout_width="43dip"
-           android:layout_height="fill_parent"
-           android:background="?attr/asHeaderButtonBackground"
-           android:padding="7dip"
-           android:src="@drawable/icn_tasks"
-           android:scaleType="fitCenter" />
-
-    </LinearLayout>
+        android:scrollbars="vertical"
+        android:divider="@android:color/transparent"
+        android:cacheColorHint="#00000000"/>
+    
+    <include layout="@layout/fla_separator"/>
 
     <!-- Footer -->
     <LinearLayout
         android:id="@+id/lists_footer"
         android:layout_width="fill_parent" 
         android:layout_height="50dip"
-        android:layout_weight="1"
         android:padding="5dip"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_alignParentBottom="true">
         
-        <Button
+        <TextView
 		    android:id="@+id/new_list_button"
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
-		    android:background="@drawable/footer_editbutton"
-		    android:gravity="center"
+		    android:gravity="left|center_vertical"
+	        android:background="?attr/asThemeTextColor"
+	        android:paddingLeft="12dip"
+		    android:drawableLeft="@drawable/filter_plus_button"
+            android:drawablePadding="13dip"
 		    android:text="@string/FLA_new_list"
-		    android:textStyle="bold"
-		    style="@style/TextAppearance.TEA_action"/>
+		    style="@style/TextAppearance.FLA_Button"/>
         
     </LinearLayout>
         
-
-    <!-- List -->
-    <ExpandableListView android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="100"
-        android:layout_below="@id/lists_header"
-        android:layout_above="@id/lists_footer"
-        android:scrollbars="vertical"
-        android:cacheColorHint="#00000000"/>
-    
-</RelativeLayout>
+</LinearLayout>
     

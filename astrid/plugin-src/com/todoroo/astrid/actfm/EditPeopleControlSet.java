@@ -5,6 +5,8 @@ import greendroid.widget.AsyncImageView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +18,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -23,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -54,6 +58,7 @@ import com.todoroo.astrid.service.ThemeService;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.ui.PeopleContainer;
 import com.todoroo.astrid.ui.PeopleContainer.OnAddNewPersonListener;
+import com.todoroo.astrid.ui.PeopleContainer.ParseSharedException;
 import com.todoroo.astrid.ui.PopupControlSet;
 
 public class EditPeopleControlSet extends PopupControlSet {
@@ -75,6 +80,8 @@ public class EditPeopleControlSet extends PopupControlSet {
     @Autowired ExceptionService exceptionService;
 
     @Autowired TagDataService tagDataService;
+
+    private final Fragment fragment;
 
     private final PeopleContainer sharedWithContainer;
 
@@ -102,21 +109,37 @@ public class EditPeopleControlSet extends PopupControlSet {
 
     private boolean assignedToMe = false;
 
+    private AssignedToUser taskRabbitUser = null;
+
+    private final List<AssignedChangedListener> listeners = new LinkedList<AssignedChangedListener>();
+
+    public interface AssignedChangedListener {
+        public boolean showTaskRabbitForUser(String name, JSONObject json);
+        public boolean shouldShowTaskRabbit();
+        public boolean didPostToTaskRabbit();
+    }
+
+    private int selected = 0; //need to remember last selected state for task rabbit
+
     static {
         AstridDependencyInjector.initialize();
     }
 
     // --- UI initialization
 
-    public EditPeopleControlSet(Activity activity, int viewLayout, int displayViewLayout, int title, int loginRequestCode) {
+    public EditPeopleControlSet(Activity activity, Fragment fragment, int viewLayout, int displayViewLayout, int title, int loginRequestCode) {
         super(activity, viewLayout, displayViewLayout, title);
         DependencyInjectionService.getInstance().inject(this);
         this.loginRequestCode = loginRequestCode;
+        this.fragment = fragment;
+        displayText.setText(activity.getString(R.string.TEA_control_who));
 
-        sharedWithRow = LayoutInflater.from(activity).inflate(R.layout.control_set_collaborators_display, null);
+        sharedWithRow = LayoutInflater.from(activity).inflate(R.layout.control_set_default_display, null);
         sharedWithView = LayoutInflater.from(activity).inflate(R.layout.control_set_collaborators, null);
+        TextView sharedRowDisplayText = (TextView)sharedWithRow.findViewById(R.id.display_row_title);
+        sharedRowDisplayText.setText(activity.getString(R.string.actfm_EPA_collaborators_header));
 
-        sharedWithDialog = new Dialog(activity, ThemeService.getDialogTheme());
+        sharedWithDialog = new Dialog(activity, ThemeService.getEditDialogTheme());
         sharedWithDialog.setTitle(R.string.actfm_EPA_collaborators_header);
         View v = getSharedWithView();
         DisplayMetrics metrics = new DisplayMetrics();
@@ -139,7 +162,7 @@ public class EditPeopleControlSet extends PopupControlSet {
         assignedList.setItemsCanFocus(false);
         assignedClear = getView().findViewById(R.id.assigned_clear);
 
-        assignedDisplay = (TextView) getDisplayView().findViewById(R.id.assigned_display);
+        assignedDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
         sharedWithContainer = (PeopleContainer) getSharedWithView().findViewById(R.id.share_container);
         cbFacebook = (CheckBox) getSharedWithView().findViewById(R.id.checkbox_facebook);
         cbTwitter = (CheckBox) getSharedWithView().findViewById(R.id.checkbox_twitter);
@@ -150,8 +173,12 @@ public class EditPeopleControlSet extends PopupControlSet {
 
     @Override
     public void readFromTask(Task sourceTask) {
-        task = sourceTask;
-        setUpData();
+        setTask(sourceTask);
+        setUpData(task, null);
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     public View getSharedWithRow() {
@@ -163,7 +190,7 @@ public class EditPeopleControlSet extends PopupControlSet {
     }
 
     @SuppressWarnings("nls")
-    private void setUpData() {
+    public void setUpData(final Task task, final TagData includeTag) {
         try {
             JSONObject sharedWith;
             if(task.getValue(Task.SHARED_WITH).length() > 0)
@@ -197,27 +224,19 @@ public class EditPeopleControlSet extends PopupControlSet {
                             final String tag = metadata.getValue(TagService.TAG);
                             TagData tagData = tagDataService.getTag(tag, TagData.MEMBER_COUNT, TagData.MEMBERS, TagData.USER);
                             if(tagData != null && tagData.getValue(TagData.MEMBER_COUNT) > 0) {
-                                JSONArray members = new JSONArray(tagData.getValue(TagData.MEMBERS));
-                                for(int i = 0; i < members.length(); i++) {
-                                    JSONObject user = members.getJSONObject(i);
-                                    user.put("tag", tag);
-                                    sharedPeople.add(user);
-                                    collaborators.add(user);
-                                }
-                                if(!TextUtils.isEmpty(tagData.getValue(TagData.USER))) {
-                                    JSONObject user = new JSONObject(tagData.getValue(TagData.USER));
-                                    user.put("tag", tag);
-                                    sharedPeople.add(user);
-                                    collaborators.add(user);
-                                }
+                                addMembersFromTagData(tagData, tag, sharedPeople, collaborators);
                             } else {
                                 nonSharedTags.add((Metadata) metadata.clone());
                             }
                         }
 
+                        if (includeTag != null && tags.getCount() == 0) {
+                            addMembersFromTagData(includeTag, null, sharedPeople, collaborators);
+                        }
+
                         if(collaborators.size() > 0)
                             buildCollaborators(collaborators);
-                        buildAssignedToSpinner(sharedPeople);
+                        buildAssignedToSpinner(task, sharedPeople);
                     } catch (JSONException e) {
                         exceptionService.reportError("json-reading-data", e);
                     } finally {
@@ -228,6 +247,24 @@ public class EditPeopleControlSet extends PopupControlSet {
 
         } catch (JSONException e) {
             exceptionService.reportError("json-reading-data", e);
+        }
+    }
+
+    private static void addMembersFromTagData(TagData tagData, String tag, ArrayList<JSONObject> sharedPeople, ArrayList<JSONObject> collaborators) throws JSONException {
+        JSONArray members = new JSONArray(tagData.getValue(TagData.MEMBERS));
+        if (tag == null)
+            tag = tagData.getValue(TagData.NAME);
+        for(int i = 0; i < members.length(); i++) {
+            JSONObject user = members.getJSONObject(i);
+            user.put("tag", tag);
+            sharedPeople.add(user);
+            collaborators.add(user);
+        }
+        if(!TextUtils.isEmpty(tagData.getValue(TagData.USER))) {
+            JSONObject user = new JSONObject(tagData.getValue(TagData.USER));
+            user.put("tag", tag);
+            sharedPeople.add(user);
+            collaborators.add(user);
         }
     }
 
@@ -281,13 +318,13 @@ public class EditPeopleControlSet extends PopupControlSet {
     }
 
     @SuppressWarnings("nls")
-    private void buildAssignedToSpinner(ArrayList<JSONObject> sharedPeople) throws JSONException {
+    private void buildAssignedToSpinner(Task model, ArrayList<JSONObject> sharedPeople) throws JSONException {
         HashSet<Long> userIds = new HashSet<Long>();
         HashSet<String> emails = new HashSet<String>();
         HashMap<String, AssignedToUser> names = new HashMap<String, AssignedToUser>();
 
-        if(task.getValue(Task.USER_ID) > 0) {
-            JSONObject user = new JSONObject(task.getValue(Task.USER));
+        if(model.getValue(Task.USER_ID) > 0) {
+            JSONObject user = new JSONObject(model.getValue(Task.USER));
             sharedPeople.add(0, user);
         }
 
@@ -295,8 +332,8 @@ public class EditPeopleControlSet extends PopupControlSet {
         myself.put("id", Task.USER_ID_SELF);
         sharedPeople.add(0, myself);
 
-        boolean hasTags = task.getTransitory("tags") != null &&
-                ((HashSet<String>)task.getTransitory("tags")).size() > 0;
+        boolean hasTags = model.getTransitory("tags") != null &&
+                ((HashSet<String>)model.getTransitory("tags")).size() > 0;
         if (actFmPreferenceService.isLoggedIn() && hasTags) {
             JSONObject unassigned = new JSONObject();
             unassigned.put("id", Task.USER_ID_UNASSIGNED);
@@ -344,7 +381,7 @@ public class EditPeopleControlSet extends PopupControlSet {
                 names.put(name, atu);
         }
 
-        String assignedStr = task.getValue(Task.USER);
+        String assignedStr = model.getValue(Task.USER);
         int assignedIndex = 0;
         if (!TextUtils.isEmpty(assignedStr)) {
             JSONObject assigned = new JSONObject(assignedStr);
@@ -361,7 +398,17 @@ public class EditPeopleControlSet extends PopupControlSet {
             }
         }
 
-        final int selected = assignedIndex;
+        for (AssignedChangedListener l : listeners) {
+            if (l.shouldShowTaskRabbit()) {
+                taskRabbitUser = new AssignedToUser(activity.getString(R.string.actfm_EPA_task_rabbit), new JSONObject().put("default_picture", R.drawable.task_rabbit_image));
+                listValues.add(taskRabbitUser);
+                if(l.didPostToTaskRabbit()){
+                    assignedIndex = listValues.size()-1;
+                }
+            }
+        }
+
+        selected = assignedIndex;
 
         final AssignedUserAdapter usersAdapter = new AssignedUserAdapter(activity, listValues);
         activity.runOnUiThread(new Runnable() {
@@ -402,12 +449,18 @@ public class EditPeopleControlSet extends PopupControlSet {
             } else {
                 image.setUrl(getItem(position).user.optString("picture"));
             }
+            if (getItem(position).user.optInt("default_picture", 0) > 0) {
+                image.setDefaultImageResource(getItem(position).user.optInt("default_picture"));
+            }
             return convertView;
         }
     }
 
-    private void assignToMe() {
-        assignedClear.performClick();
+    public void assignToMe() {
+        if (assignedList != null && assignedList.getChildAt(0) != null) {
+            assignedList.performItemClick(assignedList.getChildAt(0), 0, 0);
+            refreshDisplayView();
+        }
     }
 
     private void setUpListeners() {
@@ -417,8 +470,21 @@ public class EditPeopleControlSet extends PopupControlSet {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position,
                     long id) {
                 AssignedToUser user = (AssignedToUser) assignedList.getAdapter().getItem(position);
+
+                for (AssignedChangedListener l : listeners) {
+                    if(l.showTaskRabbitForUser(user.label, user.user)) {
+//                        assignedList.setItemChecked(selected, true);
+//                        assignedList.setItemChecked(position, false);
+                        assignedDisplay.setText(user.toString());
+                        assignedCustom.setText(""); //$NON-NLS-1$
+                        DialogUtilities.dismissDialog(activity, dialog);
+                        return;
+                    }
+
+                }
                 assignedDisplay.setText(user.toString());
                 assignedCustom.setText(""); //$NON-NLS-1$
+                selected = position;
                 refreshDisplayView();
                 DialogUtilities.dismissDialog(activity, dialog);
             }
@@ -428,8 +494,9 @@ public class EditPeopleControlSet extends PopupControlSet {
         assignedClear.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                  assignedCustom.setText(""); //$NON-NLS-1$
-                  assignedList.setItemChecked(0, true);
+                assignedCustom.setText(""); //$NON-NLS-1$
+                selected = 0;
+                assignedList.setItemChecked(selected, true);
             }
         });
 
@@ -438,8 +505,8 @@ public class EditPeopleControlSet extends PopupControlSet {
             public void textChanged(String text) {
                 getSharedWithView().findViewById(R.id.share_additional).setVisibility(View.VISIBLE);
                 if(text.indexOf('@') > -1) {
-                    getSharedWithView().findViewById(R.id.tag_label).setVisibility(View.VISIBLE);
-                    getSharedWithView().findViewById(R.id.tag_name).setVisibility(View.VISIBLE);
+//                    getSharedWithView().findViewById(R.id.tag_label).setVisibility(View.VISIBLE);
+//                    getSharedWithView().findViewById(R.id.tag_name).setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -455,9 +522,25 @@ public class EditPeopleControlSet extends PopupControlSet {
     // --- events
 
     @Override
+    protected void readFromTaskOnInitialize() {
+        // Nothing, we don't lazy load this control set yet
+    }
+
+    @Override
     public String writeToModel(Task model) {
         // do nothing, we use a separate method
         return null;
+    }
+
+    @Override
+    protected String writeToModelAfterInitialized(Task task) {
+        // Nothing, we don't lazy load this control set yet
+        return null;
+    }
+
+    @Override
+    protected void afterInflate() {
+        // Nothing, we don't lazy load this control set yet
     }
 
     /**
@@ -480,15 +563,22 @@ public class EditPeopleControlSet extends PopupControlSet {
                 assignedView = assignedCustom;
             } else {
                 AssignedToUser item = (AssignedToUser) assignedList.getAdapter().getItem(assignedList.getCheckedItemPosition());
-                if (item != null)
+                if (item != null) {
+                    if (item.equals(taskRabbitUser)) { //don't want to ever set the user as the task rabbit user
+
+                        /*item = (AssignedToUser) assignedList.getAdapter().getItem(0);
+                        selected = 0;*/
+                        return true;
+                    }
                     userJson = item.user;
+                }
             }
 
             if (userJson != null) {
                 String email = userJson.optString("email");
                 if (!TextUtils.isEmpty(email) && email.indexOf('@') == -1)
                     throw new ParseSharedException(assignedView,
-                        activity.getString(R.string.actfm_EPA_invalid_email, userJson.optString("email")));
+                            activity.getString(R.string.actfm_EPA_invalid_email, userJson.optString("email")));
             }
 
             if(userJson == null || userJson.optLong("id", Task.USER_ID_EMAIL) == Task.USER_ID_SELF) {
@@ -533,13 +623,18 @@ public class EditPeopleControlSet extends PopupControlSet {
                 }
             }
 
-            JSONObject sharedWith = parseSharedWithAndTags();
+            JSONObject sharedWith = sharedWithContainer.parseSharedWithAndTags(activity, false);
+            if(cbFacebook.isChecked())
+                sharedWith.put("fb", true);
+            if(cbTwitter.isChecked())
+                sharedWith.put("tw", true);
+
             dirty = dirty || sharedWith.has("p");
             if(dirty && !actFmPreferenceService.isLoggedIn()) {
                 DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        activity.startActivityForResult(new Intent(activity, ActFmLoginActivity.class),
+                        fragment.startActivityForResult(new Intent(activity, ActFmLoginActivity.class),
                                 loginRequestCode);
                     }
                 };
@@ -585,10 +680,9 @@ public class EditPeopleControlSet extends PopupControlSet {
     }
 
     private void makePrivateTask() {
-        assignToMe();
         sharedWithContainer.removeAllViews();
         sharedWithContainer.addPerson(""); //$NON-NLS-1$
-        refreshDisplayView();
+        assignToMe();
     }
 
     private void showSaveToast(String saveToast) {
@@ -598,52 +692,15 @@ public class EditPeopleControlSet extends PopupControlSet {
         Toast.makeText(activity, saveToast, length).show();
     }
 
-    private class ParseSharedException extends Exception {
-        private static final long serialVersionUID = -4135848250086302970L;
-        public TextView view;
-        public String message;
-
-        public ParseSharedException(TextView view, String message) {
-            this.view = view;
-            this.message = message;
-        }
-    }
-
-    @SuppressWarnings("nls")
-    private JSONObject parseSharedWithAndTags() throws
-            JSONException, ParseSharedException {
-        JSONObject sharedWith = new JSONObject();
-        if(cbFacebook.isChecked())
-            sharedWith.put("fb", true);
-        if(cbTwitter.isChecked())
-            sharedWith.put("tw", true);
-
-        JSONArray peopleList = new JSONArray();
-        for(int i = 0; i < sharedWithContainer.getChildCount(); i++) {
-            TextView textView = sharedWithContainer.getTextView(i);
-            textView.setTextAppearance(activity, android.R.style.TextAppearance_Medium_Inverse);
-            String text = textView.getText().toString();
-
-            if(text.length() == 0)
-                continue;
-
-            if(text.indexOf('@') == -1)
-                throw new ParseSharedException(textView,
-                        activity.getString(R.string.actfm_EPA_invalid_email, text));
-            peopleList.put(text);
-        }
-        if(peopleList.length() > 0)
-            sharedWith.put("p", peopleList);
-
-        return sharedWith;
-    }
-
     @SuppressWarnings("nls")
     protected Object[] buildSharingArgs(JSONArray emails) throws JSONException {
         ArrayList<Object> values = new ArrayList<Object>();
-        long currentTaskID = task.getValue(Task.REMOTE_ID);
-        values.add("id");
-        values.add(currentTaskID);
+
+        if(task.containsNonNullValue(Task.REMOTE_ID)) {
+            long currentTaskID = task.getValue(Task.REMOTE_ID);
+            values.add("id");
+            values.add(currentTaskID);
+        }
 
         if(emails != null) {
             for(int i = 0; i < emails.length(); i++) {
@@ -680,11 +737,11 @@ public class EditPeopleControlSet extends PopupControlSet {
             values.add(message);
         }
 
-        String tag = ((TextView) getSharedWithView().findViewById(R.id.tag_name)).getText().toString();
-        if(!TextUtils.isEmpty(tag)) {
-            values.add("tag");
-            values.add(tag);
-        }
+//        String tag = ((TextView) getSharedWithView().findViewById(R.id.tag_name)).getText().toString();
+//        if(!TextUtils.isEmpty(tag)) {
+//            values.add("tag");
+//            values.add(tag);
+//        }
 
         return values.toArray(new Object[values.size()]);
     }
@@ -695,6 +752,26 @@ public class EditPeopleControlSet extends PopupControlSet {
      */
     public boolean isAssignedToMe() {
         return assignedToMe;
+    }
+
+    /**
+     * Check if task will be assigned to current user when save setting is called
+     */
+    public boolean willBeAssignedToMe() {
+        JSONObject userJson = null;
+        if(!TextUtils.isEmpty(assignedCustom.getText())) {
+            userJson = PeopleContainer.createUserJson(assignedCustom);
+        } else {
+            AssignedToUser item = (AssignedToUser) assignedList.getAdapter().getItem(assignedList.getCheckedItemPosition());
+            if (item != null)
+                userJson = item.user;
+        }
+
+        if(userJson == null || userJson.optLong("id", Task.USER_ID_EMAIL) == Task.USER_ID_SELF) { //$NON-NLS-1$
+            return true;
+        }
+
+        return false;
     }
 
     public String getAssignedToString() {
@@ -723,5 +800,22 @@ public class EditPeopleControlSet extends PopupControlSet {
                 user = (AssignedToUser) assignedList.getAdapter().getItem(0);
             assignedDisplay.setText(user.toString());
         }
+    }
+
+    @Override
+    protected void additionalDialogSetup() {
+        super.additionalDialogSetup();
+        dialog.getWindow()
+            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+                    | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    public void addListener(AssignedChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(AssignedChangedListener listener) {
+        if (listeners.contains(listener))
+            listeners.remove(listener);
     }
 }

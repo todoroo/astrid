@@ -8,9 +8,9 @@ import android.view.animation.AlphaAnimation;
 import android.widget.ProgressBar;
 
 import com.todoroo.andlib.utility.AndroidUtilities;
-import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
+import com.todoroo.astrid.sync.SyncResultCallbackAdapter;
 
-public class ProgressBarSyncResultCallback implements SyncResultCallback {
+public class ProgressBarSyncResultCallback extends SyncResultCallbackAdapter {
 
     private ProgressBar progressBar;
     private final Activity activity;
@@ -26,6 +26,16 @@ public class ProgressBarSyncResultCallback implements SyncResultCallback {
 
         if(progressBar == null)
             progressBar = new ProgressBar(activity);
+
+        progressBar.setProgress(0);
+        progressBar.setMax(0);
+    }
+
+    public ProgressBarSyncResultCallback(Activity activity, ProgressBar pBar,
+            Runnable onFinished) {
+        this.progressBar = pBar;
+        this.activity = activity;
+        this.onFinished = onFinished;
 
         progressBar.setProgress(0);
         progressBar.setMax(0);

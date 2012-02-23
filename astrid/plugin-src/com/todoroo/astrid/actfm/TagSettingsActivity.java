@@ -10,14 +10,19 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -27,12 +32,16 @@ import android.widget.Toast;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
+import com.todoroo.andlib.service.ExceptionService;
 import com.todoroo.andlib.utility.AndroidUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
 import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.astrid.actfm.ActFmCameraModule.CameraResultCallback;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
+import com.todoroo.astrid.activity.FilterListFragment;
+import com.todoroo.astrid.activity.ShortcutActivity;
+import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
@@ -41,22 +50,31 @@ import com.todoroo.astrid.service.ThemeService;
 import com.todoroo.astrid.tags.TagFilterExposer;
 import com.todoroo.astrid.tags.TagService;
 import com.todoroo.astrid.ui.PeopleContainer;
+import com.todoroo.astrid.ui.PeopleContainer.ParseSharedException;
 import com.todoroo.astrid.utility.Flags;
 import com.todoroo.astrid.welcome.HelpInfoPopover;
 
-public class TagSettingsActivity extends Activity {
+public class TagSettingsActivity extends FragmentActivity {
+
+    public static final String TOKEN_NEW_FILTER = "newFilter"; //$NON-NLS-1$
+
+    private static final int MENU_SAVE_ID = R.string.TEA_menu_save;
+    private static final int MENU_DISCARD_ID = R.string.TEA_menu_discard;
 
     protected static final int REQUEST_ACTFM_LOGIN = 3;
 
     private static final String MEMBERS_IN_PROGRESS = "members"; //$NON-NLS-1$
 
     private TagData tagData;
+    private Filter filter; // Used for creating shortcuts, only initialized if necessary
 
     @Autowired TagDataService tagDataService;
 
     @Autowired ActFmSyncService actFmSyncService;
 
     @Autowired ActFmPreferenceService actFmPreferenceService;
+
+    @Autowired ExceptionService exceptionService;
 
     private PeopleContainer tagMembers;
     private AsyncImageView picture;
@@ -65,7 +83,8 @@ public class TagSettingsActivity extends Activity {
     private CheckBox isSilent;
     private Bitmap setBitmap;
 
-    boolean isNewTag = false;
+    private boolean isNewTag = false;
+    private boolean isDialog;
 
     public TagSettingsActivity() {
         DependencyInjectionService.getInstance().inject(this);
@@ -73,15 +92,23 @@ public class TagSettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setupForDialogOrFullscreen();
         super.onCreate(savedInstanceState);
-        ThemeService.applyTheme(this);
         setContentView(R.layout.tag_settings_activity);
-        tagData = getIntent().getParcelableExtra(TagViewActivity.EXTRA_TAG_DATA);
+        tagData = getIntent().getParcelableExtra(TagViewFragment.EXTRA_TAG_DATA);
         if (tagData == null) {
             isNewTag = true;
             tagData = new TagData();
         }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setCustomView(R.layout.header_title_view);
+        }
+
         setUpSettingsPage();
 
         if(savedInstanceState != null && savedInstanceState.containsKey(MEMBERS_IN_PROGRESS)) {
@@ -100,6 +127,15 @@ public class TagSettingsActivity extends Activity {
             }).start();
         }
         showCollaboratorsPopover();
+
+    }
+
+    private void setupForDialogOrFullscreen() {
+        isDialog = AndroidUtilities.isTabletSized(this);
+        if (isDialog)
+            setTheme(ThemeService.getDialogTheme());
+        else
+            ThemeService.applyTheme(this);
     }
 
     private void showCollaboratorsPopover() {
@@ -111,6 +147,22 @@ public class TagSettingsActivity extends Activity {
     }
 
     protected void setUpSettingsPage() {
+        if (isDialog) {
+            findViewById(R.id.save_and_cancel).setVisibility(View.VISIBLE);
+            findViewById(R.id.cancel).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            findViewById(R.id.save).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveSettings();
+                }
+            });
+        }
+
         tagMembers = (PeopleContainer) findViewById(R.id.members_container);
         tagName = (EditText) findViewById(R.id.tag_name);
         tagDescription = (EditText) findViewById(R.id.tag_description);
@@ -120,6 +172,7 @@ public class TagSettingsActivity extends Activity {
 
         if(actFmPreferenceService.isLoggedIn()) {
             picture.setVisibility(View.VISIBLE);
+            picture.setDefaultImageResource(TagService.getDefaultImageIDForTag(tagData.getValue(TagData.NAME)));
             findViewById(R.id.picture_label).setVisibility(View.VISIBLE);
             findViewById(R.id.listSettingsMore).setVisibility(View.VISIBLE);
         }
@@ -131,25 +184,24 @@ public class TagSettingsActivity extends Activity {
             }
         });
 
-        findViewById(R.id.saveMembers).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                saveSettings();
-            }
-        });
-
-        findViewById(R.id.cancel).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                finish();
-            }
-        });
+        if (isNewTag) {
+            findViewById(R.id.create_shortcut_container).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.create_shortcut).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (filter == null) {
+                        filter = TagFilterExposer.filterFromTagData(TagSettingsActivity.this, tagData);
+                    }
+                    FilterListFragment.showCreateShortcutDialog(TagSettingsActivity.this, ShortcutActivity.createIntent(filter), filter);
+                }
+            });
+        }
 
         refreshSettingsPage();
     }
 
     private void saveSettings() {
-        setResult(RESULT_OK);
         String oldName = tagData.getValue(TagData.NAME);
         String newName = tagName.getText().toString().trim();
 
@@ -181,15 +233,52 @@ public class TagSettingsActivity extends Activity {
 
         tagData.setValue(TagData.TAG_DESCRIPTION, newDesc);
 
-        JSONArray members = tagMembers.toJSONArray();
+        JSONArray members;
+        try {
+            members = tagMembers.parseSharedWithAndTags(this, true).optJSONArray("p");
+        } catch (JSONException e) {
+            exceptionService.displayAndReportError(this, "save-people", e);
+            return;
+        } catch (ParseSharedException e) {
+            if(e.view != null) {
+                e.view.setTextColor(Color.RED);
+                e.view.requestFocus();
+            }
+            DialogUtilities.okDialog(this, e.message, null);
+            return;
+        }
+        if (members == null)
+            members = new JSONArray();
 
         if(members.length() > 0 && !actFmPreferenceService.isLoggedIn()) {
             if(newName.length() > 0 && oldName.length() == 0) {
                 tagDataService.save(tagData);
             }
-            startActivityForResult(new Intent(this, ActFmLoginActivity.class),
-                        REQUEST_ACTFM_LOGIN);
+
+            DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface d, int which) {
+                    startActivityForResult(new Intent(TagSettingsActivity.this, ActFmLoginActivity.class),
+                            REQUEST_ACTFM_LOGIN);
+                }
+            };
+
+            DialogInterface.OnClickListener cancelListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface d, int which) {
+
+                    tagMembers.removeAllViews();
+                    tagMembers.addPerson(""); //$NON-NLS-1$
+                }
+            };
+            DialogUtilities.okCancelCustomDialog(TagSettingsActivity.this, getString(R.string.actfm_EPA_login_button),
+                    getString(R.string.actfm_TVA_login_to_share), R.string.actfm_EPA_login_button,
+                    R.string.actfm_EPA_dont_share_button, android.R.drawable.ic_dialog_alert,
+                    okListener, cancelListener);
+           Toast.makeText(this, R.string.tag_list_saved, Toast.LENGTH_LONG).show();
+
             return;
+
         }
 
         int oldMemberCount = tagData.getValue(TagData.MEMBER_COUNT);
@@ -212,16 +301,12 @@ public class TagSettingsActivity extends Activity {
             Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
             tagDataService.save(tagData);
 
-            final String name = newName;
             final Runnable loadTag = new Runnable() {
                 @Override
                 public void run() {
-                    Intent intent = new Intent(TagSettingsActivity.this, TagViewActivity.class);
-                    intent.putExtra(TagViewActivity.EXTRA_TAG_NAME, name);
-                    intent.putExtra(TagViewActivity.TOKEN_FILTER,
-                            TagFilterExposer.filterFromTagData(TagSettingsActivity.this, tagData));
+                    setResult(RESULT_OK, new Intent().putExtra(TOKEN_NEW_FILTER,
+                            TagFilterExposer.filterFromTagData(TagSettingsActivity.this, tagData)));
                     finish();
-                    startActivity(intent);
                 }
             };
 
@@ -241,6 +326,7 @@ public class TagSettingsActivity extends Activity {
 
             return;
         } else {
+            setResult(RESULT_OK);
             tagDataService.save(tagData);
         }
 
@@ -250,28 +336,36 @@ public class TagSettingsActivity extends Activity {
 
     @Override
     public void finish() {
-        finishWithAnimation(true);
+        finishWithAnimation(!isDialog);
     }
 
     private void finishWithAnimation(boolean backAnimation) {
         super.finish();
         if (backAnimation) {
-            overridePendingTransition(R.anim.slide_right_in, R.anim.slide_right_out);
-        } else {
-            overridePendingTransition(R.anim.slide_left_in, R.anim.slide_left_out);
+            AndroidUtilities.callOverridePendingTransition(this, R.anim.slide_right_in, R.anim.slide_right_out);
         }
     }
 
     @SuppressWarnings("nls")
     private void refreshSettingsPage() {
         tagName.setText(tagData.getValue(TagData.NAME));
-        if (isNewTag) {
-            ((TextView)findViewById(R.id.listLabel)).setText(getString(R.string.tag_new_list));
+        ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            View customView = ab.getCustomView();
+            TextView titleView = (TextView) customView.findViewById(R.id.title);
+            if (isNewTag) {
+                titleView.setText(getString(R.string.tag_new_list));
+            } else {
+                titleView.setText(getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            }
         } else {
-            ((TextView) findViewById(R.id.listLabel)).setText(this.getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            if (isNewTag) {
+                setTitle(getString(R.string.tag_new_list));
+            } else {
+                setTitle(getString(R.string.tag_settings_title, tagData.getValue(TagData.NAME)));
+            }
         }
         picture.setUrl(tagData.getValue(TagData.PICTURE));
-        setTitle(tagData.getValue(TagData.NAME));
 
         TextView ownerLabel = (TextView) findViewById(R.id.tag_owner);
         try {
@@ -354,5 +448,40 @@ public class TagSettingsActivity extends Activity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem item;
+        item = menu.add(Menu.NONE, MENU_DISCARD_ID, 0, R.string.TEA_menu_discard);
+        item.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+        item = menu.add(Menu.NONE, MENU_SAVE_ID, 0, R.string.TEA_menu_save);
+        item.setIcon(android.R.drawable.ic_menu_save);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+        case MENU_DISCARD_ID:
+            finish();
+            break;
+        case MENU_SAVE_ID:
+            saveSettings();
+            break;
+        case android.R.id.home:
+            finish();
+            break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
+
+
+
 
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import android.text.TextUtils;
 
+import com.todoroo.andlib.data.AbstractModel;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
@@ -26,6 +27,7 @@ import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.StoreObject;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.gtasks.sync.GtasksTaskContainer;
+import com.todoroo.astrid.subtasks.OrderedListUpdater.OrderedListIterator;
 import com.todoroo.astrid.sync.SyncMetadataService;
 import com.todoroo.astrid.sync.SyncProviderUtilities;
 
@@ -76,14 +78,47 @@ public final class GtasksMetadataService extends SyncMetadataService<GtasksTaskC
     }
 
     @Override
+    public synchronized void findLocalMatch(GtasksTaskContainer remoteTask) {
+        if(remoteTask.task.getId() != Task.NO_ID)
+            return;
+        TodorooCursor<Metadata> cursor = metadataDao.query(Query.select(Metadata.PROPERTIES).
+                where(Criterion.and(MetadataCriteria.withKey(getMetadataKey()),
+                        getLocalMatchCriteria(remoteTask))));
+        try {
+            if(cursor.getCount() == 0)
+                return;
+            cursor.moveToFirst();
+            remoteTask.task.setId(cursor.get(Metadata.TASK));
+            remoteTask.gtaskMetadata = new Metadata(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public long localIdForGtasksId(String gtasksId) {
+        TodorooCursor<Metadata> metadata = metadataDao.query(Query.select(Metadata.TASK).where(
+                Criterion.and(Metadata.KEY.eq(GtasksMetadata.METADATA_KEY), GtasksMetadata.ID.eq(gtasksId))));
+        try {
+            if (metadata.getCount() > 0) {
+                metadata.moveToFirst();
+                return (new Metadata(metadata).getValue(Metadata.TASK));
+            } else {
+                return AbstractModel.NO_ID;
+            }
+        } finally {
+            metadata.close();
+        }
+    }
+
+    @Override
     protected TodorooCursor<Task> filterLocallyUpdated(TodorooCursor<Task> tasks, long lastSyncDate) {
         HashSet<Long> taskIds = new HashSet<Long>();
         for(tasks.moveToFirst(); !tasks.isAfterLast(); tasks.moveToNext())
             taskIds.add(tasks.get(Task.ID));
 
         TodorooCursor<Metadata> metadata = metadataDao.query(Query.select(Metadata.TASK).where(
-                Criterion.and(MetadataCriteria.withKey(GtasksSyncMetadata.METADATA_KEY),
-                GtasksSyncMetadata.LAST_SYNC.gt(lastSyncDate))));
+                Criterion.and(MetadataCriteria.withKey(GtasksMetadata.METADATA_KEY),
+                GtasksMetadata.LAST_SYNC.gt(lastSyncDate))));
         for(metadata.moveToFirst(); !metadata.isAfterLast(); metadata.moveToNext())
             taskIds.remove(metadata.get(Metadata.TASK));
 
@@ -94,17 +129,13 @@ public final class GtasksMetadataService extends SyncMetadataService<GtasksTaskC
     // --- list iterating helpers
 
 
-    public interface ListIterator {
-        public void processTask(long taskId, Metadata metadata);
-    }
-
-    public void iterateThroughList(StoreObject list, ListIterator iterator) {
+    public void iterateThroughList(StoreObject list, OrderedListIterator iterator) {
         String listId = list.getValue(GtasksList.REMOTE_ID);
         iterateThroughList(listId, iterator, 0, false);
     }
 
     @SuppressWarnings("nls")
-    public void iterateThroughList(String listId, ListIterator iterator, long startAtOrder, boolean reverse) {
+    public void iterateThroughList(String listId, OrderedListIterator iterator, long startAtOrder, boolean reverse) {
         Field orderField = Functions.cast(GtasksMetadata.ORDER, "LONG");
         Order order = reverse ? Order.desc(orderField) : Order.asc(orderField);
         Criterion startAtCriterion = reverse ?  Functions.cast(GtasksMetadata.ORDER, "LONG").lt(startAtOrder) :
@@ -161,7 +192,7 @@ public final class GtasksMetadataService extends SyncMetadataService<GtasksTaskC
         final AtomicLong parentToMatch = new AtomicLong(gtasksMetadata.getValue(GtasksMetadata.PARENT_TASK).longValue());
         final AtomicReference<String> sibling = new AtomicReference<String>();
 
-        ListIterator iterator = new ListIterator() {
+        OrderedListIterator iterator = new OrderedListIterator() {
             @Override
             public void processTask(long taskId, Metadata metadata) {
                 Task t = taskDao.fetch(taskId, Task.TITLE, Task.DELETION_DATE);

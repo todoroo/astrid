@@ -5,7 +5,6 @@ import java.util.Date;
 import android.app.Activity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -31,21 +30,17 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
     private static final int EXISTING_TIME_UNSET = -2;
 
     //private final CheckBox enabled;
-    private final Spinner spinner;
+    private Spinner spinner;
     private int previousSetting = Task.HIDE_UNTIL_NONE;
+    private final int title;
+    private int selection;
 
     private long existingDate = EXISTING_TIME_UNSET;
-    private int existingDateHour = EXISTING_TIME_UNSET;
-    private int existingDateMinutes = EXISTING_TIME_UNSET;
 
     public HideUntilControlSet(Activity activity, int viewLayout, int displayViewLayout, int title) {
         super(activity, viewLayout, displayViewLayout, title);
-        this.spinner = (Spinner) getView().findViewById(R.id.hideUntil);
-        this.spinner.setOnItemSelectedListener(this);
-        this.spinner.setPromptId(title);
-        ViewGroup parent = (ViewGroup) getView().getParent();
-        parent.removeView(getView());
-        ((LinearLayout) getDisplayView()).addView(getView()); // hack to make listeners work
+        this.title = title;
+        this.displayText.setText(activity.getString(R.string.TEA_hideUntil_label));
     }
 
     private ArrayAdapter<HideUntilValue> adapter;
@@ -96,13 +91,10 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
                 updated[0] = new HideUntilValue(DateUtilities.getDateString(activity, new Date(specificDate)),
                         Task.HIDE_UNTIL_SPECIFIC_DAY, specificDate);
                 existingDate = specificDate;
-                existingDateHour = SPECIFIC_DATE;
             } else {
                 updated[0] = new HideUntilValue(DateUtilities.getDateStringWithTime(activity, new Date(specificDate)),
                         Task.HIDE_UNTIL_SPECIFIC_DAY_TIME, specificDate);
                 existingDate = specificDate;
-                existingDateHour = hideUntilAsDate.getHours();
-                existingDateMinutes = hideUntilAsDate.getMinutes();
             }
             values = updated;
         }
@@ -149,6 +141,7 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
         } else {
             previousSetting = position;
         }
+        selection = spinner.getSelectedItemPosition();
         refreshDisplayView();
     }
 
@@ -175,7 +168,9 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
     public void setDefaults() {
         int setting = Preferences.getIntegerFromString(R.string.p_default_hideUntil_key,
                 Task.HIDE_UNTIL_NONE);
-        spinner.setSelection(setting);
+        selection = setting;
+        if (spinner != null)
+            spinner.setSelection(selection);
         refreshDisplayView();
     }
 
@@ -184,6 +179,8 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
         return new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (spinner == null) // Force load
+                    getView();
                 spinner.performClick();
             }
         };
@@ -191,9 +188,16 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
 
     @Override
     protected void refreshDisplayView() {
-        HideUntilValue value = adapter.getItem(spinner.getSelectedItemPosition());
-        TextView auxDisplay = (TextView) getDisplayView().findViewById(R.id.hide_until_display);
-        auxDisplay.setText(value.toString());
+        TextView auxDisplay = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
+        auxDisplay.setText(adapter.getItem(selection).toString());
+    }
+
+    @Override
+    protected void afterInflate() {
+        this.spinner = (Spinner) getView().findViewById(R.id.hideUntil);
+        this.spinner.setOnItemSelectedListener(this);
+        this.spinner.setPromptId(title);
+        ((LinearLayout) getDisplayView()).addView(getView()); // hack to make listeners work
     }
 
     @Override
@@ -209,7 +213,6 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
         // For the hide until due case, we need the time component
         long dueTime = task.hasDueTime() ? task.getValue(Task.DUE_DATE)/1000L*1000L : dueDay.getTime();
 
-        int selection = 0;
         if(date == 0) {
             selection = 0;
             date = 0;
@@ -224,17 +227,15 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
             date = 0;
         }
 
-        if (selection == 0) {
-            //enabled.setChecked(false);
-            //spinner.setVisibility(View.GONE);
-        } else {
-            //enabled.setChecked(true);
-            //spinner.setVisibility(View.VISIBLE);
-        }
-
         HideUntilValue[] list = createHideUntilList(date);
         adapter = new ArrayAdapter<HideUntilValue>(
                 activity, android.R.layout.simple_spinner_item, list);
+
+        super.readFromTask(task);
+    }
+
+    @Override
+    protected void readFromTaskOnInitialize() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -243,7 +244,7 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
     }
 
     @Override
-    public String writeToModel(Task task) {
+    protected String writeToModelAfterInitialized(Task task) {
         if(adapter == null || spinner == null)
             return null;
         HideUntilValue item = adapter.getItem(spinner.getSelectedItemPosition());
@@ -253,7 +254,7 @@ public class HideUntilControlSet extends PopupControlSet implements OnItemSelect
         task.setValue(Task.HIDE_UNTIL, value);
 
         if (value != 0)
-            return activity.getString(R.string.TEA_hideUntil_message, DateAndTimePicker.getDisplayString(activity, value));
+            return activity.getString(R.string.TEA_hideUntil_message, DateAndTimePicker.getDisplayString(activity, value, false, false));
         return null;
     }
 

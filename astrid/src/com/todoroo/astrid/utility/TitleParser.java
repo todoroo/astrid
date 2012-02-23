@@ -12,7 +12,7 @@ import com.mdimension.jchronic.AstridChronic;
 import com.mdimension.jchronic.Chronic;
 import com.todoroo.astrid.data.Task;
 
-
+@SuppressWarnings("nls")
 public class TitleParser {
     Task task;
     ArrayList<String> tags;
@@ -22,46 +22,60 @@ public class TitleParser {
         this.tags = tags;
     }
 
-    public void parse(){
-        repeatHelper(task);
-        dayHelper(task);
-        listHelper(task,tags);
-        priorityHelper(task);
+    public boolean parse() {
+        boolean markup = false;
+        markup = repeatHelper(task) || markup;
+        markup = dayHelper(task) || markup;
+        markup = listHelper(task,tags) || markup;
+        markup = priorityHelper(task) || markup;
+        return markup;
     }
 
-    public static String trimParenthesis(String pattern){
+    public static String[] trimParenthesisAndSplit(String pattern){
         if (pattern.charAt(0) == '#' || pattern.charAt(0) == '@') {
             pattern = pattern.substring(1);
         }
         if ('(' == pattern.charAt(0)) {
-            return pattern.substring(1, pattern.length()-2);
+            String lists = pattern.substring(1, pattern.length()-1);
+            return lists.split("\\s+");
         }
-        return pattern;
+        return new String[] { pattern };
     }
-    public static void listHelper(Task task, ArrayList<String> tags) {
+    public static boolean listHelper(Task task, ArrayList<String> tags) {
         String inputText = task.getValue(Task.TITLE);
         Pattern tagPattern = Pattern.compile("(\\s|^)#(\\(.*\\)|[^\\s]+)");
         Pattern contextPattern = Pattern.compile("(\\s|^)@(\\(.*\\)|[^\\s]+)");
+        boolean result = false;
 
         while(true) {
             Matcher m = tagPattern.matcher(inputText);
             if(m.find()) {
-                tags.add(TitleParser.trimParenthesis(m.group(2)));
+                result = true;
+                String[] splitTags = TitleParser.trimParenthesisAndSplit(m.group(2));
+                if (splitTags != null) {
+                    for (String tag : splitTags)
+                        tags.add(tag);
+                }
             } else {
                 m = contextPattern.matcher(inputText);
                 if(m.find()) {
-                    tags.add(TitleParser.trimParenthesis(m.group(2)));
-                }else{
+                    result = true;
+                    String[] splitTags = TitleParser.trimParenthesisAndSplit(m.group(2));
+                    if (splitTags != null) {
+                        for (String tag : splitTags)
+                            tags.add(tag);
+                    }
+                } else{
                     break;
                 }
             }
             inputText = inputText.substring(0, m.start()) + inputText.substring(m.end());
         }
         task.setValue(Task.TITLE, inputText.trim());
+        return result;
     }
 
     //helper method for priorityHelper. converts the string to a Task Importance
-    @SuppressWarnings("nls")
     private static int str_to_priority(String priority_str) {
         if (priority_str!=null)
             priority_str.toLowerCase().trim();
@@ -76,7 +90,7 @@ public class TitleParser {
     }
 
     //priorityHelper parses the string and sets the Task's importance
-    private static void priorityHelper(Task task) {
+    private static boolean priorityHelper(Task task) {
         String inputText = task.getValue(Task.TITLE);
         String[] importanceStrings = {
                 "()((^|[^\\w!])!+|(^|[^\\w!])!\\d)($|[^\\w!])",
@@ -85,19 +99,23 @@ public class TitleParser {
                 "(?i)(\\sbang\\s?(\\d)$)",
                 "(?i)()(\\shigh(est)?|\\slow(est)?|\\stop|\\sleast) ?priority$"
         };
+        boolean result = false;
         for (String importanceString:importanceStrings){
-            Pattern importancePattern= Pattern.compile(importanceString);
+            Pattern importancePattern = Pattern.compile(importanceString);
             while (true){
                 Matcher m = importancePattern.matcher(inputText);
                 if(m.find()) {
+                    result = true;
                     task.setValue(Task.IMPORTANCE, str_to_priority(m.group(2).trim()));
-                    inputText = inputText.substring(0, m.start()+1) + inputText.substring(m.end());
+                    int start = m.start() == 0 ? 0 : m.start() + 1;
+                    inputText = inputText.substring(0, start) + inputText.substring(m.end());
 
                 } else
                     break;
             }
         }
         task.setValue(Task.TITLE, inputText.trim());
+        return result;
     }
 
     //helper for dayHelper. Converts am/pm to an int 0/1.
@@ -118,8 +136,7 @@ public class TitleParser {
     //Handles setting the task's date.
     //Day of week (e.g. Monday, Tuesday,..) is overridden by a set date (e.g. October 23 2013).
     //Vague times (e.g. breakfast, night) are overridden by a set time (9 am, at 10, 17:00)
-    @SuppressWarnings("nls")
-    private static void dayHelper(Task task ) {
+    private static boolean dayHelper(Task task ) {
         String inputText = task.getValue(Task.TITLE);
         Calendar cal = null;
         Boolean containsSpecificTime = false;
@@ -311,13 +328,14 @@ public class TitleParser {
             } else {
                 task.setValue(Task.DUE_DATE, Task.createDueDate(Task.URGENCY_SPECIFIC_DAY, cal.getTime().getTime()));
             }
+            return true;
         }
+        return false;
     }
     //---------------------DATE--------------------------
 
     //Parses through the text and sets the frequency of the task.
-    @SuppressWarnings("nls")
-    private static void repeatHelper(Task task) {
+    private static boolean repeatHelper(Task task) {
         String inputText = task.getValue(Task.TITLE);
         HashMap<String, Frequency> repeatTimes = new HashMap<String, Frequency>();
         repeatTimes.put("(?i)\\bevery ?\\w{0,6} days?\\b" , Frequency.DAILY);
@@ -347,7 +365,7 @@ public class TitleParser {
                 rrule.setFreq(rtime);
                 rrule.setInterval(findInterval(inputText));
                 task.setValue(Task.RECURRENCE, rrule.toIcal());
-                return;
+                return true;
             }
         }
 
@@ -361,9 +379,10 @@ public class TitleParser {
                 rrule.setInterval(1);
                 String thing = rrule.toIcal();
                 task.setValue(Task.RECURRENCE, thing);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     //helper method for repeatHelper.

@@ -19,10 +19,21 @@
   <!-- hint when opening repeat interval -->
   <string name="repeat_interval_prompt">Repeat Interval</string>
   
-  <string name="repeat_never">No Repeat</string>
+  <string name="repeat_never">Make Repeating?</string>
   
   <string name="repeat_dont">Don\'t repeat</string>
       
+  <string-array name="repeat_interval_short">
+    <!-- repeat interval (days,weeks,months,hours,minutes,years) -->
+    <item>d</item>
+    <item>wk</item>
+    <item>mo</item>
+    <item>hr</item>
+    <item>min</item>
+    <item>yr</item>
+  </string-array>
+  
+  
   <string-array name="repeat_interval">
     <!-- repeat interval (days,weeks,months,hours,minutes,years) -->
     <item>Day(s)</item>
@@ -47,5 +58,19 @@
   
   <!-- task detail for repeat from completion date (%s -> interval) -->
   <string name="repeat_detail_completion">%s after completion</string>
+  
+  <!-- text for confirmation dialog after repeating a task -->
+  <string name="repeat_rescheduling_dialog_title">Rescheduling task \"%s\"</string>
+    
+  <string name="repeat_rescheduling_dialog_bubble">%1$s I\'ve rescheduled this repeating task from %2$s to %3$s</string>
+  
+  
+  <string-array name="repeat_encouragement">
+      <!-- Encouragement in rescheduling dialog bubble -->
+      <item>Good job!</item>
+      <item>Wow… I\'m so proud of you!</item>
+      <item>I love it when you\'re productive!</item>
+      <item>Doesn\'t it feel good to check something off?</item>
+  </string-array>
   
 </resources>

@@ -99,7 +99,10 @@ public class DateUtilities {
         String value;
         if (is24HourFormat(context)) {
             value = "H:mm";
-        } else {
+        } else if (date.getMinutes() == 0){
+            value = "h a";
+        }
+        else {
             value = "h:mm a";
         }
         return new SimpleDateFormat(value).format(date);
@@ -125,6 +128,29 @@ public class DateUtilities {
     }
 
     /**
+     * @param context android context
+     * @param date date to format
+     * @return date, with month, day, and year
+     */
+    @SuppressWarnings("nls")
+    public static String getDateStringHideYear(Context context, Date date) {
+        String month = DateUtils.getMonthString(date.getMonth() +
+                Calendar.JANUARY, DateUtils.LENGTH_MEDIUM);
+        String value;
+        // united states, you are special
+        if (Locale.US.equals(Locale.getDefault())
+                || Locale.CANADA.equals(Locale.getDefault()))
+            value = "'#' d";
+        else
+            value = "d '#'";
+
+        if (date.getYear() !=  (new Date()).getYear()) {
+            value = value + "\nyyyy";
+        }
+        return new SimpleDateFormat(value).format(date).replace("#", month);
+    }
+
+    /**
      * @return date format as getDateFormat with weekday
      */
     @SuppressWarnings("nls")
@@ -139,6 +165,15 @@ public class DateUtilities {
     public static String getWeekday(Date date) {
         return DateUtils.getDayOfWeekString(date.getDay() + Calendar.SUNDAY,
                 DateUtils.LENGTH_LONG);
+    }
+
+
+    /**
+     * @return weekday
+     */
+    public static String getWeekdayShort(Date date) {
+        return DateUtils.getDayOfWeekString(date.getDay() + Calendar.SUNDAY,
+                DateUtils.LENGTH_MEDIUM);
     }
 
     /**
@@ -160,7 +195,7 @@ public class DateUtilities {
     /**
      * @return yesterday, today, tomorrow, or null
      */
-    public static String getRelativeDay(Context context, long date) {
+    public static String getRelativeDay(Context context, long date, boolean abbreviated) {
         long today = clearTime(new Date());
         long input = clearTime(new Date(date));
 
@@ -168,16 +203,23 @@ public class DateUtilities {
             return context.getString(R.string.today).toLowerCase();
 
         if(today + ONE_DAY == input)
-            return context.getString(R.string.tomorrow).toLowerCase();
+            return context.getString(abbreviated ? R.string.tmrw : R.string.tomorrow).toLowerCase();
 
         if(today == input + ONE_DAY)
-            return context.getString(R.string.yesterday).toLowerCase();
+            return context.getString(abbreviated ? R.string.yest : R.string.yesterday).toLowerCase();
 
         if(today + DateUtilities.ONE_WEEK >= input &&
                 today - DateUtilities.ONE_WEEK <= input)
-            return DateUtilities.getWeekday(new Date(date));
+            return abbreviated ? DateUtilities.getWeekdayShort(new Date(date)) : DateUtilities.getWeekday(new Date(date));
 
-        return DateUtilities.getDateString(context, new Date(date));
+        return DateUtilities.getDateStringHideYear(context, new Date(date));
+    }
+
+    /**
+     * Calls getRelativeDay with abbreviated parameter defaulted to true
+     */
+    public static String getRelativeDay(Context context, long date) {
+        return DateUtilities.getRelativeDay(context, date, true);
     }
 
     private static long clearTime(Date date) {

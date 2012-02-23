@@ -6,6 +6,7 @@ package com.todoroo.astrid.core;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -19,7 +20,9 @@ import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.DialogUtilities;
+import com.todoroo.andlib.utility.Preferences;
 import com.todoroo.andlib.utility.TodorooPreferenceActivity;
+import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.gcal.GCalHelper;
 import com.todoroo.astrid.service.MetadataService;
@@ -33,8 +36,9 @@ import com.todoroo.astrid.service.TaskService;
  */
 public class OldTaskPreferences extends TodorooPreferenceActivity {
 
-    @Autowired private TaskService taskService;
-    @Autowired private MetadataService metadataService;
+    @Autowired TaskService taskService;
+    @Autowired MetadataService metadataService;
+    @Autowired Database database;
 
     ProgressDialog pd;
 
@@ -50,37 +54,65 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
         DependencyInjectionService.getInstance().inject(this);
 
         // Extended prefs
-        Preference preference_delete_completed = screen.findPreference(getString(R.string.EPr_manage_delete_completed));
-        preference_delete_completed.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        Preference preference = screen.findPreference(getString(R.string.EPr_manage_delete_completed));
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference p) {
                 showDeleteCompletedDialog();
                 return true;
             }
         });
 
-        Preference preference_purge_deleted = screen.findPreference(getString(R.string.EPr_manage_purge_deleted));
-        preference_purge_deleted.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        preference = screen.findPreference(getString(R.string.EPr_manage_purge_deleted));
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference p) {
                 showPurgeDeletedDialog();
                 return true;
             }
         });
 
-        Preference preference_delete_completed_events = screen.findPreference(getString(R.string.EPr_manage_delete_completed_gcal));
-        preference_delete_completed_events.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        preference = screen.findPreference(getString(R.string.EPr_manage_delete_completed_gcal));
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference p) {
                 showDeleteCompletedEventsDialog();
                 return true;
             }
         });
 
-        Preference preference_delete_all_events = screen.findPreference(getString(R.string.EPr_manage_delete_all_gcal));
-        preference_delete_all_events.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        preference = screen.findPreference(getString(R.string.EPr_manage_delete_all_gcal));
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference p) {
                 showDeleteAllEventsDialog();
                 return true;
             }
         });
+
+        preference= screen.findPreference(getString(R.string.EPr_manage_clear_all));
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference p) {
+                showClearDataDialog();
+                return true;
+            }
+        });
+    }
+
+    private void showClearDataDialog() {
+        DialogUtilities.okCancelDialog(
+                this,
+                getResources().getString(
+                        R.string.EPr_manage_clear_all_message),
+                        new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Editor editor = Preferences.getPrefs(OldTaskPreferences.this).edit();
+                        editor.clear();
+                        editor.commit();
+
+                        deleteDatabase(database.getName());
+
+                        System.exit(0);
+                    }
+                },
+                null);
     }
 
     /* (non-Javadoc)
@@ -102,7 +134,7 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                 new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        runWithDialog(new Runnable() {
+                        pd = DialogUtilities.runWithProgressDialog(OldTaskPreferences.this, new Runnable() {
                             @Override
                             public void run() {
                                 TodorooCursor<Task> cursor = taskService.query(Query.select(Task.ID, Task.CALENDAR_URI).where(
@@ -141,7 +173,7 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                 new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        runWithDialog(new Runnable() {
+                        pd = DialogUtilities.runWithProgressDialog(OldTaskPreferences.this, new Runnable() {
                             @Override
                             public void run() {
                                 TodorooCursor<Task> cursor = taskService.query(Query.select(Task.ID, Task.TITLE, Task.CALENDAR_URI).where(
@@ -177,7 +209,7 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                 new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        runWithDialog(new Runnable() {
+                        pd = DialogUtilities.runWithProgressDialog(OldTaskPreferences.this, new Runnable() {
                             @Override
                             public void run() {
                                 int deletedEventCount = 0;
@@ -198,8 +230,8 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                                 // mass update the CALENDAR_URI here,
                                 // since the GCalHelper doesnt save it due to performance-reasons
                                 Task template = new Task();
-                                template.setValue(Task.CALENDAR_URI, "");
-                                int result = taskService.update(
+                                template.setValue(Task.CALENDAR_URI, ""); //$NON-NLS-1$
+                                taskService.update(
                                         Criterion.and(Task.COMPLETION_DATE.gt(0), Task.CALENDAR_URI.isNotNull()),
                                         template);
                                 showResult(R.string.EPr_manage_delete_completed_gcal_status, deletedEventCount);
@@ -218,7 +250,7 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                 new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        runWithDialog(new Runnable() {
+                        pd = DialogUtilities.runWithProgressDialog(OldTaskPreferences.this, new Runnable() {
                             @Override
                             public void run() {
                                 int deletedEventCount = 0;
@@ -239,8 +271,8 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                                 // mass update the CALENDAR_URI here,
                                 // since the GCalHelper doesnt save it due to performance-reasons
                                 Task template = new Task();
-                                template.setValue(Task.CALENDAR_URI, "");
-                                int result = taskService.update(
+                                template.setValue(Task.CALENDAR_URI, ""); //$NON-NLS-1$
+                                taskService.update(
                                         Task.CALENDAR_URI.isNotNull(),
                                         template);
                                 showResult(R.string.EPr_manage_delete_all_gcal_status, deletedEventCount);
@@ -248,24 +280,6 @@ public class OldTaskPreferences extends TodorooPreferenceActivity {
                         });
                     }
                 }, null);
-    }
-
-    /** Run runnable with progress dialog */
-    protected void runWithDialog(final Runnable runnable) {
-        pd = DialogUtilities.progressDialog(this, getString(R.string.DLG_please_wait));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runnable.run();
-                } catch (Exception e) {
-                    DialogUtilities.okDialog(OldTaskPreferences.this,
-                            getString(R.string.DLG_error, e.toString()), null);
-                } finally {
-                    DialogUtilities.dismissDialog(OldTaskPreferences.this, pd);
-                }
-            }
-        }).start();
     }
 
     protected void showResult(int resourceText, int result) {

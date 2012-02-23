@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-07-14 18:38-0700\n"
-"PO-Revision-Date: 2011-09-07 18:36+0000\n"
+"PO-Revision-Date: 2012-01-02 19:41+0000\n"
 "Last-Translator: Alejandro Pérez <alexperezalonso@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2012-01-03 04:56+0000\n"
+"X-Generator: Launchpad (build 14616)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,14 +18,14 @@ msgid "Share"
 msgstr "Compartir"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
-msgstr "Nombre del Contacto"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
+msgstr "Contacto o email"
 
 #. task sharing dialog: shared with hint
 #: translations/strings.xml:14( name="actfm_person_or_tag_hint")
 msgid "Contact or Shared List"
-msgstr ""
+msgstr "Contacto o lista compartida"
 
 #. toast on transmit success
 #: translations/strings.xml:17( name="actfm_toast_success")
@@ -34,8 +34,8 @@ msgstr "Guardado en Servidor"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Guardado sin éxito"
+msgid "Save Failed: %s"
+msgstr "Almacenamiento fallido: %s"
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
@@ -54,6 +54,11 @@ msgstr "Tomar una Fotografía"
 msgid "Pick from Gallery"
 msgstr "Escoger de la Galería"
 
+#. menu item to clear picture selection
+#: translations/strings.xml:32( name="actfm_picture_clear")
+msgid "Clear Picture"
+msgstr "Imagen Clara"
+
 #. filter list activity: refresh tags
 #: translations/strings.xml:32( name="actfm_FLA_menu_refresh")
 msgid "Refresh Lists"
@@ -67,7 +72,7 @@ msgstr "Agregar un comentario..."
 #. Tag View Activity: task comment ($1 - user name, $2 - task title)
 #: translations/strings.xml:40( name="UAd_title_comment")
 msgid "%1$s re: %2$s"
-msgstr ""
+msgstr "%1$s re: %2$s"
 
 #. Tab for showing tasks
 #: translations/strings.xml:45(item)
@@ -105,14 +110,14 @@ msgid "none"
 msgstr "ninguno"
 
 #. Tag Settings: list collaborators label
-#: translations/strings.xml:65( name="actfm_TVA_members_label")
-msgid "Collaborators:"
+#: translations/strings.xml:74( name="actfm_TVA_members_label")
+msgid "Shared With:"
 msgstr "Colaboradores"
 
 #. Tag Settings: tag picture
 #: translations/strings.xml:68( name="actfm_TVA_tag_picture")
 msgid "List Picture"
-msgstr ""
+msgstr "Listar imagenes"
 
 #. Tag Settings: silence notifications label
 #: translations/strings.xml:71( name="actfm_TVA_silence_label")
@@ -139,14 +144,19 @@ msgid "Save &amp; Share"
 msgstr "Guardar &amp; Compartir"
 
 #. task sharing dialog: assigned label
-#: translations/strings.xml:85( name="actfm_EPA_assign_label")
-msgid "Assigned to:"
-msgstr "Asignado a:"
+#: translations/strings.xml:94( name="actfm_EPA_assign_label") translations/strings.xml:703( name="TEA_control_who")
+msgid "Who"
+msgstr "Quién"
 
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")
 msgid "Me"
 msgstr "Yo"
+
+#. task sharing dialog: anyone
+#: translations/strings.xml:100( name="actfm_EPA_unassigned")
+msgid "Anyone"
+msgstr "Cualquiera"
 
 #. task sharing dialog: custom email assignment
 #: translations/strings.xml:91( name="actfm_EPA_assign_custom")
@@ -155,8 +165,8 @@ msgstr "Personalizado…"
 
 #. task sharing dialog: shared with label
 #: translations/strings.xml:94( name="actfm_EPA_share_with")
-msgid "Add Collaborators:"
-msgstr "Añadir Colaboradores:"
+msgid "Share with:"
+msgstr "Compartir con:"
 
 #. task sharing dialog: collaborator list name (%s => name of list)
 #: translations/strings.xml:97( name="actfm_EPA_list") translations/strings.xml:1912( name="tag_FEx_name")
@@ -1738,7 +1748,7 @@ msgstr ""
 #. OpenCRX host and segment group name
 #: translations/strings.xml:1182( name="opencrx_group")
 msgid "OpenCRX server"
-msgstr ""
+msgstr "servidor de OpenCRX"
 
 #. preference description for OpenCRX host
 #: translations/strings.xml:1185( name="opencrx_host_title")
@@ -1906,12 +1916,12 @@ msgstr "Producteev"
 #. filter category for Producteev responsible person
 #: translations/strings.xml:1308( name="producteev_FEx_responsible_byme")
 msgid "Assigned by me to"
-msgstr ""
+msgstr "Asignada por mi a"
 
 #. filter category for Producteev responsible person
 #: translations/strings.xml:1311( name="producteev_FEx_responsible_byothers")
 msgid "Assigned by others to"
-msgstr ""
+msgstr "Asignada por otros a"
 
 #. dashboard title for producteev default dashboard
 #: translations/strings.xml:1328( name="producteev_default_dashboard") translations/strings.xml:1340( name="producteev_PPr_defaultdash_title")
@@ -2012,7 +2022,7 @@ msgstr ""
 #. Task Edit: Reminder at random times (%s => time plural)
 #: translations/strings.xml:1450( name="TEA_reminder_random")
 msgid "Randomly once"
-msgstr ""
+msgstr "Una vez al azar"
 
 #. Task Edit: Reminder alarm clock label
 #: translations/strings.xml:1453( name="TEA_reminder_alarm_label")

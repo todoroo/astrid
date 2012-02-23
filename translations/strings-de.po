@@ -9,8 +9,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2011-12-10 00:28+0000\n"
-"X-Generator: Launchpad (build 14450)\n"
+"X-Launchpad-Export-Date: 2011-10-29 05:19+0000\n"
+"X-Generator: Launchpad (build 14197)\n"
 
 #. People Editing Activity
 #: translations/strings.xml:8( name="EPE_action") translations/strings.xml:540( name="TEA_tab_share")
@@ -18,9 +18,9 @@ msgid "Share"
 msgstr "Freigeben"
 
 #. task sharing dialog: assigned hint
-#: translations/strings.xml:11( name="actfm_person_hint") translations/strings.xml:100( name="actfm_EPA_assigned_hint")
-msgid "Contact Name"
-msgstr "Kontakt Name"
+#: translations/strings.xml:11( name="actfm_person_hint")
+msgid "Contact or Email"
+msgstr "Kontakt"
 
 #. task sharing dialog: shared with hint
 #: translations/strings.xml:14( name="actfm_person_or_tag_hint")
@@ -34,8 +34,8 @@ msgstr "Auf dem Server gespeichert"
 
 #. toast on transmit error
 #: translations/strings.xml:20( name="actfm_toast_error")
-msgid "Save Unsuccessful"
-msgstr "Speichern nicht erfolgreich"
+msgid "Save Failed: %s"
+msgstr "Speichern nicht erfolgreich: %s"
 
 #. can't rename or delete shared tag message
 #: translations/strings.xml:23( name="actfm_tag_operation_disabled")
@@ -138,34 +138,49 @@ msgid "Save &amp; Share"
 msgstr "Speichern & teilen"
 
 #. task sharing dialog: assigned label
-#: translations/strings.xml:85( name="actfm_EPA_assign_label")
-msgid "Assigned to:"
-msgstr "Übertragen an:"
+#: translations/strings.xml:94( name="actfm_EPA_assign_label") translations/strings.xml:703( name="TEA_control_who")
+msgid "Who"
+msgstr "Wer"
 
 #. task sharing dialog: assigned to me
 #: translations/strings.xml:88( name="actfm_EPA_assign_me")
 msgid "Me"
 msgstr "Mich"
 
+#. task sharing dialog: anyone
+#: translations/strings.xml:100( name="actfm_EPA_unassigned")
+msgid "Anyone"
+msgstr "Jeder"
+
 #. task sharing dialog: custom email assignment
-#: translations/strings.xml:91( name="actfm_EPA_assign_custom")
+#: translations/strings.xml:103( name="actfm_EPA_assign_custom")
 msgid "Custom..."
-msgstr "Benutzerdefiniert …"
+msgstr "Benutzerdefiniert ..."
 
 #. task sharing dialog: shared with label
-#: translations/strings.xml:94( name="actfm_EPA_share_with")
-msgid "Add Collaborators:"
-msgstr "Mitarbeiter hinzufügen:"
+#: translations/strings.xml:106( name="actfm_EPA_share_with")
+msgid "Share with:"
+msgstr "Teilen mit:"
+
+#. task sharing dialog: shared with label
+#: translations/strings.xml:112( name="actfm_EPA_collaborators_header")
+msgid "Share with Friends"
+msgstr "Mit Freunden teilen"
 
 #. task sharing dialog: collaborator list name (%s => name of list)
 #: translations/strings.xml:97( name="actfm_EPA_list") translations/strings.xml:1912( name="tag_FEx_name")
 msgid "List: %s"
 msgstr "Liste: %s"
 
+#. task sharing dialog: assigned hint
+#: translations/strings.xml:118( name="actfm_EPA_assigned_hint")
+msgid "Contact Name"
+msgstr "Kontaktperson"
+
 #. task sharing dialog: message label text
 #: translations/strings.xml:103( name="actfm_EPA_message_text")
 msgid "Invitation Message:"
-msgstr "Einladungs Nachricht"
+msgstr "Einladungsnachricht"
 
 #. task sharing dialog: message body
 #: translations/strings.xml:106( name="actfm_EPA_message_body")
@@ -212,10 +227,27 @@ msgstr "Ungültige E-Mail: %s"
 msgid "List Not Found: %s"
 msgstr "Liste nicht gefunden: %s"
 
+#. task sharing login prompt
+#: translations/strings.xml:151( name="actfm_EPA_login_to_share")
+msgid ""
+"You need to be logged in to Astrid.com to share tasks! Please log in or make "
+"this a private task."
+msgstr ""
+"Astrid.com lässt dich online auf deine Augaben zugreiffen, teilen und an "
+"andere delegieren."
+
+#: translations/strings.xml:153( name="actfm_EPA_login_button")
+msgid "Log in"
+msgstr "Anmelden"
+
+#: translations/strings.xml:155( name="actfm_EPA_dont_share_button")
+msgid "Make private"
+msgstr "Privat machen"
+
 #. share login: Title
 #: translations/strings.xml:135( name="actfm_ALA_title")
 msgid "Welcome to Astrid.com!"
-msgstr "Willkommen bei Astrid.com"
+msgstr "Willkommen bei Astrid.com!"
 
 #. share login: Sharing Description
 #: translations/strings.xml:138( name="actfm_ALA_body")
@@ -223,23 +255,23 @@ msgid ""
 "Astrid.com lets you access your tasks online, share, and delegate with "
 "others."
 msgstr ""
-"Astrid.com lässt dich online auf deine Augaben zugreiffen, teilen und an "
-"andere delegieren."
+"Astrid.com lässt Sie ihre Aufgaben online abrufen, teilen, und auf andere "
+"übertragen."
 
 #. share login: Sharing Login FB Prompt
-#: translations/strings.xml:142( name="actfm_ALA_fb_login")
-msgid "Sign in with Facebook"
+#: translations/strings.xml:167( name="actfm_ALA_fb_login")
+msgid "Login with Facebook"
 msgstr "Mit Facebook anmelden"
 
 #. share login: Sharing Login GG Prompt
-#: translations/strings.xml:145( name="actfm_ALA_gg_login")
-msgid "Sign in with Google"
+#: translations/strings.xml:170( name="actfm_ALA_gg_login")
+msgid "Login with Google"
 msgstr "Mit Google anmelden"
 
 #. share login: Sharing Footer Password Label
-#: translations/strings.xml:148( name="actfm_ALA_pw_login")
-msgid "Don't have a Google or Facebook Account?"
-msgstr "Hast du einen Google oder Facebook Account?"
+#: translations/strings.xml:173( name="actfm_ALA_pw_login")
+msgid "Don't use Google or Facebook?"
+msgstr "Kein Google oder Facebook benutzen?"
 
 #. share login: Sharing Password Link
 #: translations/strings.xml:151( name="actfm_ALA_pw_link")
@@ -249,12 +281,12 @@ msgstr "Hier anmelden"
 #. share login: Password Are you a New User?
 #: translations/strings.xml:154( name="actfm_ALA_pw_new")
 msgid "Create a new account?"
-msgstr "Neuen Account erstellen?"
+msgstr "Neues Konto erstellen?"
 
 #. share login: Password Are you a Returning User?
 #: translations/strings.xml:157( name="actfm_ALA_pw_returning")
 msgid "Already have an account?"
-msgstr "Account schon vorhanden?"
+msgstr "Haben Sie bereits ein Konto?"
 
 #. share login: Name
 #: translations/strings.xml:160( name="actfm_ALA_name_label")
@@ -284,7 +316,7 @@ msgstr "Neues Konto erstellen"
 #. share login: Login Title
 #: translations/strings.xml:175( name="actfm_ALA_login_title")
 msgid "Login to Astrid.com"
-msgstr "Auf Astrid.com einloggen"
+msgstr "Bei Astrid.com anmelden"
 
 #. share login: OAUTH Login Prompt
 #: translations/strings.xml:178( name="actfm_OLA_prompt")
@@ -294,22 +326,34 @@ msgstr "Bitte mit Google verbinden:"
 #. share login: Sharing notice
 #: translations/strings.xml:181( name="actfm_ALA_notice")
 msgid "Astrid won't send messages e-mails without permission."
-msgstr "Astrid sendet keine Nachrichten E-Mails ohne Erlaubnis."
+msgstr "Astrid wird keine Nachrichten E-Mails senden ohne ihre Erlaubniss."
 
 #. Preferences Title: Act.fm
 #: translations/strings.xml:186( name="actfm_APr_header")
 msgid "Astrid.com (Beta!)"
 msgstr "Astrid.com (Beta!)"
 
+#: translations/strings.xml:213( name="actfm_https_title")
+msgid "Use HTTPS"
+msgstr "HTTPS benutzen"
+
+#: translations/strings.xml:214( name="actfm_https_enabled")
+msgid "HTTPS enabled (slower)"
+msgstr "HTTPS aktiviert (langsamer)"
+
+#: translations/strings.xml:215( name="actfm_https_disabled")
+msgid "HTTPS disabled (faster)"
+msgstr "HTTPS deaktiviert (schneller)"
+
 #. title for notification tray after synchronizing
 #: translations/strings.xml:189( name="actfm_notification_title")
 msgid "Astrid.com Sync"
-msgstr "Astrid.com Synchronisieren"
+msgstr "Astrid.com synchronisieren"
 
 #. text for notification when comments are received
 #: translations/strings.xml:192( name="actfm_notification_comments")
 msgid "New comments received / click for more details"
-msgstr "Neue Kommentare erhalten / klicke für mehr Informationen"
+msgstr "Neue Kommentare empfangen / klicken für mehr Details"
 
 #. Task Edit Activity: Container Label
 #: translations/strings.xml:203( name="alarm_ACS_label") translations/strings.xml:543( name="TEA_tab_alarms")
@@ -334,12 +378,12 @@ msgstr "Backups"
 #. Backup: Status Header
 #: translations/strings.xml:226( name="backup_BPr_group_status") translations/strings.xml:2145( name="sync_SPr_group_status")
 msgid "Status"
-msgstr "Status"
+msgstr "Zustand"
 
 #. Backup Status: last backup was a success (%s -> last date). Keep it short!
-#: translations/strings.xml:229( name="backup_status_success")
-msgid "Latest: %s"
-msgstr "Letztes Backup: %s"
+#: translations/strings.xml:258( name="backup_status_success")
+msgid "Latest backup:\\n%s"
+msgstr "Letztes Backup:\\n%s"
 
 #. Backup Status: last error failed. Keep it short!
 #: translations/strings.xml:231( name="backup_status_failed")
@@ -349,7 +393,7 @@ msgstr "Letztes Backup fehlgeschlagen"
 #. Backup Status: error subtitle
 #: translations/strings.xml:233( name="backup_status_failed_subtitle")
 msgid "(tap to show error)"
-msgstr "(klicken, um Fehlermeldung anzuzeigen)"
+msgstr "(klicken um Fehler anzuzeigen)"
 
 #. Backup Status: never backed up
 #: translations/strings.xml:235( name="backup_status_never")
@@ -359,7 +403,7 @@ msgstr "Bisher kein Backup erstellt!"
 #. Backup Options Group Label
 #: translations/strings.xml:238( name="backup_BPr_group_options") translations/strings.xml:2163( name="sync_SPr_group_options")
 msgid "Options"
-msgstr "Optionen"
+msgstr "Einstellungen"
 
 #. Preference: Automatic Backup Title
 #: translations/strings.xml:241( name="backup_BPr_auto_title")
@@ -369,17 +413,17 @@ msgstr "Automatische Backups"
 #. Preference: Automatic Backup Description (when disabled)
 #: translations/strings.xml:243( name="backup_BPr_auto_disabled")
 msgid "Automatic Backups Disabled"
-msgstr "Keine automatischen Backups"
+msgstr "Automatische Backups deaktiviert"
 
 #. Preference: Automatic Backup Description (when enabled)
 #: translations/strings.xml:245( name="backup_BPr_auto_enabled")
 msgid "Backup will occur daily"
-msgstr "Backup wird täglich erfolgen"
+msgstr "Verwalte deine Backups"
 
 #. Preference screen restoring Tasks Help
 #: translations/strings.xml:248( name="backup_BPr_how_to_restore")
 msgid "How do I restore backups?"
-msgstr "Wie kann ich ein Backup wiederherstellen?"
+msgstr "Wie stelle ich Backups wieder her?"
 
 #. Preference screen Restoring Tasks Help Dialog Text
 #: translations/strings.xml:250( name="backup_BPr_how_to_restore_dialog")
@@ -394,12 +438,12 @@ msgstr ""
 #. backup activity label
 #: translations/strings.xml:255( name="backup_BAc_label")
 msgid "Manage Backups"
-msgstr "Sicherungen verwalten"
+msgstr "Backups verwalten"
 
 #. backup activity title
 #: translations/strings.xml:258( name="backup_BAc_title")
 msgid "Manage Your Backups"
-msgstr "Verwalte deine Backups"
+msgstr "Ihre Backups verwalten"
 
 #. backup activity import button
 #: translations/strings.xml:261( name="backup_BAc_import")
@@ -414,7 +458,7 @@ msgstr "Aufgaben exportieren"
 #. Message displayed when error occurs
 #: translations/strings.xml:269( name="backup_TXI_error")
 msgid "Import Error"
-msgstr "Fehler beim Importieren"
+msgstr "Importfehler"
 
 #: translations/strings.xml:271( name="export_toast")
 msgid "Backed Up %1$s to %2$s."
@@ -422,17 +466,17 @@ msgstr "%1$s bis %2$s gesichert."
 
 #: translations/strings.xml:273( name="export_toast_no_tasks")
 msgid "No Tasks to Export."
-msgstr "Keine Aufgaben zum exportieren."
+msgstr "Keine Aufgaben zu exportieren."
 
 #. Progress Dialog Title for exporting
 #: translations/strings.xml:276( name="export_progress_title")
 msgid "Exporting..."
-msgstr "Exportiere..."
+msgstr "Exportieren..."
 
 #. Backup: Title of Import Summary Dialog
 #: translations/strings.xml:279( name="import_summary_title")
 msgid "Restore Summary"
-msgstr "Zusammenfassung \"Wiederherstellen\""
+msgstr "Zusammenfassung wiederherstellen"
 
 #. Backup: Summary message for import. (%s => file name, %s => total # tasks, %s => imported, %s => skipped, %s => errors)
 #: translations/strings.xml:282( name="import_summary_message")
@@ -446,37 +490,37 @@ msgstr ""
 #. Progress Dialog Title for importing
 #: translations/strings.xml:290( name="import_progress_title")
 msgid "Importing..."
-msgstr "Importiere..."
+msgstr "Importieren..."
 
 #. Progress Dialog text for import reading task (%d -> task number)
 #: translations/strings.xml:293( name="import_progress_read")
 msgid "Reading task %d..."
-msgstr "Lese Aufgabe %d ..."
+msgstr "Lese Aufgabe %d..."
 
 #. Backup: Dialog when unable to open a file
 #: translations/strings.xml:296( name="DLG_error_opening")
 msgid "Could not find this item:"
-msgstr "Folgender Eintrag konnte nicht gefunden werden:"
+msgstr "Dieses Element konnte nicht gefunden werden:"
 
 #. Backup: Dialog when unable to open SD card folder (%s => folder)
 #: translations/strings.xml:299( name="DLG_error_sdcard")
 msgid "Cannot access folder: %s"
-msgstr "Ordner kann nicht geöffnet werden: %s"
+msgstr "Ordner konnte nicht geöffnet werden: %s"
 
 #. Backup: Dialog when unable to open SD card in general
 #: translations/strings.xml:302( name="DLG_error_sdcard_general")
 msgid "Cannot access your SD card!"
-msgstr "Zugriff auf SD Karte nicht möglich!"
+msgstr "SD-Karte konnte nicht geöffnet werden!"
 
 #. Backup: File Selector dialog for import
 #: translations/strings.xml:305( name="import_file_prompt")
 msgid "Select a File to Restore"
-msgstr "Datei zum Wiederherstellen auswählen"
+msgstr "Wählen Sie eine Datei zum Wiederherstellen"
 
 #. Application Name (shown on home screen & in launcher)
 #: translations/strings.xml:315( name="app_name")
 msgid "Astrid Tasks"
-msgstr "Astrid Tasks"
+msgstr "Astrid Aufgaben"
 
 #. permission title for READ_TASKS
 #: translations/strings.xml:318( name="read_permission_label") translations/strings.xml:324( name="write_permission_label")
@@ -486,12 +530,12 @@ msgstr "Astrid Zugriffsrechte"
 #. permission description for READ_TASKS
 #: translations/strings.xml:321( name="read_permission_desc")
 msgid "read tasks, display task filters"
-msgstr "Lese Aufgaben, zeige Aufgabenfilter an"
+msgstr "Aufgaben lesen, Aufgabenfilter anzeigen"
 
 #. permission description for READ_TASKS
 #: translations/strings.xml:327( name="write_permission_desc")
 msgid "create new tasks, edit existing tasks"
-msgstr "Erstelle neue Aufgaben, editiere bestehende Aufgaben"
+msgstr "Neue Aufgaben erstellen, existierende Aufgaben bearbeiten"
 
 #. question for deleting tasks
 #: translations/strings.xml:332( name="DLG_delete_this_task_question")
@@ -501,12 +545,12 @@ msgstr "Diese Aufgabe löschen?"
 #. question for deleting items (%s => item name)
 #: translations/strings.xml:335( name="DLG_delete_this_item_question")
 msgid "Delete this item: %s?"
-msgstr "Diesen Eintrag löschen: %s?"
+msgstr "Dieses Element löschen: %s?"
 
 #. Progress dialog shown when upgrading
 #: translations/strings.xml:338( name="DLG_upgrading")
 msgid "Upgrading your tasks..."
-msgstr "Aktualisiere Ihre Aufgaben..."
+msgstr "Ihre Aufgaben werden aktualisiert..."
 
 #. Title for dialog selecting a time (hours and minutes)
 #: translations/strings.xml:341( name="DLG_hour_minutes")
@@ -519,8 +563,9 @@ msgid ""
 "Astrid should to be updated to the latest version in the Android market! "
 "Please do that before continuing, or wait a few seconds."
 msgstr ""
-"Astrid sollte auf die neuste Version aktualisiert werden! Lade dir hierzu "
-"die neuste Version aus dem Android Market oder warte ein paar Sekunden."
+"Astrid sollte auf die aktuellste Version im Android Market aktualisiert "
+"werden! Bitte tun Sie dies, bevor Sie fortfahren, oder warten Sie ein paar "
+"Sekunden."
 
 #. Button for going to Market
 #: translations/strings.xml:349( name="DLG_to_market")
@@ -530,12 +575,12 @@ msgstr "Gehe zum Market"
 #. Button for accepting EULA
 #: translations/strings.xml:352( name="DLG_accept")
 msgid "I Accept"
-msgstr "Zustimmen"
+msgstr "Ich akzeptiere"
 
 #. Button for declining EULA
 #: translations/strings.xml:355( name="DLG_decline")
 msgid "I Decline"
-msgstr "Ablehnen"
+msgstr "Ich akzeptiere nicht"
 
 #. EULA title
 #: translations/strings.xml:358( name="DLG_eula_title")
@@ -545,22 +590,45 @@ msgstr "Astrid Nutzungsbedingungen"
 #. Progress Dialog generic text
 #: translations/strings.xml:361( name="DLG_please_wait")
 msgid "Please Wait"
-msgstr "Bitte warten"
+msgstr "Bitte warten Sie"
+
+#. Dialog - loading
+#: translations/strings.xml:393( name="DLG_loading") translations/strings.xml:640(item) translations/strings.xml:853( name="TWi_loading")
+msgid "Loading..."
+msgstr "Lade..."
+
+#: translations/strings.xml:398( name="DLG_ok")
+msgid "OK"
+msgstr "OK"
+
+#: translations/strings.xml:400( name="DLG_cancel")
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#. Third Tab - add-ons
+#: translations/strings.xml:402( name="DLG_more") translations/strings.xml:610( name="TEA_tab_more") translations/strings.xml:722( name="TEA_more")
+msgid "More"
+msgstr "Mehr"
 
 #. Label for DateButtons with no value
 #: translations/strings.xml:366( name="WID_dateButtonUnset")
 msgid "Click To Set"
-msgstr "Klicken zum bestätigen"
+msgstr "Kommentare"
 
 #. String formatter for DateButtons ($D => date, $T => time)
 #: translations/strings.xml:369( name="WID_dateButtonLabel")
 msgid "$D $T"
-msgstr "$D $T"
+msgstr "Nichts zum Anzeigen"
 
 #. String formatter for Disable button
 #: translations/strings.xml:372( name="WID_disableButton")
 msgid "Disable"
 msgstr "Deaktivieren"
+
+#. Label for DateButtons with no value
+#: translations/strings.xml:417( name="welcome_show_eula")
+msgid "Accept EULA to get started!"
+msgstr "Akzeptieren Sie EULE um zu starten!"
 
 #. Note Exposer
 #: translations/strings.xml:377( name="ENE_label") translations/strings.xml:573( name="TEA_note_label")
@@ -575,12 +643,7 @@ msgstr "Kommentare"
 #. EditNoteActivity - no comments
 #: translations/strings.xml:383( name="ENA_no_comments")
 msgid "Nothing To Show"
-msgstr "Nichts zum Anzeigen"
-
-#. EditNoteActivity - loading
-#: translations/strings.xml:386( name="ENA_loading") translations/strings.xml:570(item) translations/strings.xml:783( name="TWi_loading")
-msgid "Loading..."
-msgstr "Lade..."
+msgstr "Nichts zum anzeigen"
 
 #. EditNoteActivity - refresh comments
 #: translations/strings.xml:389( name="ENA_refresh_comments")
@@ -605,17 +668,17 @@ msgstr "Sortierung &amp; Versteckte"
 #. Menu: Sync Now
 #: translations/strings.xml:403( name="TLA_menu_sync")
 msgid "Sync Now!"
-msgstr "Jetzt synchronisieren!"
+msgstr "Jetzt Synchronisieren!"
 
 #. Menu: Settings
 #: translations/strings.xml:406( name="TLA_menu_settings")
 msgid "Settings"
 msgstr "Einstellungen"
 
-#. Menu: Help
-#: translations/strings.xml:409( name="TLA_menu_help") translations/strings.xml:511( name="FLA_menu_help")
-msgid "Help"
-msgstr "Hilfe"
+#. Menu: Support
+#: translations/strings.xml:452( name="TLA_menu_support")
+msgid "Support"
+msgstr "Unterstützung"
 
 #. Search Label
 #: translations/strings.xml:412( name="TLA_search_label")
@@ -806,11 +869,6 @@ msgstr "Astrid: Neue Aufgabe"
 #: translations/strings.xml:537( name="TEA_tab_basic")
 msgid "Basic"
 msgstr "Allgemein"
-
-#. Third Tab - add-ons
-#: translations/strings.xml:546( name="TEA_tab_more")
-msgid "More"
-msgstr "Mehr"
 
 #. Task title label
 #: translations/strings.xml:549( name="TEA_title_label")

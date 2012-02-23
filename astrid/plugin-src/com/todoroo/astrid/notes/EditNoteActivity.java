@@ -2,31 +2,39 @@ package com.todoroo.astrid.notes;
 
 import greendroid.widget.AsyncImageView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONObject;
 
-import android.app.ListActivity;
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.text.util.Linkify;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -34,28 +42,36 @@ import com.timsu.astrid.R;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
+import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
 import com.todoroo.andlib.utility.DateUtilities;
 import com.todoroo.andlib.utility.Preferences;
+import com.todoroo.astrid.actfm.ActFmCameraModule;
+import com.todoroo.astrid.actfm.ActFmCameraModule.CameraResultCallback;
+import com.todoroo.astrid.actfm.ActFmCameraModule.ClearImageCallback;
 import com.todoroo.astrid.actfm.sync.ActFmPreferenceService;
 import com.todoroo.astrid.actfm.sync.ActFmSyncService;
+import com.todoroo.astrid.adapter.UpdateAdapter;
 import com.todoroo.astrid.core.PluginServices;
 import com.todoroo.astrid.dao.MetadataDao.MetadataCriteria;
 import com.todoroo.astrid.dao.UpdateDao;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.data.Update;
+import com.todoroo.astrid.helper.ImageDiskCache;
 import com.todoroo.astrid.helper.ProgressBarSyncResultCallback;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.StatisticsConstants;
 import com.todoroo.astrid.service.StatisticsService;
-import com.todoroo.astrid.service.SyncV2Service.SyncResultCallback;
+import com.todoroo.astrid.sync.SyncResultCallback;
+import com.todoroo.astrid.timers.TimerActionControlSet.TimerActionListener;
 import com.todoroo.astrid.utility.Flags;
 
-public class EditNoteActivity extends ListActivity {
+public class EditNoteActivity extends LinearLayout implements TimerActionListener {
+
+
 
     public static final String EXTRA_TASK_ID = "task"; //$NON-NLS-1$
-    private static final int MENU_REFRESH_ID = Menu.FIRST;
     private static final String LAST_FETCH_KEY = "task-fetch-"; //$NON-NLS-1$
 
     private Task task;
@@ -66,35 +82,60 @@ public class EditNoteActivity extends ListActivity {
     @Autowired UpdateDao updateDao;
 
     private final ArrayList<NoteOrUpdate> items = new ArrayList<NoteOrUpdate>();
-    private NoteAdapter adapter;
     private EditText commentField;
     private TextView loadingText;
+    private final View commentsBar;
+    private final View parentView;
+    private View timerView;
+    private View commentButton;
+    private int commentItems = 10;
+    private ImageButton pictureButton;
+    private Bitmap pendingCommentPicture = null;
+    private final Fragment fragment;
+    private final ImageDiskCache imageCache;
+    private final int cameraButton;
+    private final String linkColor;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    private final List<UpdatesChangedListener> listeners = new LinkedList<UpdatesChangedListener>();
+
+    public interface UpdatesChangedListener {
+        public void updatesChanged();
+        public void commentAdded();
+    }
+
+    public EditNoteActivity(Fragment fragment, View parent, long t) {
+        super(fragment.getActivity());
+
+        imageCache = ImageDiskCache.getInstance();
+        this.fragment = fragment;
+
+        linkColor = UpdateAdapter.getLinkColor(fragment);
+
+        cameraButton = getDefaultCameraButton();
+
         DependencyInjectionService.getInstance().inject(this);
-        super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_Dialog);
-        setContentView(R.layout.edit_note_activity);
+        setOrientation(VERTICAL);
 
-        findViewById(R.id.dismiss_comments).setOnClickListener(dismissCommentsListener);
+        commentsBar = parent.findViewById(R.id.updatesFooter);
+        parentView = parent;
 
-        long taskId = getIntent().getLongExtra(EXTRA_TASK_ID, -1);
-        task = PluginServices.getTaskService().fetchById(taskId, Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
+        loadViewForTaskID(t);
+    }
+
+    private int getDefaultCameraButton() {
+        return R.drawable.camera_button;
+    }
+
+    public void loadViewForTaskID(long t){
+        task = PluginServices.getTaskService().fetchById(t, Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
         if(task == null) {
-            finish();
             return;
         }
-
-        setTitle(task.getValue(Task.TITLE));
-
         setUpInterface();
         setUpListAdapter();
 
         if(actFmPreferenceService.isLoggedIn()) {
-            findViewById(R.id.add_comment).setVisibility(View.VISIBLE);
-
-            if(task.getValue(Task.REMOTE_ID) == 0)
+            if(!task.containsNonNullValue(Task.REMOTE_ID))
                 refreshData(true, null);
             else {
                 String fetchKey = LAST_FETCH_KEY + task.getId();
@@ -111,11 +152,16 @@ public class EditNoteActivity extends ListActivity {
         }
     }
 
+
+
     // --- UI preparation
 
     private void setUpInterface() {
-        final View commentButton = findViewById(R.id.commentButton);
-        commentField = (EditText) findViewById(R.id.commentField);
+
+
+        timerView = commentsBar.findViewById(R.id.timer_container);
+        commentButton = commentsBar.findViewById(R.id.commentButton);
+        commentField = (EditText) commentsBar.findViewById(R.id.commentField);
         commentField.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
@@ -129,8 +175,12 @@ public class EditNoteActivity extends ListActivity {
         commentField.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                commentButton.setVisibility((s.length() > 0) ? View.VISIBLE : View.GONE);
+                commentButton.setVisibility((s.length() > 0 || pendingCommentPicture != null) ? View.VISIBLE
+                        : View.GONE);
+                timerView.setVisibility((s.length() > 0 || pendingCommentPicture != null) ? View.GONE
+                        : View.VISIBLE);
             }
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 //
@@ -140,6 +190,21 @@ public class EditNoteActivity extends ListActivity {
                 //
             }
         });
+
+        commentField.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    timerView.setVisibility(View.GONE);
+                    commentButton.setVisibility(View.VISIBLE);
+                }
+                else {
+                    timerView.setVisibility(View.VISIBLE);
+                    commentButton.setVisibility(View.GONE);
+                }
+            }
+        });
         commentButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,20 +212,40 @@ public class EditNoteActivity extends ListActivity {
             }
         });
 
+        final ClearImageCallback clearImage = new ClearImageCallback() {
+            @Override
+            public void clearImage() {
+                pendingCommentPicture = null;
+                pictureButton.setImageResource(cameraButton);
+            }
+        };
+        pictureButton = (ImageButton) commentsBar.findViewById(R.id.picture);
+        pictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (pendingCommentPicture != null)
+                    ActFmCameraModule.showPictureLauncher(fragment, clearImage);
+                else
+                    ActFmCameraModule.showPictureLauncher(fragment, null);
+            }
+        });
         if(!TextUtils.isEmpty(task.getValue(Task.NOTES))) {
-            TextView notes = new TextView(this);
+            TextView notes = new TextView(getContext());
             notes.setLinkTextColor(Color.rgb(100, 160, 255));
             notes.setTextSize(18);
-            getListView().addHeaderView(notes);
             notes.setText(task.getValue(Task.NOTES));
             notes.setPadding(5, 10, 5, 10);
             Linkify.addLinks(notes, Linkify.ALL);
         }
-        loadingText = (TextView) findViewById(R.id.loading);
+
+        //TODO add loading text back in
+        //        loadingText = (TextView) findViewById(R.id.loading);
+        loadingText = new TextView(getContext());
     }
 
     private void setUpListAdapter() {
         items.clear();
+        this.removeAllViews();
         TodorooCursor<Metadata> notes = metadataService.query(
                 Query.select(Metadata.PROPERTIES).where(
                         MetadataCriteria.byTaskAndwithKey(task.getId(),
@@ -175,24 +260,31 @@ public class EditNoteActivity extends ListActivity {
             notes.close();
         }
 
-        if(task.getValue(Task.REMOTE_ID) > 0) {
-            TodorooCursor<Update> updates = updateDao.query(Query.select(Update.PROPERTIES).where(
-                            Update.TASK.eq(task.getValue(Task.REMOTE_ID))));
-            try {
-                Update update = new Update();
-                for(updates.moveToFirst(); !updates.isAfterLast(); updates.moveToNext()) {
-                    update.readFromCursor(updates);
-                    items.add(NoteOrUpdate.fromUpdate(update));
-                }
-            } finally {
-                updates.close();
+
+        TodorooCursor<Update> updates;
+        if (!task.containsNonNullValue(Task.REMOTE_ID)) {
+            updates = updateDao.query(Query.select(Update.PROPERTIES).where(Update.TASK_LOCAL.eq(task.getId())));
+        }
+        else  {
+            updates = updateDao.query(Query.select(Update.PROPERTIES).where(Criterion.or(
+                    Update.TASK.eq(task.getValue(Task.REMOTE_ID)), Update.TASK_LOCAL.eq(task.getId()))));
+        }
+        try {
+            Update update = new Update();
+            for(updates.moveToFirst(); !updates.isAfterLast(); updates.moveToNext()) {
+                update.readFromCursor(updates);
+                NoteOrUpdate noa = NoteOrUpdate.fromUpdate(update, linkColor);
+                if(noa != null)
+                    items.add(noa);
             }
+        } finally {
+            updates.close();
         }
 
         Collections.sort(items, new Comparator<NoteOrUpdate>() {
             @Override
             public int compare(NoteOrUpdate a, NoteOrUpdate b) {
-                if(a.createdAt > b.createdAt)
+                if(a.createdAt < b.createdAt)
                     return 1;
                 else if (a.createdAt == b.createdAt)
                     return 0;
@@ -200,54 +292,121 @@ public class EditNoteActivity extends ListActivity {
                     return -1;
             }
         });
-        adapter = new NoteAdapter(this, R.id.name, items);
-        setListAdapter(adapter);
 
-        getListView().setSelection(items.size() - 1);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if(menu.size() > 0)
-            return true;
-
-        MenuItem item;
-        if(actFmPreferenceService.isLoggedIn()) {
-            item = menu.add(Menu.NONE, MENU_REFRESH_ID, Menu.NONE,
-                    R.string.ENA_refresh_comments);
-            item.setIcon(R.drawable.ic_menu_refresh);
+        for (int i = 0; i < Math.min(items.size(), commentItems); i++) {
+            View notesView = this.getUpdateNotes(items.get(i), this);
+            this.addView(notesView);
         }
 
-        return true;
+        if ( items.size() > commentItems) {
+            Button loadMore = new Button(getContext());
+            loadMore.setText(R.string.TEA_load_more);
+            loadMore.setBackgroundColor(Color.alpha(0));
+            loadMore.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // Perform action on click
+                    commentItems += 10;
+                    setUpListAdapter();
+                }
+            });
+            this.addView(loadMore);
+        }
+        else if (items.size() == 0) {
+            TextView noUpdates = new TextView(getContext());
+            noUpdates.setText(R.string.TEA_no_activity);
+            noUpdates.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+                    LayoutParams.WRAP_CONTENT));
+            noUpdates.setPadding(10, 10, 10, 10);
+            noUpdates.setGravity(Gravity.CENTER);
+            noUpdates.setTextSize(20);
+            this.addView(noUpdates);
+        }
+
+
+        for (UpdatesChangedListener l : listeners) {
+            l.updatesChanged();
+        }
     }
 
-    // --- events
 
-    private void refreshData(boolean manual, SyncResultCallback existingCallback) {
+
+    public View getUpdateNotes(NoteOrUpdate note, ViewGroup parent) {
+        View convertView = ((Activity)getContext()).getLayoutInflater().inflate(
+                R.layout.update_adapter_row, parent, false);
+
+        bindView(convertView, note);
+        return convertView;
+    }
+
+    /** Helper method to set the contents and visibility of each field */
+    public synchronized void bindView(View view, NoteOrUpdate item) {
+        // picture
+        final AsyncImageView pictureView = (AsyncImageView)view.findViewById(R.id.picture); {
+            pictureView.setDefaultImageResource(R.drawable.icn_default_person_image);
+            pictureView.setUrl(item.picture);
+
+        }
+
+        // name
+        final TextView nameView = (TextView)view.findViewById(R.id.title); {
+            nameView.setText(item.title);
+            Linkify.addLinks(nameView, Linkify.ALL);
+        }
+
+        // date
+        final TextView date = (TextView)view.findViewById(R.id.date); {
+            CharSequence dateString = DateUtils.getRelativeTimeSpanString(item.createdAt,
+                    DateUtilities.now(), DateUtils.MINUTE_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_RELATIVE);
+            date.setText(dateString);
+        }
+
+        // picture
+        final AsyncImageView commentPictureView = (AsyncImageView)view.findViewById(R.id.comment_picture); {
+            if(TextUtils.isEmpty(item.commentPicture) || item.commentPicture.equals("null"))  //$NON-NLS-1$
+                commentPictureView.setVisibility(View.GONE);
+            else {
+                commentPictureView.setVisibility(View.VISIBLE);
+                if(imageCache.contains(item.commentPicture)) {
+                    try {
+                        commentPictureView.setDefaultImageBitmap(imageCache.get(item.commentPicture));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    commentPictureView.setUrl(item.commentPicture);
+                }
+            }
+        }
+    }
+
+    public void refreshData(boolean manual, SyncResultCallback existingCallback) {
         final SyncResultCallback callback;
         if(existingCallback != null)
             callback = existingCallback;
         else {
             callback = new ProgressBarSyncResultCallback(
-                    this, R.id.progressBar, new Runnable() {
-               @Override
-                public void run() {
-                   setUpListAdapter();
-                   loadingText.setText(R.string.ENA_no_comments);
-                   loadingText.setVisibility(items.size() == 0 ? View.VISIBLE : View.GONE);
-                }
-            });
+                    ((Activity)getContext()), (ProgressBar)parentView.findViewById(R.id.progressBar), new Runnable() {
+                        @Override
+                        public void run() {
+                            setUpListAdapter();
+                            loadingText.setText(R.string.ENA_no_comments);
+                            loadingText.setVisibility(items.size() == 0 ? View.VISIBLE : View.GONE);
+                        }
+                    });
 
             callback.started();
             callback.incrementMax(100);
         }
 
         // push task if it hasn't been pushed
-        if(task.getValue(Task.REMOTE_ID) == 0) {
+        if(!task.containsNonNullValue(Task.REMOTE_ID) && !TextUtils.isEmpty(task.getValue(Task.TITLE))) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     actFmSyncService.pushTask(task.getId());
+                    task = PluginServices.getTaskService().fetchById(task.getId(), Task.NOTES, Task.ID, Task.REMOTE_ID, Task.TITLE);
                     refreshData(false, callback);
                 }
             }).start();
@@ -265,137 +424,152 @@ public class EditNoteActivity extends ListActivity {
     }
 
     private void addComment() {
+        addComment(commentField.getText().toString(), "task_comment", true); //$NON-NLS-1$
+    }
+
+
+    private String getPictureHashForUpdate(Update u) {
+        return String.format("%s%s", u.getValue(Update.TASK), u.getValue(Update.CREATION_DATE)); //$NON-NLS-1$
+    }
+    private void addComment(String message, String actionCode, boolean usePicture) {
+        // Allow for users to just add picture
+        if (TextUtils.isEmpty(message) && usePicture) {
+            message = " "; //$NON-NLS-1$
+        }
         Update update = new Update();
-        update.setValue(Update.MESSAGE, commentField.getText().toString());
-        update.setValue(Update.ACTION_CODE, "task_comment"); //$NON-NLS-1$
+        update.setValue(Update.MESSAGE, message);
+        update.setValue(Update.ACTION_CODE, actionCode);
         update.setValue(Update.USER_ID, 0L);
-        update.setValue(Update.TASK, task.getValue(Task.REMOTE_ID));
+        if(task.containsNonNullValue(Task.REMOTE_ID))
+            update.setValue(Update.TASK, task.getValue(Task.REMOTE_ID));
+        update.setValue(Update.TASK_LOCAL, task.getId());
         update.setValue(Update.CREATION_DATE, DateUtilities.now());
-        Flags.checkAndClear(Flags.ACTFM_SUPPRESS_SYNC);
+        update.setValue(Update.TARGET_NAME, task.getValue(Task.TITLE));
+
+        if (usePicture && pendingCommentPicture != null) {
+            update.setValue(Update.PICTURE, Update.PICTURE_LOADING);
+            try {
+                String updateString = getPictureHashForUpdate(update);
+                imageCache.put(updateString, pendingCommentPicture);
+                update.setValue(Update.PICTURE, updateString);
+            }
+            catch (Exception e) {
+                Log.e("EditNoteActivity", "Failed to put image to disk...");
+            }
+        }
+        Flags.set(Flags.ACTFM_SUPPRESS_SYNC);
         updateDao.createNew(update);
 
+        final long updateId = update.getId();
+        final Bitmap tempPicture = usePicture ? pendingCommentPicture : null;
+        new Thread() {
+            @Override
+            public void run() {
+                actFmSyncService.pushUpdate(updateId, tempPicture);
+
+            }
+        }.start();
         commentField.setText(""); //$NON-NLS-1$
-        setUpListAdapter();
 
+        pendingCommentPicture = usePicture ? null : pendingCommentPicture;
+        pictureButton.setImageResource(cameraButton);
         StatisticsService.reportEvent(StatisticsConstants.ACTFM_TASK_COMMENT);
-    }
 
-    private final OnClickListener dismissCommentsListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            finish();
-        }
-    };
-
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        // handle my own menus
-        switch (item.getItemId()) {
-
-        case MENU_REFRESH_ID: {
-            refreshData(true, null);
-            return true;
-        }
-
-        default: return false;
+        setUpListAdapter();
+        for (UpdatesChangedListener l : listeners) {
+            l.commentAdded();
         }
     }
 
-    // --- adapter
+    public int numberOfComments() {
+        return items.size();
+    }
 
     private static class NoteOrUpdate {
         private final String picture;
-        private final String title;
-        private final String body;
+        private final Spanned title;
+        private final String commentPicture;
         private final long createdAt;
 
-        public NoteOrUpdate(String picture, String title, String body,
+        public NoteOrUpdate(String picture, Spanned title, String commentPicture,
                 long createdAt) {
             super();
             this.picture = picture;
             this.title = title;
-            this.body = body;
+            this.commentPicture = commentPicture;
             this.createdAt = createdAt;
         }
 
         public static NoteOrUpdate fromMetadata(Metadata m) {
             if(!m.containsNonNullValue(NoteMetadata.THUMBNAIL))
                 m.setValue(NoteMetadata.THUMBNAIL, ""); //$NON-NLS-1$
-
+            if(!m.containsNonNullValue(NoteMetadata.COMMENT_PICTURE))
+                m.setValue(NoteMetadata.COMMENT_PICTURE, ""); //$NON-NLS-1$
+            Spanned title = Html.fromHtml(String.format("%s\n%s", m.getValue(NoteMetadata.TITLE), m.getValue(NoteMetadata.BODY))); //$NON-NLS-1$
             return new NoteOrUpdate(m.getValue(NoteMetadata.THUMBNAIL),
-                    m.getValue(NoteMetadata.TITLE),
-                    m.getValue(NoteMetadata.BODY),
+                    title,
+                    m.getValue(NoteMetadata.COMMENT_PICTURE),
                     m.getValue(Metadata.CREATION_DATE));
         }
 
         @SuppressWarnings("nls")
-        public static NoteOrUpdate fromUpdate(Update u) {
+        public static NoteOrUpdate fromUpdate(Update u, String linkColor) {
             JSONObject user = ActFmPreferenceService.userFromModel(u);
 
-            String description = u.getValue(Update.ACTION);
-            String message = u.getValue(Update.MESSAGE);
-            if(u.getValue(Update.ACTION_CODE).equals("task_comment"))
-                description = message;
-            else if(!TextUtils.isEmpty(message))
-                description += " " + message;
+            String commentPicture = u.getValue(Update.PICTURE);
 
+            Spanned title = UpdateAdapter.getUpdateComment(u, user, linkColor, UpdateAdapter.FROM_TASK_VIEW);
             return new NoteOrUpdate(user.optString("picture"),
-                    user.optString("name", ""),
-                    description,
+                    title,
+                    commentPicture,
                     u.getValue(Update.CREATION_DATE));
         }
 
-        @Override
-        public String toString() {
-            return title + ": " + body; //$NON-NLS-1$
-        }
     }
 
-    private class NoteAdapter extends ArrayAdapter<NoteOrUpdate> {
-
-        public NoteAdapter(Context context, int textViewResourceId, List<NoteOrUpdate> list) {
-            super(context, textViewResourceId, list);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if(convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.update_adapter_row, parent, false);
-            }
-            bindView(convertView, items.get(position));
-            return convertView;
-        }
-
-        /** Helper method to set the contents and visibility of each field */
-        public synchronized void bindView(View view, NoteOrUpdate item) {
-            // picture
-            final AsyncImageView pictureView = (AsyncImageView)view.findViewById(R.id.picture); {
-                if(TextUtils.isEmpty(item.picture))
-                    pictureView.setVisibility(View.GONE);
-                else {
-                    pictureView.setVisibility(View.VISIBLE);
-                    pictureView.setUrl(item.picture);
-                }
-            }
-
-            // name
-            final TextView nameView = (TextView)view.findViewById(R.id.title); {
-                nameView.setText(item.title);
-            }
-
-            // description
-            final TextView descriptionView = (TextView)view.findViewById(R.id.description); {
-                descriptionView.setText(item.body);
-                Linkify.addLinks(descriptionView, Linkify.ALL);
-            }
-
-            // date
-            final TextView date = (TextView)view.findViewById(R.id.date); {
-                CharSequence dateString = DateUtils.getRelativeTimeSpanString(item.createdAt,
-                        DateUtilities.now(), DateUtils.MINUTE_IN_MILLIS,
-                        DateUtils.FORMAT_ABBREV_RELATIVE);
-                date.setText(dateString);
-            }
-        }
+    public void addListener(UpdatesChangedListener listener) {
+        listeners.add(listener);
     }
+
+    public void removeListener(UpdatesChangedListener listener) {
+        if (listeners.contains(listener))
+            listeners.remove(listener);
+    }
+
+    @Override
+    public void timerStarted(Task t) {
+        addComment(String.format("%s %s",  //$NON-NLS-1$
+                getContext().getString(R.string.TEA_timer_comment_started),
+                DateUtilities.getTimeString(getContext(), new Date())),
+                "task_started",  //$NON-NLS-1$
+                false);
+    }
+
+    @Override
+    public void timerStopped(Task t) {
+        String elapsedTime = DateUtils.formatElapsedTime(t.getValue(Task.ELAPSED_SECONDS));
+        addComment(String.format("%s %s\n%s %s", //$NON-NLS-1$
+                getContext().getString(R.string.TEA_timer_comment_stopped),
+                DateUtilities.getTimeString(getContext(), new Date()),
+                getContext().getString(R.string.TEA_timer_comment_spent),
+                elapsedTime), "task_stopped", false); //$NON-NLS-1$
+    }
+
+    /*
+     * Call back from edit task when picture is added
+     */
+    public boolean activityResult(int requestCode, int resultCode, Intent data) {
+
+        CameraResultCallback callback = new CameraResultCallback() {
+            @Override
+            public void handleCameraResult(Bitmap bitmap) {
+                pendingCommentPicture = bitmap;
+                pictureButton.setImageBitmap(pendingCommentPicture);
+            }
+        };
+
+        return (ActFmCameraModule.activityResult((Activity)getContext(),
+                requestCode, resultCode, data, callback));
+    }
+
 }

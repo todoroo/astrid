@@ -24,6 +24,12 @@ public class NotificationTests extends DatabaseTestCase {
     }
 
     @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Notifications.forceNotificationManager(true);
+    }
+
+    @Override
     protected void tearDown() throws Exception {
         Notifications.setNotificationManager(null);
     }
@@ -47,7 +53,7 @@ public class NotificationTests extends DatabaseTestCase {
 
         Intent intent = new Intent();
         intent.putExtra(Notifications.ID_KEY, task.getId());
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_DUE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_DUE);
         new Notifications().onReceive(getContext(), intent);
         assertTrue(triggered.value);
     }
@@ -77,7 +83,7 @@ public class NotificationTests extends DatabaseTestCase {
 
         Intent intent = new Intent();
         intent.putExtra(Notifications.ID_KEY, task.getId());
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_DUE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_DUE);
         new Notifications().onReceive(getContext(), intent);
     }
 
@@ -106,7 +112,7 @@ public class NotificationTests extends DatabaseTestCase {
 
         Intent intent = new Intent();
         intent.putExtra(Notifications.ID_KEY, task.getId());
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_DUE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_DUE);
         new Notifications().onReceive(getContext(), intent);
     }
 
@@ -131,7 +137,7 @@ public class NotificationTests extends DatabaseTestCase {
                 assertTrue(notification.vibrate.length > 0);
             }
         });
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_DUE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_DUE);
         new Notifications().onReceive(getContext(), intent);
 
         // random notification does not
@@ -143,8 +149,8 @@ public class NotificationTests extends DatabaseTestCase {
                         notification.vibrate.length == 0);
             }
         });
-        intent.removeExtra(Notifications.TYPE_KEY);
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_RANDOM);
+        intent.removeExtra(Notifications.EXTRAS_TYPE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_RANDOM);
         new Notifications().onReceive(getContext(), intent);
 
         // wrapping works
@@ -157,8 +163,8 @@ public class NotificationTests extends DatabaseTestCase {
                 assertTrue((notification.defaults & Notification.DEFAULT_SOUND) == 0);
             }
         });
-        intent.removeExtra(Notifications.TYPE_KEY);
-        intent.putExtra(Notifications.TYPE_KEY, ReminderService.TYPE_DUE);
+        intent.removeExtra(Notifications.EXTRAS_TYPE);
+        intent.putExtra(Notifications.EXTRAS_TYPE, ReminderService.TYPE_DUE);
         new Notifications().onReceive(getContext(), intent);
 
         // nonstop notification still sounds
