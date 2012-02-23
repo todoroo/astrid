@@ -37,6 +37,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.commonsware.cwac.merge.MergeAdapter;
 import com.timsu.astrid.R;
 import com.todoroo.andlib.data.TodorooCursor;
 import com.todoroo.andlib.service.Autowired;
@@ -51,8 +52,8 @@ import com.todoroo.astrid.dao.UserDao;
 import com.todoroo.astrid.data.Metadata;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
-import com.todoroo.astrid.helper.AsyncImageView;
 import com.todoroo.astrid.data.User;
+import com.todoroo.astrid.helper.AsyncImageView;
 import com.todoroo.astrid.service.AstridDependencyInjector;
 import com.todoroo.astrid.service.MetadataService;
 import com.todoroo.astrid.service.TagDataService;
@@ -108,7 +109,8 @@ public class EditPeopleControlSet extends PopupControlSet {
 
     private final View assignedClear;
 
-    private final ArrayList<AssignedToUser> listValues = new ArrayList<AssignedToUser>();
+    private final ArrayList<AssignedToUser> listValues = new ArrayList<AssignedToUser>(); // For users who are on this list
+    private final ArrayList<AssignedToUser> astridFriends = new ArrayList<AssignedToUser>(); // For all other astrid users
 
     private final int loginRequestCode;
 
@@ -324,13 +326,13 @@ public class EditPeopleControlSet extends PopupControlSet {
     }
 
     @SuppressWarnings("nls")
-    private void buildAssignedToSpinner(Task t, ArrayList<JSONObject> sharedPeople) throws JSONException {
+    private void buildAssignedToSpinner(Task initTask, ArrayList<JSONObject> sharedPeople) throws JSONException {
         HashSet<Long> userIds = new HashSet<Long>();
         HashSet<String> emails = new HashSet<String>();
         HashMap<String, AssignedToUser> names = new HashMap<String, AssignedToUser>();
 
-        if(t.getValue(Task.USER_ID) > 0) {
-            JSONObject user = new JSONObject(t.getValue(Task.USER));
+        if(initTask.getValue(Task.USER_ID) > 0) {
+            JSONObject user = new JSONObject(initTask.getValue(Task.USER));
             sharedPeople.add(0, user);
         }
 
@@ -338,18 +340,62 @@ public class EditPeopleControlSet extends PopupControlSet {
         myself.put("id", Task.USER_ID_SELF);
         sharedPeople.add(0, myself);
 
-        boolean hasTags = t.getTransitory("tags") != null &&
-                ((HashSet<String>)t.getTransitory("tags")).size() > 0;
+        boolean hasTags = initTask.getTransitory("tags") != null &&
+                ((HashSet<String>)initTask.getTransitory("tags")).size() > 0;
+
         boolean addUnassigned = actFmPreferenceService.isLoggedIn() && hasTags;
         if (addUnassigned) {
             JSONObject unassigned = new JSONObject();
             unassigned.put("id", Task.USER_ID_UNASSIGNED);
             sharedPeople.add(1, unassigned);
         }
-        addAstridFriends(sharedPeople);
 
         // de-duplicate by user id and/or email
-        listValues.clear();
+        addUsersToList(listValues, sharedPeople, userIds, emails, names);
+        addUsersToList(astridFriends, getAstridFriends(), userIds, emails, names);
+
+        int assignedIndex = computeAssignedIndex(initTask, listValues, astridFriends);
+
+        for (AssignedChangedListener l : listeners) {
+            if (l.shouldShowTaskRabbit()) {
+                taskRabbitUser = new AssignedToUser(activity.getString(R.string.actfm_EPA_task_rabbit), new JSONObject().put("default_picture", R.drawable.task_rabbit_image));
+                int taskRabbitIndex = addUnassigned ? 2 : 1;
+                if (assignedIndex >= taskRabbitIndex)
+                    assignedIndex++;
+                listValues.add(taskRabbitIndex, taskRabbitUser);
+                if(l.didPostToTaskRabbit()){
+                    assignedIndex = taskRabbitIndex;
+                }
+            }
+        }
+
+        selected = assignedIndex;
+
+        final AssignedUserAdapter usersAdapter = new AssignedUserAdapter(activity, listValues);
+        final AssignedUserAdapter friendsAdapter = new AssignedUserAdapter(activity, astridFriends);
+        final MergeAdapter mergeAdapter = new MergeAdapter();
+        mergeAdapter.addAdapter(usersAdapter);
+        if (friendsAdapter.getCount() > 0) {
+            TextView header = new TextView(activity);
+            header.setText("Astrid Friends");
+            mergeAdapter.addView(header);
+            mergeAdapter.addAdapter(friendsAdapter);
+        }
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                assignedList.setAdapter(mergeAdapter);
+                assignedList.setItemChecked(selected, true);
+                refreshDisplayView();
+            }
+        });
+    }
+
+    @SuppressWarnings("nls")
+    private void addUsersToList(ArrayList<AssignedToUser> list, ArrayList<JSONObject> sharedPeople,
+            HashSet<Long> userIds, HashSet<String> emails, HashMap<String, AssignedToUser> names) {
+        list.clear();
         for(int i = 0; i < sharedPeople.size(); i++) {
             JSONObject person = sharedPeople.get(i);
             if(person == null)
@@ -371,7 +417,7 @@ public class EditPeopleControlSet extends PopupControlSet {
                 name = activity.getString(R.string.actfm_EPA_unassigned);
 
             AssignedToUser atu = new AssignedToUser(name, person);
-            listValues.add(atu);
+            list.add(atu);
             if(names.containsKey(name)) {
                 AssignedToUser user = names.get(name);
                 if(user != null && user.user.has("email")) {
@@ -384,56 +430,42 @@ public class EditPeopleControlSet extends PopupControlSet {
                 if(!TextUtils.isEmpty("email"))
                     atu.label = email;
                 else
-                    listValues.remove(atu);
+                    list.remove(atu);
             } else
                 names.put(name, atu);
         }
-
-        String assignedStr = t.getValue(Task.USER);
-        int assignedIndex = 0;
-        if (!TextUtils.isEmpty(assignedStr)) {
-            JSONObject assigned = new JSONObject(assignedStr);
-            long assignedId = assigned.optLong("id", -2);
-            String assignedEmail = assigned.optString("email");
-            for (int i = 0; i < listValues.size(); i++) {
-                JSONObject user = listValues.get(i).user;
-                if (user != null) {
-                    if (user.optLong("id") == assignedId ||
-                            (user.optString("email").equals(assignedEmail) &&
-                                    !(TextUtils.isEmpty(assignedEmail))))
-                        assignedIndex = i;
-                }
-            }
-        }
-
-        for (AssignedChangedListener l : listeners) {
-            if (l.shouldShowTaskRabbit()) {
-                taskRabbitUser = new AssignedToUser(activity.getString(R.string.actfm_EPA_task_rabbit), new JSONObject().put("default_picture", R.drawable.task_rabbit_image));
-                int taskRabbitIndex = addUnassigned ? 2 : 1;
-                if (assignedIndex >= taskRabbitIndex)
-                    assignedIndex++;
-                listValues.add(taskRabbitIndex, taskRabbitUser);
-                if(l.didPostToTaskRabbit()){
-                    assignedIndex = taskRabbitIndex;
-                }
-            }
-        }
-
-        selected = assignedIndex;
-
-        final AssignedUserAdapter usersAdapter = new AssignedUserAdapter(activity, listValues);
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                assignedList.setAdapter(usersAdapter);
-                assignedList.setItemChecked(selected, true);
-                refreshDisplayView();
-            }
-        });
     }
 
-    private void addAstridFriends(ArrayList<JSONObject> sharedPeople) {
+    private int computeAssignedIndex(Task task, ArrayList<AssignedToUser>... userLists) throws JSONException {
+        String assignedStr = task.getValue(Task.USER);
+        int assignedIndex = 0;
+        if (!TextUtils.isEmpty(assignedStr)) {
+            int listIndex = 0; // Which list we found the assigned user in
+            for (ArrayList<AssignedToUser> list : userLists) {
+                JSONObject assigned = new JSONObject(assignedStr);
+                long assignedId = assigned.optLong("id", -2);
+                String assignedEmail = assigned.optString("email");
+                for (int i = 0; i < list.size(); i++) {
+                    JSONObject user = list.get(i).user;
+                    if (user != null) {
+                        if (user.optLong("id") == assignedId ||
+                                (user.optString("email").equals(assignedEmail) &&
+                                        !(TextUtils.isEmpty(assignedEmail)))) {
+                            assignedIndex = i + listIndex;
+                            break;
+                        }
+                    }
+                }
+                if (assignedIndex > 0)
+                    break;
+            }
+        }
+        return assignedIndex;
+    }
+
+    private ArrayList<JSONObject> getAstridFriends() {
         TodorooCursor<User> users = userDao.query(Query.select(User.PROPERTIES).orderBy(Order.asc(User.NAME)));
+        ArrayList<JSONObject> astridUsers = new ArrayList<JSONObject>();
         try {
             User user = new User();
             for (users.moveToFirst(); !users.isAfterLast(); users.moveToNext()) {
@@ -441,7 +473,7 @@ public class EditPeopleControlSet extends PopupControlSet {
                 JSONObject userJson = new JSONObject();
                 try {
                     ActFmSyncService.JsonHelper.jsonFromUser(userJson, user);
-                    sharedPeople.add(userJson);
+                    astridUsers.add(userJson);
                 } catch (JSONException e) {
                     // Ignored
                 }
@@ -449,6 +481,7 @@ public class EditPeopleControlSet extends PopupControlSet {
         } finally {
             users.close();
         }
+        return astridUsers;
     }
 
 
@@ -473,15 +506,16 @@ public class EditPeopleControlSet extends PopupControlSet {
             }
             AsyncImageView image = (AsyncImageView) convertView.findViewById(R.id.person_image);
             image.setDefaultImageResource(R.drawable.icn_default_person_image);
-            if (position == 0) {
+            AssignedToUser item = getItem(position);
+            if (position == 0 && item.user.optLong("id") == Task.USER_ID_SELF) {
                 image.setUrl(ActFmPreferenceService.thisUser().optString("picture"));
-            } else if (position == 1) {
+            } else if (position == 1 && item.user.optLong("id") == Task.USER_ID_UNASSIGNED) {
                 image.setUrl("");
                 image.setDefaultImageResource(R.drawable.icn_anyone);
             } else {
-                image.setUrl(getItem(position).user.optString("picture"));
+                image.setUrl(item.user.optString("picture"));
             }
-            if (getItem(position).user.optInt("default_picture", 0) > 0) {
+            if (item.user.optInt("default_picture", 0) > 0) {
                 image.setDefaultImageResource(getItem(position).user.optInt("default_picture"));
             }
             return convertView;
