@@ -11,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.os.Parcel;
@@ -47,6 +48,9 @@ public abstract class AbstractModel implements Parcelable, Cloneable {
 
     /** sentinel for objects without an id */
     public static final long NO_ID = 0;
+
+    /** prefix for transitories retained in content values */
+    public static final String RETAIN_TRANSITORY_PREFIX = "retain-trans-"; //$NON-NLS-1$
 
     // --- abstract methods
 
@@ -371,6 +375,11 @@ public abstract class AbstractModel implements Parcelable, Cloneable {
         return transitoryData.remove(key);
     }
 
+    public Set<String> getAllTransitoryKeys() {
+        if (transitoryData == null)
+            return null;
+        return transitoryData.keySet();
+    }
 
     // --- Convenience wrappers for using transitories as flags
     public boolean checkTransitory(String flag) {
