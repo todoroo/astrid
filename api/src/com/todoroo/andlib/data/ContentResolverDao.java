@@ -2,8 +2,10 @@ package com.todoroo.andlib.data;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,6 +15,7 @@ import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Criterion;
 import com.todoroo.andlib.sql.Query;
+import com.todoroo.andlib.utility.AndroidUtilities;
 
 
 /**
@@ -91,17 +94,35 @@ public class ContentResolverDao<TYPE extends AbstractModel> {
      * @return true if data was written to the db, false otherwise
      */
     public boolean save(TYPE model) {
+        boolean retainedTransitories = false;
         if(model.isSaved()) {
             if(model.getSetValues() == null)
                 return false;
+            writeTransitoriesToModelContentValues(model);
+            retainedTransitories = true;
             if(cr.update(uriWithId(model.getId()), model.getSetValues(), null, null) != 0)
                 return true;
         }
+        if (!retainedTransitories)
+            writeTransitoriesToModelContentValues(model);
         Uri uri = cr.insert(baseUri, model.getMergedValues());
         long id = Long.parseLong(uri.getLastPathSegment());
         model.setId(id);
         model.markSaved();
         return true;
+    }
+
+    private void writeTransitoriesToModelContentValues(AbstractModel model) {
+        Set<String> keys = model.getAllTransitoryKeys();
+        if (keys != null) {
+            ContentValues transitories = new ContentValues();
+            for (String key : keys) {
+                String newKey = AbstractModel.RETAIN_TRANSITORY_PREFIX + key;
+                Object value = model.getTransitory(key);
+                AndroidUtilities.putInto(transitories, newKey, value, false);
+            }
+            model.mergeWith(transitories);
+        }
     }
 
     /**
