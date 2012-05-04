@@ -33,7 +33,7 @@
   <!-- for push notifications -->
   <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
   <!-- for missed call reminders -->
-  <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+  <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE"/>  -->
 
   <!-- ============================================== Exported Permissions = -->
 
@@ -201,11 +201,13 @@
       </intent-filter>
     </receiver>
     
+    <!-- 
     <receiver android:name="com.todoroo.astrid.calls.PhoneStateChangedReceiver">
         <intent-filter>
             <action android:name="android.intent.action.PHONE_STATE"/>
         </intent-filter>
     </receiver>
+    -->
 
     <!-- ======================================================== Services = -->
 
