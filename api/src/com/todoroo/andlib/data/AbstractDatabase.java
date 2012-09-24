@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.peculiarcat.sqlmaid.Connector;
 import com.todoroo.andlib.data.Property.PropertyVisitor;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.ContextManager;
@@ -40,6 +41,12 @@ import com.todoroo.andlib.utility.AndroidUtilities;
  */
 @SuppressWarnings("nls")
 abstract public class AbstractDatabase {
+
+    /**
+     * The dbkey-name for astrids database to use with sqlbride and sql-tools as described here:<br>
+     * http://www.peculiarcat.com/?p=151
+     */
+    public static final String DEBUG_DBKEY = "astriddb";
 
 	// --- abstract methods
 
@@ -272,6 +279,20 @@ abstract public class AbstractDatabase {
         public DatabaseHelper(Context context, String name,
                 CursorFactory factory, int version) {
             super(context, name, factory, version);
+        }
+
+        @Override
+        public synchronized SQLiteDatabase getWritableDatabase() {
+            SQLiteDatabase db = super.getWritableDatabase();
+            Connector.getInstance().checkPermissions(DEBUG_DBKEY);
+            return db;
+        }
+
+        @Override
+        public synchronized SQLiteDatabase getReadableDatabase() {
+            SQLiteDatabase db = super.getReadableDatabase();
+            Connector.getInstance().checkPermissions(DEBUG_DBKEY);
+            return db;
         }
 
         /**

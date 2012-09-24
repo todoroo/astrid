@@ -30,7 +30,9 @@ import android.widget.ImageView;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
+import com.peculiarcat.sqlmaid.Connector;
 import com.timsu.astrid.R;
+import com.todoroo.andlib.data.AbstractDatabase;
 import com.todoroo.andlib.service.Autowired;
 import com.todoroo.andlib.service.DependencyInjectionService;
 import com.todoroo.andlib.sql.Functions;
@@ -47,6 +49,7 @@ import com.todoroo.astrid.api.AstridApiConstants;
 import com.todoroo.astrid.api.Filter;
 import com.todoroo.astrid.api.FilterListItem;
 import com.todoroo.astrid.core.CustomFilterExposer;
+import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.TagData;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.AsyncImageView;
@@ -214,6 +217,9 @@ public class TaskListActivity extends AstridActivity implements MainMenuListener
         // Have to call this here because sometimes StartupService
         // isn't called (i.e. if the app was silently alive in the background)
         abTestEventReportingService.trackUserRetention(this);
+        // setup database-debug-connection for use with sqlbride and external sql-tool
+        if (Constants.DEBUG)
+            Connector.getInstance().registerDatabase(this, AbstractDatabase.DEBUG_DBKEY, Database.NAME);
     }
 
     private void setupPagerAdapter() {
@@ -489,6 +495,14 @@ public class TaskListActivity extends AstridActivity implements MainMenuListener
     protected void onStop() {
         super.onStop();
         AndroidUtilities.tryUnregisterReceiver(this, tagDeletedReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // quit database-debug-connection for use with sqlbride and external sql-tool
+        if (Constants.DEBUG)
+            Connector.getInstance().unregisterDatabase(this, AbstractDatabase.DEBUG_DBKEY, Database.NAME);
+        super.onDestroy();
     }
 
     public void setSelectedItem(Filter item) {
