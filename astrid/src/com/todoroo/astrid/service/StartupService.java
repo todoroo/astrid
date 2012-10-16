@@ -46,6 +46,7 @@ import com.todoroo.astrid.backup.BackupService;
 import com.todoroo.astrid.backup.TasksXmlImporter;
 import com.todoroo.astrid.dao.Database;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.gcal.CalendarStartupReceiver;
 import com.todoroo.astrid.gtasks.GtasksPreferenceService;
 import com.todoroo.astrid.gtasks.sync.GtasksSyncService;
 import com.todoroo.astrid.opencrx.OpencrxCoreUtils;
@@ -118,7 +119,6 @@ public class StartupService {
     public synchronized void onStartupApplication(final Activity context) {
         if(hasStartedUp || context == null)
             return;
-
 
         // sets up context manager
         ContextManager.setContext(context);
@@ -222,6 +222,7 @@ public class StartupService {
 
                 // perform initialization
                 ReminderStartupReceiver.startReminderSchedulingService(context);
+                CalendarStartupReceiver.scheduleCalendarAlarms(context);
                 BackupService.scheduleService(context);
                 actFmSyncService.initialize();
 
