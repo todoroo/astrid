@@ -45,7 +45,7 @@ public class Database extends AbstractDatabase {
     /**
      * Database name (must be unique)
      */
-    private static final String NAME = "database";
+    public static final String NAME = "database";
 
     /**
      * List of table/ If you're adding a new table, add it to this list and

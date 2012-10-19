@@ -39,7 +39,7 @@ public final class Constants {
     public static final long WIDGET_UPDATE_INTERVAL = 30 * 60 * 1000L;
 
     /**
-     * Whether to turn on debugging logging and UI
+     * Whether to turn on debugging logging, jdbc-connect per sqlbride and UI
      */
     public static final boolean DEBUG = false;
 
