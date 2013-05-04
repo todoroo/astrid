@@ -299,6 +299,7 @@ public final class Task extends RemoteModel {
         defaultValues.put(COMPLETION_DATE.name, 0);
         defaultValues.put(DELETION_DATE.name, 0);
         defaultValues.put(IMPORTANCE.name, IMPORTANCE_NONE);
+        defaultValues.put(REPORT.name, "");
 
         defaultValues.put(CALENDAR_URI.name, "");
         defaultValues.put(RECURRENCE.name, "");
