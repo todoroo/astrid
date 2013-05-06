@@ -259,6 +259,8 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private EditText notesEditText;
 
+    //private EditText reportEditText;
+
     private Dialog whenDialog;
 
     private boolean overrideFinishAnim;
