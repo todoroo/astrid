@@ -103,6 +103,7 @@ import com.todoroo.astrid.timers.TimerPlugin;
 import com.todoroo.astrid.ui.DateChangedAlerts;
 import com.todoroo.astrid.ui.DeadlineControlSet;
 import com.todoroo.astrid.ui.EditNotesControlSet;
+import com.todoroo.astrid.ui.EditReportControlSet;
 import com.todoroo.astrid.ui.EditTitleControlSet;
 import com.todoroo.astrid.ui.HideUntilControlSet;
 import com.todoroo.astrid.ui.ImportanceControlSet;

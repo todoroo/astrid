@@ -1,4 +1,4 @@
-package com.todoroo.astrid.activity;
+package com.todoroo.astrid.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.timsu.astrid.R;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.ThemeService;
-import com.todoroo.astrid.ui.PopupControlSet;
 
 public class EditReportControlSet extends PopupControlSet {
 
