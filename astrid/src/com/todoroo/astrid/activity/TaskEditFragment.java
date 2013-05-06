@@ -230,6 +230,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private EditPeopleControlSet peopleControlSet = null;
     private EditNotesControlSet notesControlSet = null;
+    private final EditReportControlSet reportControlSet = null;
     private HideUntilControlSet hideUntilControls = null;
     private TagsControlSet tagsControlSet = null;
     private FilesControlSet filesControlSet = null;
@@ -259,7 +260,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private EditText notesEditText;
 
-    //private EditText reportEditText;
+    private EditText reportEditText;
 
     private Dialog whenDialog;
 
@@ -530,7 +531,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
         controlSetMap.put(getString(R.string.TEA_ctrl_notes_pref),
                 notesControlSet);
 
-        /*EditReportControlSet reportControlSet = new EditReportControlSet(getActivity(),
+        /*reportControlSet = new EditReportControlSet(getActivity(),
                 R.layout.control_set_report, R.layout.control_set_report_display);
         reportEditText = (EditText) reportControlSet.getView().findViewById(
                 R.id.report);

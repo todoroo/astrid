@@ -1,28 +1,16 @@
-package com.todoroo.astrid.ui;
+package com.todoroo.astrid.activity;
 
 import android.app.Activity;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.timsu.astrid.R;
 import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.ui.PopupControlSet;
 
 public class EditReportControlSet extends PopupControlSet {
-
-    protected EditText editText;
-    protected TextView notesPreview;
-    protected ImageView image;
 
     public EditReportControlSet(Activity activity, int viewLayout,
             int displayViewLayout, int title) {
         super(activity, viewLayout, displayViewLayout, title);
         // TODO Auto-generated constructor stub
-    }
-
-    public EditReportControlSet(Activity activity, int viewLayout, int displayViewLayout) {
-        super(activity, viewLayout, displayViewLayout, R.string.TEA_note_label);
-        image = (ImageView) getDisplayView().findViewById(R.id.display_row_icon);
     }
 
     @Override
