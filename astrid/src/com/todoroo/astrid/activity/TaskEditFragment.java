@@ -533,7 +533,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
                 notesControlSet);
 
         reportControlSet = new EditReportControlSet(getActivity(),
-                R.layout.control_set_notes, R.layout.control_set_notes_display);
+                R.layout.control_set_report, R.layout.control_set_report_display);
         reportEditText = (EditText) reportControlSet.getView().findViewById(
                 R.id.report);
         controls.add(reportControlSet);

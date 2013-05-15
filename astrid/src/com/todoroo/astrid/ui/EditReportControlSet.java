@@ -83,7 +83,7 @@ public class EditReportControlSet extends PopupControlSet {
 
     @Override
     protected void afterInflate() {
-        //editText = (EditText) getView().findViewById(R.id.report);
+        editText = (EditText) getView().findViewById(R.id.report);
         reportPreview = (TextView) getDisplayView().findViewById(R.id.display_row_edit);
     }
 
