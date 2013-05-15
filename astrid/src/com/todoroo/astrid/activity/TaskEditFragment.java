@@ -532,13 +532,13 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
         controlSetMap.put(getString(R.string.TEA_ctrl_notes_pref),
                 notesControlSet);
 
-        /*reportControlSet = new EditReportControlSet(getActivity(),
-                R.layout.control_set_report, R.layout.control_set_report_display);
+        reportControlSet = new EditReportControlSet(getActivity(),
+                R.layout.control_set_notes, R.layout.control_set_notes_display);
         reportEditText = (EditText) reportControlSet.getView().findViewById(
                 R.id.report);
         controls.add(reportControlSet);
         controlSetMap.put(getString(R.string.TEA_ctrl_report_pref),
-                reportControlSet);*/
+                reportControlSet);
 
         ReminderControlSet reminderControl = new ReminderControlSet(
                 getActivity(), R.layout.control_set_reminders,
