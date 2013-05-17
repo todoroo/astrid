@@ -231,7 +231,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private EditPeopleControlSet peopleControlSet = null;
     private EditNotesControlSet notesControlSet = null;
-    private final EditReportControlSet reportControlSet = null;
+    private EditReportControlSet reportControlSet = null;
     private HideUntilControlSet hideUntilControls = null;
     private TagsControlSet tagsControlSet = null;
     private FilesControlSet filesControlSet = null;

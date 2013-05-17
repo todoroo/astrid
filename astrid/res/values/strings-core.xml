@@ -1020,5 +1020,6 @@ you get stuff done. It features reminders, tags, sync, Locale plug-in, a widget 
   <string name="market_unavailable">Unfortunately the market is not available for your system.</string>
   <string name="TEA_report_label">Report</string>
   <string name="TEA_report_empty">Report...</string>
+  <string name="TEA_report_hint">Enter your report...</string>
   
 </resources>
