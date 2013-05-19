@@ -447,6 +447,7 @@
       <item >@string/TEA_control_importance</item>
       <item >@string/TEA_control_lists</item>
       <item >@string/TEA_control_notes</item>
+      <item >@string/TEA_control_report</item>
       <item >@string/TEA_control_files</item>
       <item >@string/TEA_control_more_section</item>
       <item >@string/TEA_control_reminders</item>

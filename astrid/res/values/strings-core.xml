@@ -1021,5 +1021,6 @@ you get stuff done. It features reminders, tags, sync, Locale plug-in, a widget 
   <string name="TEA_report_label">Report</string>
   <string name="TEA_report_empty">Report...</string>
   <string name="TEA_report_hint">Enter your report...</string>
+  <string name="TEA_control_report">Report</string>
   
 </resources>
