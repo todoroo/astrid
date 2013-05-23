@@ -20,13 +20,13 @@
         android:orientation="horizontal"
         android:paddingLeft="10dip"
         android:paddingRight="10dip" >
-        <ImageView android:id="@id/display_row_icon"
+        <ImageView android:id="@+id/display_row_icon"
             android:layout_marginRight="10dip"
             android:layout_width="20dip"
             android:layout_height="20dip"
             android:scaleType="fitCenter"/>
         <TextView
-            android:id="@id/display_row_edit"
+            android:id="@+id/display_row_edit"
             style="@style/TextAppearance.EditRowDisplay"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

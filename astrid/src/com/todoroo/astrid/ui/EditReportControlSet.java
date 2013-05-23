@@ -43,11 +43,11 @@ public class EditReportControlSet extends PopupControlSet {
         if (TextUtils.isEmpty(textToUse)) {
             reportPreview.setText(R.string.TEA_report_empty);
             reportPreview.setTextColor(unsetColor);
-            image.setImageResource(R.drawable.tea_icn_edit_gray);
+            image.setImageResource(R.drawable.tea_icn_report_gray);
         } else {
             reportPreview.setText(textToUse);
             reportPreview.setTextColor(themeColor);
-            image.setImageResource(ThemeService.getTaskEditDrawable(R.drawable.tea_icn_edit, R.drawable.tea_icn_edit_lightblue));
+            image.setImageResource(ThemeService.getTaskEditDrawable(R.drawable.tea_icn_report, R.drawable.tea_icn_report_lightblue));
         }
 
         linkifyDisplayView();
