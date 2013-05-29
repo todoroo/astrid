@@ -25,6 +25,7 @@ import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.TaskEditControlSet;
 import com.todoroo.astrid.repeats.RepeatControlSet.RepeatChangedListener;
 import com.todoroo.astrid.service.TaskService;
+import com.todoroo.astrid.ui.EvaluationControlSet.EvaluationChangedListener;
 import com.todoroo.astrid.ui.ImportanceControlSet.ImportanceChangedListener;
 
 /**
@@ -32,13 +33,14 @@ import com.todoroo.astrid.ui.ImportanceControlSet.ImportanceChangedListener;
  * @author Tim Su <tim@todoroo.com>
  *
  */
-public class EditTitleControlSet extends TaskEditControlSet implements ImportanceChangedListener, RepeatChangedListener {
+public class EditTitleControlSet extends TaskEditControlSet implements ImportanceChangedListener, EvaluationChangedListener, RepeatChangedListener {
     private EditText editText;
     protected CheckableImageView completeBox;
     private final int editTextId;
 
     private boolean isRepeating;
     private int importanceValue;
+    private int evaluationValue;
 
     @Autowired
     private TaskService taskService;
@@ -98,6 +100,11 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         updateCompleteBox();
     }
 
+    @Override
+    public void evaluationChanged(int i, int color) {
+        evaluationValue = i;
+        updateCompleteBox();
+    }
 
     @Override
     public void repeatChanged(boolean repeat) {
@@ -111,6 +118,7 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         super.readFromTask(task);
         isRepeating = !TextUtils.isEmpty(task.getValue(Task.RECURRENCE));
         importanceValue = model.getValue(Task.IMPORTANCE);
+        evaluationValue = model.getValue(Task.EVALUATION);
     }
 
 

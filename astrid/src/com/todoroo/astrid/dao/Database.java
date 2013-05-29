@@ -53,7 +53,7 @@ public class Database extends AbstractDatabase {
      * Database version number. This variable must be updated when database
      * tables are updated, as it determines whether a database needs updating.
      */
-    public static final int VERSION = 36;
+    public static final int VERSION = 37;
 
     /**
      * Database name (must be unique)
@@ -405,6 +405,9 @@ public class Database extends AbstractDatabase {
 
         case 35:
             tryExecSQL(addColumnSql(Task.TABLE, Task.REPORT, visitor, null));
+
+        case 36:
+            tryExecSQL(addColumnSql(Task.TABLE, Task.EVALUATION, visitor, null));
 
             return true;
         }

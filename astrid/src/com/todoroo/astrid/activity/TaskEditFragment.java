@@ -105,6 +105,7 @@ import com.todoroo.astrid.ui.DeadlineControlSet;
 import com.todoroo.astrid.ui.EditNotesControlSet;
 import com.todoroo.astrid.ui.EditReportControlSet;
 import com.todoroo.astrid.ui.EditTitleControlSet;
+import com.todoroo.astrid.ui.EvaluationControlSet;
 import com.todoroo.astrid.ui.HideUntilControlSet;
 import com.todoroo.astrid.ui.ImportanceControlSet;
 import com.todoroo.astrid.ui.NestableScrollView;
@@ -232,6 +233,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
     private EditPeopleControlSet peopleControlSet = null;
     private EditNotesControlSet notesControlSet = null;
     private EditReportControlSet reportControlSet = null;
+    private EvaluationControlSet evaluationControlSet = null;
     private HideUntilControlSet hideUntilControls = null;
     private TagsControlSet tagsControlSet = null;
     private FilesControlSet filesControlSet = null;
@@ -539,6 +541,13 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
         controls.add(reportControlSet);
         controlSetMap.put(getString(R.string.TEA_ctrl_report_pref),
                 reportControlSet);
+
+        evaluationControlSet = new EvaluationControlSet(
+                getActivity(), R.layout.control_set_evaluation);
+        controls.add(evaluationControlSet);
+        evaluationControlSet.addListener(editTitle);
+        controlSetMap.put(getString(R.string.TEA_ctrl_evaluation_pref),
+                evaluationControlSet);
 
         ReminderControlSet reminderControl = new ReminderControlSet(
                 getActivity(), R.layout.control_set_reminders,

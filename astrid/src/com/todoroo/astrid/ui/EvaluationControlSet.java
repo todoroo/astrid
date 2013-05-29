@@ -1,0 +1,196 @@
+package com.todoroo.astrid.ui;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import android.app.Activity;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ToggleButton;
+
+import com.timsu.astrid.R;
+import com.todoroo.astrid.data.Task;
+import com.todoroo.astrid.helper.TaskEditControlSet;
+import com.todoroo.astrid.service.ThemeService;
+
+public class EvaluationControlSet extends TaskEditControlSet {
+    private final List<CompoundButton> buttons = new LinkedList<CompoundButton>();
+    private final int[] colors;
+    private final List<EvaluationChangedListener> listeners = new LinkedList<EvaluationChangedListener>();
+
+    public interface EvaluationChangedListener {
+        public void evaluationChanged(int i, int color);
+    }
+
+    public EvaluationControlSet(Activity activity, int layout) {
+        super(activity, layout);
+        colors = Task.getEvaluationColors(activity.getResources());
+    }
+
+    public void setEvaluation(Integer i) {
+        for(CompoundButton b : buttons) {
+            if(b.getTag() == i) {
+                b.setTextSize(getTextSize());
+                b.setChecked(true);
+                b.setBackgroundResource(ThemeService.getDarkVsLight(R.drawable.importance_background_selected, R.drawable.importance_background_selected_dark, false));
+            } else {
+                b.setTextSize(getTextSize());
+                b.setChecked(false);
+                b.setTextColor(colors[(Integer)b.getTag()]);
+                b.setBackgroundResource(0);
+            }
+        }
+
+        for (EvaluationChangedListener l : listeners) {
+            l.evaluationChanged(i, colors[i]);
+        }
+    }
+
+    private int getTextSize() {
+        return 24;
+    }
+
+    public Integer getEvaluation() {
+        for(CompoundButton b : buttons)
+            if(b.isChecked())
+                return (Integer) b.getTag();
+        return null;
+    }
+
+    public void addListener(EvaluationChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(EvaluationChangedListener listener) {
+        if (listeners.contains(listener))
+            listeners.remove(listener);
+    }
+
+    @Override
+    public void readFromTask(Task task) {
+        super.readFromTask(task);
+        setEvaluation(model.getValue(Task.EVALUATION));
+    }
+
+    @Override
+    protected void readFromTaskOnInitialize() {
+        setEvaluation(model.getValue(Task.EVALUATION));
+    }
+
+    @Override
+    protected String writeToModelAfterInitialized(Task task) {
+        if(getEvaluation() != null)
+            task.setValue(Task.EVALUATION, getEvaluation());
+        return null;
+    }
+
+    @Override
+    protected void afterInflate() {
+        LinearLayout container = (LinearLayout) getView().findViewById(R.id.evaluation_container);
+
+        int min = Task.EVALUATION_MOST;
+        int max = Task.EVALUATION_LEAST;
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        //Activity context = new Activity();
+        //context.getApplicationContext();
+
+        for(int i = max; i >= min; i--) {
+            final ToggleButton button = new ToggleButton(activity);
+            LinearLayout.LayoutParams params;
+
+            int dimension = 38;
+            params = new LinearLayout.LayoutParams((int) (metrics.density * dimension), (int) (metrics.density * dimension));
+            button.setLayoutParams(params);
+
+            StringBuilder label = new StringBuilder();
+
+            label.append(' ');
+
+            //Drawable tea_evaluation_disaster = context.getResources().getDrawable(R.drawable.tea_evaluation_disaster);
+
+            if (i == max)
+                button.setButtonDrawable(R.drawable.tea_evaluation_disaster);
+            if (i == Task.EVALUATION_LEAST - 1)
+                button.setButtonDrawable(R.drawable.tea_evaluation_bad);
+            if (i == Task.EVALUATION_LEAST - 2)
+                button.setButtonDrawable(R.drawable.tea_evaluation_disaster);
+            if (i == Task.EVALUATION_LEAST - 3)
+                button.setButtonDrawable(R.drawable.tea_evaluation_good);
+            if (i == Task.EVALUATION_LEAST - 4)
+                button.setButtonDrawable(R.drawable.tea_evaluation_awesome);
+
+            button.setTextOff(label);
+            button.setTextOn(label);
+            button.setPadding(0, 1, 0, 0);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    setEvaluation((Integer)button.getTag());
+                }
+            });
+            button.setTag(i);
+
+            buttons.add(button);
+
+            View padding = new View(activity);
+            LinearLayout.LayoutParams paddingParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            paddingParams.weight = 1.0f;
+            padding.setLayoutParams(paddingParams);
+            container.addView(padding);
+            container.addView(button);
+        }
+    }
+
+    /*protected void afterInflate() {
+        LinearLayout container = (LinearLayout) getView().findViewById(R.id.evaluation_container);
+
+        int min = Task.EVALUATION_MOST;
+        int max = Task.EVALUATION_LEAST;
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        for(int i = max; i >= min; i--) {
+            final ToggleButton button = new ToggleButton(activity);
+            LinearLayout.LayoutParams params;
+
+            int dimension = 38;
+            params = new LinearLayout.LayoutParams((int) (metrics.density * dimension), (int) (metrics.density * dimension));
+            button.setLayoutParams(params);
+
+            StringBuilder label = new StringBuilder();
+            if (i == max)
+                label.append('#');
+            for(int j = Task.EVALUATION_LEAST - 1; j >= i; j--)
+                label.append('*');
+
+            button.setTextColor(colors[i]);
+            button.setTextOff(label);
+            button.setTextOn(label);
+            button.setPadding(0, 1, 0, 0);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    setEvaluation((Integer)button.getTag());
+                }
+            });
+            button.setTag(i);
+
+            buttons.add(button);
+
+            View padding = new View(activity);
+            LinearLayout.LayoutParams paddingParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            paddingParams.weight = 1.0f;
+            padding.setLayoutParams(paddingParams);
+            container.addView(padding);
+            container.addView(button);
+        }
+    }*/
+
+}

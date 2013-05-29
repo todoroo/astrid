@@ -66,6 +66,7 @@ public class EditReportControlSet extends PopupControlSet {
         dialog.getWindow()
             .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
                     | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
     }
 
     @Override

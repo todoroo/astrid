@@ -17,6 +17,7 @@ import android.util.Log;
 import com.timsu.astrid.R;
 import com.timsu.astrid.data.LegacyAbstractController;
 import com.timsu.astrid.data.LegacyAbstractModel;
+import com.timsu.astrid.data.enums.Evaluation;
 import com.timsu.astrid.data.enums.Importance;
 import com.timsu.astrid.data.enums.RepeatInterval;
 
@@ -41,6 +42,7 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
     public static final String     NOTES                  = "notes";
     public static final String     PROGRESS_PERCENTAGE    = "progressPercentage";
     public static final String     IMPORTANCE             = "importance";
+    public static final String     EVALUATION             = "evaluation";
     public static final String     ESTIMATED_SECONDS      = "estimatedSeconds";
     public static final String     ELAPSED_SECONDS        = "elapsedSeconds";
     public static final String     TIMER_START            = "timerStart";
@@ -80,6 +82,7 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
         defaultValues.put(NOTES, "");
         defaultValues.put(PROGRESS_PERCENTAGE, 0);
         defaultValues.put(IMPORTANCE, Importance.DEFAULT.ordinal());
+        defaultValues.put(EVALUATION, Evaluation.DEFAULT.ordinal());
         defaultValues.put(ESTIMATED_SECONDS, 0);
         defaultValues.put(ELAPSED_SECONDS, 0);
         defaultValues.put(TIMER_START, 0);
@@ -119,6 +122,7 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
                 append(NOTES).append(" text not null,").
                 append(PROGRESS_PERCENTAGE).append(" integer not null,").
                 append(IMPORTANCE).append(" integer not null,").
+                append(EVALUATION).append(" integer not null,").
                 append(ESTIMATED_SECONDS).append(" integer,").
                 append(ELAPSED_SECONDS).append(" integer,").
                 append(TIMER_START).append(" integer,").
@@ -287,6 +291,8 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
                 getProgressPercentage();
             else if(field.equals(IMPORTANCE))
                 getImportance();
+            else if(field.equals(EVALUATION))
+                getEvaluation();
             else if(field.equals(ESTIMATED_SECONDS))
                 getEstimatedSeconds();
             else if(field.equals(ELAPSED_SECONDS))
@@ -426,6 +432,13 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
         return Importance.values()[value];
     }
 
+    protected Evaluation getEvaluation() {
+        Integer value = retrieveInteger(EVALUATION);
+        if(value == null)
+            return null;
+        return Evaluation.values()[value];
+    }
+
     protected Integer getEstimatedSeconds() {
         return retrieveInteger(ESTIMATED_SECONDS);
     }
@@ -530,6 +543,10 @@ public abstract class AbstractTaskModel extends LegacyAbstractModel {
 
     protected void setImportance(Importance importance) {
         putIfChangedFromDatabase(IMPORTANCE, importance.ordinal());
+    }
+
+    protected void setEvaluation(Evaluation evaluation) {
+        putIfChangedFromDatabase(EVALUATION, evaluation.ordinal());
     }
 
     protected void setEstimatedSeconds(Integer estimatedSeconds) {

@@ -476,11 +476,13 @@
       <item>@string/TEA_ctrl_lists_pref</item>
       <item>@string/TEA_ctrl_notes_pref</item>
       <item>@string/TEA_ctrl_report_pref</item>
+      <item>@string/TEA_ctrl_evaluation_pref</item>
       <item>@string/TEA_ctrl_files_pref</item>
       <item>@string/TEA_ctrl_more_pref</item>
       <item>@string/TEA_ctrl_reminders_pref</item>
       <item>@string/TEA_ctrl_timer_pref</item>
       <item>@string/TEA_ctrl_hide_section_pref</item>
   </string-array>
+  <string name="TEA_ctrl_evaluation_pref">TEA_ctrl_evaluation_pref</string>
 
 </resources>

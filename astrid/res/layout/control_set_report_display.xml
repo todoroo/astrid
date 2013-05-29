@@ -28,17 +28,23 @@
         <TextView
             android:id="@+id/display_row_edit"
             style="@style/TextAppearance.EditRowDisplay"
-            android:layout_width="fill_parent"
+            android:layout_width="0dp"
+            android:layout_weight=".50"
             android:layout_height="wrap_content"
             android:paddingTop="10dip"
             android:paddingBottom="10dip"
             android:gravity="left" />
+        <TextView
+            android:text="Evaluate below"
+            android:textColor="@color/task_edit_deadline_gray"
+            style="@style/TextAppearance.EditRowDisplay"
+            android:layout_width="0dp"
+            android:layout_weight=".50"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dip"
+            android:paddingBottom="10dip"
+            android:gravity="right" />
     </LinearLayout>
 
-    <View
-        android:id="@id/TEA_Separator"
-        style="@style/TEA_Separator"
-        android:layout_width="fill_parent"
-        android:layout_height="1px" />
 
 </LinearLayout>
