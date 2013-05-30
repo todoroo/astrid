@@ -20,16 +20,16 @@ import com.todoroo.astrid.service.ThemeService;
 
 public class EvaluationControlSet extends TaskEditControlSet {
     private final List<CompoundButton> buttons = new LinkedList<CompoundButton>();
-    private final int[] colors;
-    private final List<EvaluationChangedListener> listeners = new LinkedList<EvaluationChangedListener>();
+    //private final int[] colors;
+    //private final List<EvaluationChangedListener> listeners = new LinkedList<EvaluationChangedListener>();
 
-    public interface EvaluationChangedListener {
-        public void evaluationChanged(int i, int color);
-    }
+    //public interface EvaluationChangedListener {
+        //public void evaluationChanged(int i, int color);
+    //}
 
     public EvaluationControlSet(Activity activity, int layout) {
         super(activity, layout);
-        colors = Task.getEvaluationColors(activity.getResources());
+        //colors = Task.getEvaluationColors(activity.getResources());
     }
 
     public void setEvaluation(Integer i) {
@@ -45,9 +45,9 @@ public class EvaluationControlSet extends TaskEditControlSet {
             }
         }
 
-        for (EvaluationChangedListener l : listeners) {
-            l.evaluationChanged(i, colors[i]);
-        }
+        //for (EvaluationChangedListener l : listeners) {
+            //l.evaluationChanged(i, colors[i]);
+        //}
     }
 
     public Integer getEvaluation() {
@@ -57,14 +57,14 @@ public class EvaluationControlSet extends TaskEditControlSet {
         return null;
     }
 
-    public void addListener(EvaluationChangedListener listener) {
-        listeners.add(listener);
-    }
+    //public void addListener(EvaluationChangedListener listener) {
+        //listeners.add(listener);
+    //}
 
-    public void removeListener(EvaluationChangedListener listener) {
-        if (listeners.contains(listener))
-            listeners.remove(listener);
-    }
+    //public void removeListener(EvaluationChangedListener listener) {
+        //if (listeners.contains(listener))
+            //listeners.remove(listener);
+    //}
 
     @Override
     public void readFromTask(Task task) {
@@ -145,7 +145,7 @@ public class EvaluationControlSet extends TaskEditControlSet {
 
             button.setTextOff(label);
             button.setTextOn(label);
-            button.setPadding(1, 0, 0, 0);
+            button.setPadding(0, 1, 0, 0);
 
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

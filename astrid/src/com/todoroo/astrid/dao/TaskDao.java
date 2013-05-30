@@ -219,9 +219,6 @@ public class TaskDao extends RemoteModelDao<Task> {
         if(!item.containsValue(Task.IMPORTANCE))
             item.setValue(Task.IMPORTANCE, Preferences.getIntegerFromString(
                     R.string.p_default_importance_key, Task.IMPORTANCE_SHOULD_DO));
-        if(!item.containsValue(Task.EVALUATION))
-            item.setValue(Task.EVALUATION, Preferences.getIntegerFromString(
-                    R.string.p_default_importance_key, Task.EVALUATION_AVERAGE));
         if(!item.containsValue(Task.DUE_DATE)) {
             int setting = Preferences.getIntegerFromString(R.string.p_default_urgency_key,
                     Task.URGENCY_NONE);

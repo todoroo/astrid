@@ -296,16 +296,6 @@ public final class Task extends RemoteModel {
         };
     }
 
-    public static int[] getEvaluationColors(Resources r) {
-        return new int[] {
-                r.getColor(R.color.evaluation_1),
-                r.getColor(R.color.evaluation_2),
-                r.getColor(R.color.evaluation_3),
-                r.getColor(R.color.evaluation_4),
-                r.getColor(R.color.evaluation_5),
-        };
-    }
-
     public static int IMPORTANCE_MOST = IMPORTANCE_DO_OR_DIE;
     public static int IMPORTANCE_LEAST = IMPORTANCE_NONE;
 

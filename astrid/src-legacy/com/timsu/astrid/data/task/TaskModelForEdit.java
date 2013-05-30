@@ -9,7 +9,6 @@ import java.util.Date;
 
 import android.database.Cursor;
 
-import com.timsu.astrid.data.enums.Evaluation;
 import com.timsu.astrid.data.enums.Importance;
 
 
@@ -20,7 +19,6 @@ public class TaskModelForEdit extends AbstractTaskModel {
     static String[] FIELD_LIST = new String[] {
         NAME,
         IMPORTANCE,
-        EVALUATION,
         ESTIMATED_SECONDS,
         ELAPSED_SECONDS,
         DEFINITE_DUE_DATE,
@@ -87,11 +85,6 @@ public class TaskModelForEdit extends AbstractTaskModel {
     @Override
     public Importance getImportance() {
         return super.getImportance();
-    }
-
-    @Override
-    public Evaluation getEvaluation() {
-        return super.getEvaluation();
     }
 
     @Override
@@ -162,11 +155,6 @@ public class TaskModelForEdit extends AbstractTaskModel {
     @Override
     public void setImportance(Importance importance) {
         super.setImportance(importance);
-    }
-
-    @Override
-    public void setEvaluation(Evaluation evaluation) {
-        super.setEvaluation(evaluation);
     }
 
     @Override
