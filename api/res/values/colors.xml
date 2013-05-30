@@ -12,11 +12,5 @@
     <color name="importance_4">#ff808080</color>    
     <color name="importance_5">#ff505050</color>    
     <color name="importance_6">#ff202020</color>
-        
-    <color name="evaluation_1">#99CC00</color>
-    <color name="evaluation_2">#33B5E5</color>
-    <color name="evaluation_3">#FF4444</color>
-    <color name="evaluation_4">#FF4444</color>
-    <color name="evaluation_5">#FF4444</color>
 
 </resources>
