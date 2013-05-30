@@ -16,7 +16,6 @@ import android.widget.ToggleButton;
 import com.timsu.astrid.R;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.TaskEditControlSet;
-import com.todoroo.astrid.service.ThemeService;
 
 public class EvaluationControlSet extends TaskEditControlSet {
     private final List<CompoundButton> buttons = new LinkedList<CompoundButton>();
@@ -36,7 +35,7 @@ public class EvaluationControlSet extends TaskEditControlSet {
         for(CompoundButton b : buttons) {
             if(b.getTag() == i) {
                 b.setChecked(true);
-                b.setBackgroundResource(ThemeService.getDarkVsLight(R.drawable.importance_background_selected, R.drawable.importance_background_selected_dark, false));
+                b.setBackgroundResource(R.drawable.evaluation_background_selected);
             } else {
                 b.setChecked(false);
                 b.setBackgroundResource(0);
@@ -111,19 +110,19 @@ public class EvaluationControlSet extends TaskEditControlSet {
             label.append(' ');
 
             Drawable tea_evaluation_disaster = context.getResources().getDrawable(R.drawable.tea_evaluation_disaster);
-            tea_evaluation_disaster.setAlpha(120);
+            tea_evaluation_disaster.setAlpha(170);
 
             Drawable tea_evaluation_bad = context.getResources().getDrawable(R.drawable.tea_evaluation_bad);
-            tea_evaluation_bad.setAlpha(120);
+            tea_evaluation_bad.setAlpha(170);
 
             Drawable tea_evaluation_average = context.getResources().getDrawable(R.drawable.tea_evaluation_average);
-            tea_evaluation_average.setAlpha(120);
+            tea_evaluation_average.setAlpha(170);
 
             Drawable tea_evaluation_good = context.getResources().getDrawable(R.drawable.tea_evaluation_good);
-            tea_evaluation_good.setAlpha(120);
+            tea_evaluation_good.setAlpha(170);
 
             Drawable tea_evaluation_awesome = context.getResources().getDrawable(R.drawable.tea_evaluation_awesome);
-            tea_evaluation_awesome.setAlpha(120);
+            tea_evaluation_awesome.setAlpha(170);
 
             if (i == max){
                 //if (button.isChecked())
