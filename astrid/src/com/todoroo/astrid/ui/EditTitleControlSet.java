@@ -39,7 +39,6 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
 
     private boolean isRepeating;
     private int importanceValue;
-    //private int evaluationValue;
 
     @Autowired
     private TaskService taskService;
@@ -99,17 +98,10 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         updateCompleteBox();
     }
 
-    //@Override
-    //public void evaluationChanged(int i, int color) {
-        //evaluationValue = i;
-        //updateCompleteBox();
-    //}
-
     @Override
     public void repeatChanged(boolean repeat) {
         isRepeating = repeat;
         updateCompleteBox();
-
     }
 
     @Override
@@ -117,9 +109,7 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         super.readFromTask(task);
         isRepeating = !TextUtils.isEmpty(task.getValue(Task.RECURRENCE));
         importanceValue = model.getValue(Task.IMPORTANCE);
-        //evaluationValue = model.getValue(Task.EVALUATION);
     }
-
 
     private void updateCompleteBox() {
         boolean checked = completeBox.isChecked();

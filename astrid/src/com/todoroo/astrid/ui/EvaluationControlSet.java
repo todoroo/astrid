@@ -19,16 +19,9 @@ import com.todoroo.astrid.helper.TaskEditControlSet;
 
 public class EvaluationControlSet extends TaskEditControlSet {
     private final List<CompoundButton> buttons = new LinkedList<CompoundButton>();
-    //private final int[] colors;
-    //private final List<EvaluationChangedListener> listeners = new LinkedList<EvaluationChangedListener>();
-
-    //public interface EvaluationChangedListener {
-        //public void evaluationChanged(int i, int color);
-    //}
 
     public EvaluationControlSet(Activity activity, int layout) {
         super(activity, layout);
-        //colors = Task.getEvaluationColors(activity.getResources());
     }
 
     public void setEvaluation(Integer i) {
@@ -39,14 +32,8 @@ public class EvaluationControlSet extends TaskEditControlSet {
             } else {
                 b.setChecked(false);
                 b.setBackgroundResource(0);
-                //b.getCompoundDrawables()[0].setAlpha(120);
-                //b.getBackground().setAlpha(120);
             }
         }
-
-        //for (EvaluationChangedListener l : listeners) {
-            //l.evaluationChanged(i, colors[i]);
-        //}
     }
 
     public Integer getEvaluation() {
@@ -55,15 +42,6 @@ public class EvaluationControlSet extends TaskEditControlSet {
                 return (Integer) b.getTag();
         return null;
     }
-
-    //public void addListener(EvaluationChangedListener listener) {
-        //listeners.add(listener);
-    //}
-
-    //public void removeListener(EvaluationChangedListener listener) {
-        //if (listeners.contains(listener))
-            //listeners.remove(listener);
-    //}
 
     @Override
     public void readFromTask(Task task) {
@@ -125,8 +103,6 @@ public class EvaluationControlSet extends TaskEditControlSet {
             tea_evaluation_awesome.setAlpha(170);
 
             if (i == max){
-                //if (button.isChecked())
-                    //tea_evaluation_disaster.setAlpha(120);
                 button.setButtonDrawable(tea_evaluation_disaster);
             }
             if (i == Task.EVALUATION_LEAST - 1){

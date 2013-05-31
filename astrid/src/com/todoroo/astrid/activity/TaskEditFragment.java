@@ -279,7 +279,6 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private boolean moreSectionHasControls;
 
-    private Bundle savedInstance;
     /*
      * ======================================================================
      * ======================================================= initialization
@@ -545,20 +544,11 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
         controlSetMap.put(getString(R.string.TEA_ctrl_report_pref),
                 reportControlSet);
 
-        //if (savedInstance != null
-                //&& savedInstance.containsKey(TASK_IN_PROGRESS)) {
-
-            //Task task = savedInstance.getParcelable(TASK_IN_PROGRESS);
-
-        //if (model.isCompleted()){
-            evaluationControlSet = new EvaluationControlSet(
-                    getActivity(), R.layout.control_set_evaluation);
-            controls.add(evaluationControlSet);
-            //evaluationControlSet.addListener(editTitle);
-            controlSetMap.put(getString(R.string.TEA_ctrl_evaluation_pref),
-                    evaluationControlSet);
-        //}
-        //}
+        evaluationControlSet = new EvaluationControlSet(
+                getActivity(), R.layout.control_set_evaluation);
+        controls.add(evaluationControlSet);
+        controlSetMap.put(getString(R.string.TEA_ctrl_evaluation_pref),
+                evaluationControlSet);
 
         ReminderControlSet reminderControl = new ReminderControlSet(
                 getActivity(), R.layout.control_set_reminders,

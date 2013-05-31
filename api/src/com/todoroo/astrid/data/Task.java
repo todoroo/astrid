@@ -62,7 +62,7 @@ public final class Task extends RemoteModel {
     public static final IntegerProperty IMPORTANCE = new IntegerProperty(
             TABLE, "importance");
 
-    /** Evaluation of Task (see evaluation flags) */
+    /** Evaluation of Task */
     public static final IntegerProperty EVALUATION = new IntegerProperty(
             TABLE, "evaluation");
 
