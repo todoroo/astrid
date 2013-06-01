@@ -49,6 +49,7 @@ import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -685,6 +686,49 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
         dialog.show();
     }
 
+    protected EditText reportEditText;
+
+    private void showEditReportDialog(final Task task) {
+        String report = null;
+        Task t = taskService.fetchById(task.getId(), Task.REPORT);
+        report = t.getValue(Task.REPORT);
+
+        //EditReportControlSet reportControlSet = new EditReportControlSet(fragment.getActivity(),
+                //R.layout.control_set_report);
+
+        int theme = ThemeService.getEditDialogTheme();
+        final Dialog dialog = new Dialog(fragment.getActivity(), theme);
+        dialog.setTitle(R.string.TEA_report_label);
+        View reportView = LayoutInflater.from(fragment.getActivity()).inflate(R.layout.control_set_report, null);
+        dialog.setContentView(reportView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+
+        reportView.findViewById(R.id.edit_dlg_ok).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                task.setValue(Task.REPORT, reportEditText.getText().toString());
+                dialog.dismiss();
+            }
+        });
+
+        final TextView reportField = (TextView) reportView.findViewById(R.id.report);
+        reportField.setText(report);
+
+        reportEditText = (EditText) reportView.findViewById(R.id.report);
+
+        LayoutParams params = dialog.getWindow().getAttributes();
+        params.width = LayoutParams.FILL_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
+        Configuration config = fragment.getResources().getConfiguration();
+        int size = config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        if (AndroidUtilities.getSdkVersion() >= 9 && size == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+            DisplayMetrics metrics = fragment.getResources().getDisplayMetrics();
+            params.width = metrics.widthPixels / 2;
+        }
+        dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+
+        dialog.show();
+    }
+
     private void showFilesDialog(Task task) {
         FilesControlSet filesControlSet = new FilesControlSet(fragment.getActivity(), R.layout.control_set_files,
                 R.layout.control_set_files_display, R.string.TEA_control_files);
@@ -1022,6 +1066,9 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             }
 
             Task task = viewHolder.task;
+
+            if (!task.isCompleted())
+                showEditReportDialog(task);
 
             completeTask(task, viewHolder.completeBox.isChecked());
 
