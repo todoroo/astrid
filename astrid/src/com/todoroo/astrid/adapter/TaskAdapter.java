@@ -688,13 +688,16 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
     protected EditText reportEditText;
 
+    /**
+     * Shows a Report dialog with an editable text field
+     *
+     * reportEditText is written in the model only when the user unchecks the completeBox
+     * @param task
+     */
     private void showEditReportDialog(final Task task) {
         String report = null;
         Task t = taskService.fetchById(task.getId(), Task.REPORT);
         report = t.getValue(Task.REPORT);
-
-        //EditReportControlSet reportControlSet = new EditReportControlSet(fragment.getActivity(),
-                //R.layout.control_set_report);
 
         int theme = ThemeService.getEditDialogTheme();
         final Dialog dialog = new Dialog(fragment.getActivity(), theme);
@@ -1067,10 +1070,11 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
 
             Task task = viewHolder.task;
 
-            if (!task.isCompleted())
-                showEditReportDialog(task);
-
             completeTask(task, viewHolder.completeBox.isChecked());
+
+            //show the report dialog only when the task becomes completed by clicking the complete box
+            if (task.isCompleted())
+                showEditReportDialog(task);
 
             // set check box to actual action item state
             setTaskAppearance(viewHolder, task);
@@ -1300,6 +1304,7 @@ public class TaskAdapter extends CursorAdapter implements Filterable {
             completedItems.put(task.getUuid(), newState);
             taskService.setComplete(task, newState);
         }
+
     }
 
     /**

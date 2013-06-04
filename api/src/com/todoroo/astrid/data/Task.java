@@ -50,7 +50,7 @@ public final class Task extends RemoteModel {
     public static final LongProperty ID = new LongProperty(
             TABLE, ID_PROPERTY_NAME);
 
-    /** Report */
+    /** Report of Task*/
     public static final StringProperty REPORT = new StringProperty(
             TABLE, "report");
 

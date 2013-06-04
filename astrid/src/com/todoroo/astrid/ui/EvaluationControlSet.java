@@ -17,6 +17,12 @@ import com.timsu.astrid.R;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.helper.TaskEditControlSet;
 
+/**
+ * Control set for displaying the evaluation field in the task edit fragment
+ *
+ * @author Panagiotis Koutsaftikis <p.kouts153@gmail.com>
+ *
+ */
 public class EvaluationControlSet extends TaskEditControlSet {
     private final List<CompoundButton> buttons = new LinkedList<CompoundButton>();
 

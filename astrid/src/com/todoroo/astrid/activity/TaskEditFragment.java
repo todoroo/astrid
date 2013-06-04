@@ -239,6 +239,7 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
     private FilesControlSet filesControlSet = null;
     private TimerActionControlSet timerAction;
     private EditText title;
+    private EditText reportEditText;
     private TaskEditMoreControls moreControls;
     private EditNoteActivity editNotes;
     private NestableViewPager mPager;
@@ -262,8 +263,6 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
     private VoiceInputAssistant voiceNoteAssistant;
 
     private EditText notesEditText;
-
-    private EditText reportEditText;
 
     private Dialog whenDialog;
 

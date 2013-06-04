@@ -15,6 +15,12 @@ import com.timsu.astrid.R;
 import com.todoroo.astrid.data.Task;
 import com.todoroo.astrid.service.ThemeService;
 
+/**
+ * Control set for displaying the report field in the task edit fragment
+ *
+ * @author Panagiotis Koutsaftikis <p.kouts153@gmail.com>
+ *
+ */
 public class EditReportControlSet extends PopupControlSet {
 
     protected EditText editText;
