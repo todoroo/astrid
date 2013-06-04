@@ -53,7 +53,7 @@ public class Database extends AbstractDatabase {
      * Database version number. This variable must be updated when database
      * tables are updated, as it determines whether a database needs updating.
      */
-    public static final int VERSION = 35;
+    public static final int VERSION = 37;
 
     /**
      * Database name (must be unique)
@@ -374,6 +374,7 @@ public class Database extends AbstractDatabase {
             tryExecSQL(addColumnSql(Task.TABLE, Task.HISTORY_FETCH_DATE, visitor, null));
             tryExecSQL(addColumnSql(Task.TABLE, Task.ATTACHMENTS_PUSHED_AT, visitor, null));
             tryExecSQL(addColumnSql(Task.TABLE, Task.USER_ACTIVITIES_PUSHED_AT, visitor, null));
+
             tryExecSQL(addColumnSql(TagData.TABLE, TagData.PUSHED_AT, visitor, null));
             tryExecSQL(addColumnSql(TagData.TABLE, TagData.HISTORY_FETCH_DATE, visitor, null));
             tryExecSQL(addColumnSql(TagData.TABLE, TagData.TASKS_PUSHED_AT, visitor, null));
@@ -402,7 +403,13 @@ public class Database extends AbstractDatabase {
         case 34:
             tryExecSQL(addColumnSql(TagData.TABLE, TagData.IS_FOLDER, visitor, null));
 
-        return true;
+        case 35:
+            tryExecSQL(addColumnSql(Task.TABLE, Task.REPORT, visitor, null));
+
+        case 36:
+            tryExecSQL(addColumnSql(Task.TABLE, Task.EVALUATION, visitor, null));
+
+            return true;
         }
 
         return false;

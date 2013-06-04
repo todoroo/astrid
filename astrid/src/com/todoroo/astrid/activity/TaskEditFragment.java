@@ -103,7 +103,9 @@ import com.todoroo.astrid.timers.TimerPlugin;
 import com.todoroo.astrid.ui.DateChangedAlerts;
 import com.todoroo.astrid.ui.DeadlineControlSet;
 import com.todoroo.astrid.ui.EditNotesControlSet;
+import com.todoroo.astrid.ui.EditReportControlSet;
 import com.todoroo.astrid.ui.EditTitleControlSet;
+import com.todoroo.astrid.ui.EvaluationControlSet;
 import com.todoroo.astrid.ui.HideUntilControlSet;
 import com.todoroo.astrid.ui.ImportanceControlSet;
 import com.todoroo.astrid.ui.NestableScrollView;
@@ -230,11 +232,14 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
 
     private EditPeopleControlSet peopleControlSet = null;
     private EditNotesControlSet notesControlSet = null;
+    private EditReportControlSet reportControlSet = null;
+    private EvaluationControlSet evaluationControlSet = null;
     private HideUntilControlSet hideUntilControls = null;
     private TagsControlSet tagsControlSet = null;
     private FilesControlSet filesControlSet = null;
     private TimerActionControlSet timerAction;
     private EditText title;
+    private EditText reportEditText;
     private TaskEditMoreControls moreControls;
     private EditNoteActivity editNotes;
     private NestableViewPager mPager;
@@ -299,6 +304,8 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //this.savedInstance = savedInstanceState;
 
         // if we were editing a task already, restore it
         if (savedInstanceState != null
@@ -527,6 +534,20 @@ ViewPager.OnPageChangeListener, EditNoteActivity.UpdatesChangedListener {
         controls.add(notesControlSet);
         controlSetMap.put(getString(R.string.TEA_ctrl_notes_pref),
                 notesControlSet);
+
+        reportControlSet = new EditReportControlSet(getActivity(),
+                R.layout.control_set_report, R.layout.control_set_report_display);
+        reportEditText = (EditText) reportControlSet.getView().findViewById(
+                R.id.report);
+        controls.add(reportControlSet);
+        controlSetMap.put(getString(R.string.TEA_ctrl_report_pref),
+                reportControlSet);
+
+        evaluationControlSet = new EvaluationControlSet(
+                getActivity(), R.layout.control_set_evaluation);
+        controls.add(evaluationControlSet);
+        controlSetMap.put(getString(R.string.TEA_ctrl_evaluation_pref),
+                evaluationControlSet);
 
         ReminderControlSet reminderControl = new ReminderControlSet(
                 getActivity(), R.layout.control_set_reminders,

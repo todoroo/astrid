@@ -98,12 +98,10 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         updateCompleteBox();
     }
 
-
     @Override
     public void repeatChanged(boolean repeat) {
         isRepeating = repeat;
         updateCompleteBox();
-
     }
 
     @Override
@@ -112,7 +110,6 @@ public class EditTitleControlSet extends TaskEditControlSet implements Importanc
         isRepeating = !TextUtils.isEmpty(task.getValue(Task.RECURRENCE));
         importanceValue = model.getValue(Task.IMPORTANCE);
     }
-
 
     private void updateCompleteBox() {
         boolean checked = completeBox.isChecked();

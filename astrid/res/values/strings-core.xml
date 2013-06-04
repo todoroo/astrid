@@ -1021,5 +1021,9 @@ you get stuff done. It features reminders, tags, sync, Locale plug-in, a widget 
       your tasks from a backup (Settings->Sync and backup->Backup->Import tasks) in Astrid.</string>
       
   <string name="market_unavailable">Unfortunately the market is not available for your system.</string>
+  <string name="TEA_report_label">Report</string>
+  <string name="TEA_report_empty">Report...</string>
+  <string name="TEA_report_hint">Enter your report...</string>
+  <string name="TEA_control_report">Report</string>
   
 </resources>

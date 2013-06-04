@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+** Copyright (c) 2012 Todoroo Inc
+**
+** See the file "LICENSE" for the full license governing this code. 
+-->
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+      <LinearLayout
+        android:id="@+id/evaluation_container"
+        android:orientation="horizontal"
+        android:paddingTop="5dip"
+        android:paddingBottom="5dip"
+        android:gravity="center_vertical"
+        android:layout_width="fill_parent"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:layout_height="50dip">
+	      <TextView
+	         android:id="@+id/display_row_edit"
+		     android:layout_width="wrap_content"
+	         android:layout_height="wrap_content"
+	         android:gravity="left"
+		     style="@style/TextAppearance.EditRowDisplay"/>
+      </LinearLayout>
+    
+</LinearLayout>

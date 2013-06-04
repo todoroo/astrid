@@ -50,6 +50,10 @@ public final class Task extends RemoteModel {
     public static final LongProperty ID = new LongProperty(
             TABLE, ID_PROPERTY_NAME);
 
+    /** Report of Task*/
+    public static final StringProperty REPORT = new StringProperty(
+            TABLE, "report");
+
     /** Name of Task */
     public static final StringProperty TITLE = new StringProperty(
             TABLE, "title");
@@ -57,6 +61,10 @@ public final class Task extends RemoteModel {
     /** Importance of Task (see importance flags) */
     public static final IntegerProperty IMPORTANCE = new IntegerProperty(
             TABLE, "importance");
+
+    /** Evaluation of Task */
+    public static final IntegerProperty EVALUATION = new IntegerProperty(
+            TABLE, "evaluation");
 
     /** Unixtime Task is due, 0 if not set */
     public static final LongProperty DUE_DATE = new LongProperty(
@@ -259,6 +267,14 @@ public final class Task extends RemoteModel {
     public static final int IMPORTANCE_SHOULD_DO = 2;
     public static final int IMPORTANCE_NONE = 3;
 
+ // --- evaluation settings
+
+    public static final int EVALUATION_AWESOME = 0;
+    public static final int EVALUATION_GOOD = 1;
+    public static final int EVALUATION_AVERAGE = 2;
+    public static final int EVALUATION_BAD = 3;
+    public static final int EVALUATION_DISASTER = 4;
+
     // --- social reminder types
 
     public static final String REMINDER_SOCIAL_UNSEEN = "unseen";
@@ -283,6 +299,9 @@ public final class Task extends RemoteModel {
     public static int IMPORTANCE_MOST = IMPORTANCE_DO_OR_DIE;
     public static int IMPORTANCE_LEAST = IMPORTANCE_NONE;
 
+    public static int EVALUATION_MOST = EVALUATION_AWESOME;
+    public static int EVALUATION_LEAST = EVALUATION_DISASTER;
+
     // --- defaults
 
     /** Default values container */
@@ -295,6 +314,9 @@ public final class Task extends RemoteModel {
         defaultValues.put(COMPLETION_DATE.name, 0);
         defaultValues.put(DELETION_DATE.name, 0);
         defaultValues.put(IMPORTANCE.name, IMPORTANCE_NONE);
+
+        defaultValues.put(EVALUATION.name, EVALUATION_AVERAGE);
+        defaultValues.put(REPORT.name, "");
 
         defaultValues.put(CALENDAR_URI.name, "");
         defaultValues.put(RECURRENCE.name, "");
