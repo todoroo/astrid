@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+** Copyright (c) 2012 Todoroo Inc
+**
+** See the file "LICENSE" for the full license governing this code. 
+-->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+    android:drawableLeft="@drawable/ic_label_24dp"
+    android:drawableStart="@drawable/ic_label_24dp"
+    android:drawablePadding="@dimen/keyline_second"
+    android:gravity="center_vertical"
+    android:paddingEnd="@dimen/keyline_first"
+    android:paddingLeft="@dimen/keyline_first"
+    android:paddingRight="@dimen/keyline_first"
+    android:paddingStart="@dimen/keyline_first"
+    android:textColor="?attr/asTextColor" />

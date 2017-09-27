@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+** Copyright (c) 2012 Todoroo Inc
+**
+** See the file "LICENSE" for the full license governing this code. 
+-->
+<resources>
+
+    <!-- theme attributes -->
+    <attr name="asWindowBackground" format="color" />
+    <attr name="asContentBackground" format="color" />
+    <attr name="asTextColor" format="color" />
+    <attr name="asTextColorHint" format="color" />
+    <attr name="icon_tint" format="color"/>
+    <attr name="overlay_theme" format="reference" />
+    <attr name="actionBarPrimaryText" format="color" />
+    <attr name="actionBarSecondaryText" format="color" />
+    <attr name="dark_status_bar" format="boolean" />
+    <attr name="alpha_secondary" format="dimension" />
+    <attr name="alpha_disabled" format="dimension" />
+    <attr name="fab_text" format="color" />
+    <attr name="colorAccentDialog" format="color" />
+    <attr name="card_elevation" format="dimension" />
+
+    <declare-styleable name="TimePreference">
+        <attr name="summary" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="ScrimInsetsFrameLayout">
+        <attr name="insetForeground" format="reference|color" />
+    </declare-styleable>
+
+</resources>

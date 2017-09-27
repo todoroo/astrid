@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+** Copyright (c) 2012 Todoroo Inc
+**
+** See the file "LICENSE" for the full license governing this code. 
+-->
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:paddingLeft="5dip"
+  android:paddingRight="5dip">
+        
+    <!-- estimated time -->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+	    <TextView
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="@string/TEA_estimatedDuration_label"
+	      style="@style/TextAppearance" />
+	    <TextView
+             android:id="@+id/estimatedDuration"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="end"
+             android:paddingLeft="10dip"
+            android:paddingStart="10dp"
+			android:paddingEnd="0dp"
+			android:paddingRight="0dp"
+             android:textColor="?attr/asTextColor" />
+    </LinearLayout>
+
+    <View style="@style/horizontal_divider" />
+
+    <!-- elapsed time -->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="@string/TEA_elapsedDuration_label"
+	      style="@style/TextAppearance" />
+
+	    <TextView
+             android:id="@+id/elapsedDuration"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="end"
+             android:paddingLeft="10dip"
+			android:paddingStart="10dp"
+			android:paddingRight="0dp"
+			android:paddingEnd="0dp"
+             android:textColor="?attr/asTextColor" />
+    </LinearLayout>
+
+</LinearLayout>
+

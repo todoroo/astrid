@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/theme">
+
+        <Preference
+            android:key="@string/p_theme"
+            android:title="@string/theme" />
+
+        <Preference
+            android:key="@string/p_theme_color"
+            android:title="@string/color" />
+
+        <Preference
+            android:key="@string/p_theme_accent"
+            android:title="@string/accent" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="@string/settings_general"
+        android:title="@string/settings_general">
+
+        <Preference
+            android:key="@string/EPr_appearance_header"
+            android:title="@string/EPr_appearance_header" />
+
+        <Preference
+            android:key="@string/notifications"
+            android:title="@string/notifications" />
+
+        <Preference android:title="@string/task_defaults">
+            <intent
+                android:targetClass="com.todoroo.astrid.core.DefaultsPreferences"
+                android:targetPackage="org.tasks" />
+        </Preference>
+
+        <Preference android:title="@string/date_and_time">
+            <intent
+                android:targetClass="org.tasks.preferences.DateTimePreferences"
+                android:targetPackage="org.tasks" />
+        </Preference>
+
+        <Preference
+            android:key="@string/synchronization"
+            android:title="@string/synchronization">
+            <intent
+                android:targetClass="com.todoroo.astrid.gtasks.GtasksPreferences"
+                android:targetPackage="org.tasks" />
+        </Preference>
+
+        <Preference
+            android:key="@string/EPr_manage_header"
+            android:title="@string/EPr_manage_header" />
+
+        <Preference android:title="@string/miscellaneous">
+            <intent
+                android:targetClass="org.tasks.preferences.MiscellaneousPreferences"
+                android:targetPackage="org.tasks" />
+        </Preference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/badges">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/p_badges_enabled"
+            android:title="@string/enabled"
+            android:summary="@string/launcher_support_required" />
+        <com.todoroo.astrid.ui.MultilinePreference
+            android:dependency="@string/p_badges_enabled"
+            android:key="@string/p_badge_list"
+            android:title="@string/list" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/backup_BPr_header">
+
+        <Preference
+            android:key="@string/p_backup_dir"
+            android:title="@string/backup_directory" />
+
+        <Preference
+            android:key="@string/backup_BAc_import"
+            android:title="@string/backup_BAc_import" />
+
+        <Preference
+            android:key="@string/backup_BAc_export"
+            android:title="@string/backup_BAc_export" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="@string/settings_localization"
+        android:title="@string/settings_localization">
+
+        <Preference
+            android:key="@string/p_language"
+            android:title="@string/language" />
+
+        <com.todoroo.astrid.ui.MultilineListPreference
+            android:defaultValue="-1"
+            android:key="@string/p_layout_direction"
+            android:title="@string/layout_direction"
+            android:entries="@array/layout_direction_entries"
+            android:entryValues="@array/layout_direction_values" />
+
+        <Preference android:title="@string/translations">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://tasks.org/translations" />
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
