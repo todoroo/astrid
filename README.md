@@ -88,7 +88,7 @@ work, work, work!
   
 then go to github and submit a pull request!  
 
-For further information, read [Tim's Collaborator Guide](http://www.betaful.com/2011/04/git-for-ongoing-collaboration/).
+For further information, read [Tim's Collaborator Guide](https://betaful.com/post/82668815288/git-for-ongoing-collaboration).
 
 Contact
 -------
